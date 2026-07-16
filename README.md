@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Refrd — Frontend
 
-## Getting Started
+> Referral-first job network. Your CV, straight to a friend inside the company.
 
-First, run the development server:
+## Prerequisites
 
+- [Node.js 20+](https://nodejs.org)
+- Backend running — see [refrd-backend](https://github.com/anatAtar/refrd-backend)
+
+## Setup
+
+### 1. Clone the repo
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/anatAtar/refrd-frontend.git
+cd refrd-frontend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Configure environment
+```bash
+cp .env.example .env.local
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`.env.local` needs one variable — the backend URL:
+```
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
 
-## Learn More
+### 4. Start the dev server
+```bash
+npm run dev -- -p 3001
+```
 
-To learn more about Next.js, take a look at the following resources:
+App is now running at **http://localhost:3001**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Start Order
 
-## Deploy on Vercel
+Always start the **backend first**, then the frontend:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# Terminal 1 — backend
+cd refrd-backend
+npm run docker:up   # first time only
+npm run dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Terminal 2 — frontend
+cd refrd-frontend
+npm run dev -- -p 3001
+```
+
+---
+
+## Test Accounts
+
+| Name | Email | Password |
+|---|---|---|
+| Sarah Alon | sarah@example.com | Password1 |
+| Jonathan Katz | jonathan@example.com | Password1 |
+| Maya Ron | maya@example.com | Password1 |
+
+---
+
+## Key Pages
+
+| URL | What |
+|---|---|
+| /feed | Home — jobs from your connections |
+| /jobs | Browse all jobs with filters |
+| /network | Your connections |
+| /applications | CVs you've sent |
+| /applications/inbox | CVs you've received |
+| /notifications | In-app notifications |
+| /jobs/post | Post a job (paste any URL) |
+| /join/[token] | Invite landing page |
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **Styling:** Tailwind CSS v4
+- **Server state:** SWR
+- **UI primitives:** Radix UI
+- **Language:** TypeScript 5
+
+## Related
+
+👉 Backend repo: https://github.com/anatAtar/refrd-backend
