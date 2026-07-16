@@ -1,0 +1,142 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useAuth } from '@/lib/context/AuthContext';
+import { invitesApi } from '@/lib/api/invites';
+import { usersApi } from '@/lib/api/users';
+import { Button } from '@/components/ui/Button';
+import { ApiError } from '@/lib/api/client';
+
+export default function OnboardingInvitePage() {
+  const { user, refresh } = useAuth();
+  const router = useRouter();
+  const [inviteUrl, setInviteUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    invitesApi.getLink()
+      .then((res) => setInviteUrl(res.data.url))
+      .catch(() => setInviteUrl(''))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      toast.success('Link copied!');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Could not copy — please copy manually');
+    }
+  };
+
+  const handleWhatsApp = () => {
+    const firstName = user?.fullName?.split(' ')[0] ?? 'me';
+    const msg = encodeURIComponent(
+      `Hey! I'm using Refrd to share jobs at my company and help friends get hired directly.\n\nJoin via my link and we'll be connected automatically:\n${inviteUrl}`,
+    );
+    window.open(`https://wa.me/?text=${msg}`, '_blank');
+  };
+
+  const handleDone = async () => {
+    try {
+      // Mark user as onboarded
+      await usersApi.updateMe({ onboarded: true } as Parameters<typeof usersApi.updateMe>[0]);
+      await refresh();
+    } catch {
+      // ignore
+    }
+    router.push('/feed');
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4"
+      style={{
+        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123,101,232,0.12) 0%, transparent 70%), var(--color-page)',
+      }}
+    >
+      <div className="max-w-md w-full space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="text-4xl mb-2">📲</div>
+          <h1 className="text-2xl font-bold text-text-primary">Invite your colleagues</h1>
+          <p className="text-sm text-text-secondary">
+            When they sign up via your link, you're automatically connected
+          </p>
+        </div>
+
+        {/* Progress */}
+        <div className="flex gap-1.5">
+          <div className="flex-1 h-1 rounded-full bg-violet-500" />
+          <div className="flex-1 h-1 rounded-full bg-violet-500" />
+          <div className="flex-1 h-1 rounded-full bg-violet-500" />
+        </div>
+
+        {/* Invite link */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-text-secondary block">Your personal invite link</label>
+          <div className="flex gap-2">
+            <div className="flex-1 bg-input border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-secondary font-mono truncate">
+              {loading ? '...' : inviteUrl}
+            </div>
+            <Button variant="secondary" size="sm" onClick={handleCopy} disabled={loading}>
+              {copied ? '✓ Copied' : '📋 Copy'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Share options */}
+        <div className="space-y-3">
+          {/* WhatsApp */}
+          <button
+            onClick={handleWhatsApp}
+            disabled={loading}
+            className="w-full flex items-center gap-3 px-4 py-3.5 bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 rounded-xl transition-colors text-left"
+          >
+            <span className="text-2xl">📱</span>
+            <div>
+              <p className="text-sm font-semibold text-text-primary">Share on WhatsApp</p>
+              <p className="text-xs text-text-muted">Opens WhatsApp with a pre-written message</p>
+            </div>
+          </button>
+
+          {/* Copy link */}
+          <button
+            onClick={handleCopy}
+            disabled={loading}
+            className="w-full flex items-center gap-3 px-4 py-3.5 bg-card border border-border hover:bg-card-hover rounded-xl transition-colors text-left"
+          >
+            <span className="text-2xl">🔗</span>
+            <div>
+              <p className="text-sm font-semibold text-text-primary">Copy link</p>
+              <p className="text-xs text-text-muted">Share anywhere — Slack, email, LinkedIn</p>
+            </div>
+          </button>
+        </div>
+
+        {/* Info */}
+        <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl px-4 py-3 text-sm text-text-secondary">
+          💡 Every time someone signs up via your link, you'll be <strong className="text-violet-300">auto-connected</strong> — no need to search for them.
+        </div>
+
+        {/* Done */}
+        <Button variant="primary" size="lg" className="w-full" onClick={handleDone}>
+          Go to my feed 🚀
+        </Button>
+
+        <div className="text-center">
+          <button
+            onClick={() => router.push('/onboarding/company')}
+            className="text-sm text-text-muted hover:text-text-secondary transition-colors"
+          >
+            ← Back
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
