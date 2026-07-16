@@ -11,7 +11,7 @@ export const usersApi = {
   byId: (id: string) =>
     api.get<ApiResponse<PublicUser>>(`/api/users/${id}`),
 
-  search: (q: string, page = 1, limit = 20) =>
+  search: (q: string, page = 1, limit = 50) =>
     api.get<{ data: PublicUser[] }>(`/api/users/search?q=${encodeURIComponent(q)}&page=${page}&limit=${limit}`),
 
   deleteMe: () =>
