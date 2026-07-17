@@ -14,8 +14,8 @@ export function ProgressStepper({ steps, current }: ProgressStepperProps) {
             <div
               className={cn(
                 'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all',
-                i < current && 'bg-violet-500 text-white',
-                i === current && 'bg-violet-500/20 text-violet-300 ring-1 ring-violet-500',
+                i < current && 'bg-gold-300 text-white',
+                i === current && 'bg-gold-300/20 text-gold-300 ring-1 ring-gold-300',
                 i > current && 'bg-border text-text-muted',
               )}
             >
@@ -31,7 +31,7 @@ export function ProgressStepper({ steps, current }: ProgressStepperProps) {
             </span>
           </div>
           {i < steps.length - 1 && (
-            <div className={cn('flex-1 h-px mx-2', i < current ? 'bg-violet-500/50' : 'bg-border')} />
+            <div className={cn('flex-1 h-px mx-2', i < current ? 'bg-gold-300/50' : 'bg-border')} />
           )}
         </div>
       ))}

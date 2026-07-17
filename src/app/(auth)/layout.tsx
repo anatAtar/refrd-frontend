@@ -7,22 +7,20 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="min-h-screen flex flex-col items-center justify-center px-4"
         style={{
           background:
-            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123,101,232,0.15) 0%, transparent 70%), var(--color-page)',
+            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,122,0.10) 0%, transparent 70%), var(--color-page)',
         }}
       >
         {/* Logo */}
         <div className="mb-8 text-center">
-          <div
-            className="text-4xl font-black tracking-tight mb-2"
-            style={{
-              background: 'linear-gradient(160deg, #fff 0%, #C4B6FA 60%, #7B65E8 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Refrd
+          <div className="text-4xl font-black tracking-tight mb-2">
+            <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Direct
+            </span>
+            <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Ref
+            </span>
           </div>
-          <p className="text-sm text-text-muted">Send your CV directly to a friend inside the company</p>
+          <p className="text-sm text-text-muted">Your CV, direct to the right person</p>
         </div>
 
         {/* Card */}

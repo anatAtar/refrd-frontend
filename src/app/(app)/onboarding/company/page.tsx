@@ -73,7 +73,7 @@ export default function OnboardingCompanyPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
       style={{
-        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123,101,232,0.12) 0%, transparent 70%), var(--color-page)',
+        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,122,0.10) 0%, transparent 70%), var(--color-page)',
       }}
     >
       <div className="max-w-md w-full space-y-6">
@@ -82,14 +82,14 @@ export default function OnboardingCompanyPage() {
           <div className="text-4xl mb-2">🏢</div>
           <h1 className="text-2xl font-bold text-text-primary">Where do you work?</h1>
           <p className="text-sm text-text-secondary">
-            We'll show you colleagues already on Refrd
+            We'll show you colleagues already on DirectRef
           </p>
         </div>
 
         {/* Progress */}
         <div className="flex gap-1.5">
-          <div className="flex-1 h-1 rounded-full bg-violet-500" />
-          <div className="flex-1 h-1 rounded-full bg-violet-500" />
+          <div className="flex-1 h-1 rounded-full bg-gold-300" />
+          <div className="flex-1 h-1 rounded-full bg-gold-300" />
           <div className="flex-1 h-1 rounded-full bg-border" />
         </div>
 
@@ -112,7 +112,7 @@ export default function OnboardingCompanyPage() {
         {!loading && colleagues.length > 0 && (
           <div className="space-y-3">
             <p className="text-sm font-semibold text-text-primary">
-              🎉 {colleagues.length} {colleagues.length === 1 ? 'person' : 'people'} at {company} already on Refrd
+              🎉 {colleagues.length} {colleagues.length === 1 ? 'person' : 'people'} at {company} already on DirectRef
             </p>
             <div className="space-y-2">
               {colleagues.map((c) => (

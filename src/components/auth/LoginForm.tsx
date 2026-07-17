@@ -64,7 +64,7 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
-            className="w-full bg-input border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-violet-500/40 focus:border-violet-500 transition-colors"
+            className="w-full bg-input border border-border-strong rounded-lg px-3 py-2.5 pr-10 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-gold-300/40 focus:border-gold-300 transition-colors"
           />
           <button
             type="button"
@@ -84,12 +84,12 @@ export function LoginForm() {
       </Button>
 
       <div className="text-center space-y-2 pt-2">
-        <Link href="/forgot-password" className="block text-sm text-text-secondary hover:text-violet-300 transition-colors">
+        <Link href="/forgot-password" className="block text-sm text-text-secondary hover:text-gold-300 transition-colors">
           Forgot your password?
         </Link>
         <p className="text-sm text-text-muted">
           No account?{' '}
-          <Link href="/register" className="text-violet-300 hover:text-violet-400 font-medium">
+          <Link href="/register" className="text-gold-300 hover:text-gold-400 font-medium">
             Sign up
           </Link>
         </p>

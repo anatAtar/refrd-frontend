@@ -119,7 +119,7 @@ export default function PostJobPage() {
             <button
               type="button"
               onClick={() => setScraped(true)}
-              className="text-sm text-text-muted hover:text-violet-300 transition-colors underline underline-offset-2"
+              className="text-sm text-text-muted hover:text-gold-300 transition-colors underline underline-offset-2"
             >
               Enter manually instead
             </button>
@@ -166,7 +166,7 @@ export default function PostJobPage() {
             <select
               value={form.jobType}
               onChange={set('jobType')}
-              className="w-full bg-input border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-violet-500/40"
+              className="w-full bg-input border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-gold-300/40"
             >
               <option value="">— Select type —</option>
               <option value="full-time">Full-time</option>

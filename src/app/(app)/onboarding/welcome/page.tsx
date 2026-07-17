@@ -10,7 +10,7 @@ export default function OnboardingWelcomePage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
       style={{
-        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123,101,232,0.18) 0%, transparent 70%), var(--color-page)',
+        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,122,0.12) 0%, transparent 70%), var(--color-page)',
       }}
     >
       <div className="max-w-md w-full text-center space-y-8">
@@ -18,12 +18,12 @@ export default function OnboardingWelcomePage() {
         <div
           className="text-3xl font-black tracking-tight"
           style={{
-            background: 'linear-gradient(160deg, #fff 0%, #C4B6FA 55%, #7B65E8 100%)',
+            background: 'linear-gradient(160deg,#FAFAFA,#D4AF7A)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
           }}
         >
-          Refrd
+          DirectRef
         </div>
 
         {/* Wave + greeting */}
@@ -33,7 +33,7 @@ export default function OnboardingWelcomePage() {
             Welcome, {firstName}!
           </h1>
           <p className="text-text-secondary leading-relaxed">
-            Refrd connects you with friends inside companies you want to work at.
+            DirectRef connects you with friends inside companies you want to work at.
             Your CV goes straight to a real person — not an ATS black hole.
           </p>
         </div>
@@ -55,7 +55,7 @@ export default function OnboardingWelcomePage() {
         {/* CTA */}
         <Link
           href="/onboarding/company"
-          className="block w-full py-3 px-6 bg-violet-500 hover:bg-violet-600 text-white font-semibold rounded-xl transition-colors text-center"
+          className="block w-full py-3 px-6 bg-gold-300 hover:bg-gold-500 text-white font-semibold rounded-xl transition-colors text-center"
         >
           Let's set up your network →
         </Link>

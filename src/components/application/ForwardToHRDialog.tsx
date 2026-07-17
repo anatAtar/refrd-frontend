@@ -62,7 +62,7 @@ export function ForwardToHRDialog({ open, onClose, applicationId, seekerName, jo
             charCount
             rows={3}
           />
-          <div className="flex items-start gap-2 bg-violet-500/8 border border-violet-500/15 rounded-lg px-3 py-2">
+          <div className="flex items-start gap-2 bg-gold-300/8 border border-gold-300/15 rounded-lg px-3 py-2">
             <span>💡</span>
             <p className="text-xs text-text-secondary">
               An email with {seekerName}&apos;s CV will be sent to the HR team, including your referral note.

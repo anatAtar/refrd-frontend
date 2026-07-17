@@ -18,7 +18,7 @@ import { ApiError } from '@/lib/api/client';
 import type { PublicUser, Connection } from '@/lib/types';
 import Link from 'next/link';
 
-type Tab = 'all' | 'hasjobs' | 'pending' | 'sent';
+type Tab = 'all' | 'pending' | 'sent';
 
 export default function NetworkPage() {
   const { user }      = useAuth();
@@ -85,7 +85,6 @@ export default function NetworkPage() {
 
   const filtered = useMemo(() => {
     let list = tab === 'pending' ? pending : tab === 'sent' ? sent : accepted;
-    if (tab === 'hasjobs') list = accepted.filter((c) => c.requester?.companyName);
     return list;
   }, [tab, pending, sent, accepted]);
 
@@ -133,10 +132,9 @@ export default function NetworkPage() {
   };
 
   const TABS = [
-    { id: 'all',     label: 'My Connections', count: accepted.length },
-    { id: 'hasjobs', label: 'Has Jobs',        count: accepted.filter(c => c.requester?.companyName).length },
-    { id: 'pending', label: 'Requests',        count: pending.length,  highlight: pending.length > 0 },
-    { id: 'sent',    label: 'Sent',            count: sent.length },
+    { id: 'all',     label: 'All',      count: accepted.length },
+    { id: 'pending', label: 'Requests', count: pending.length,  highlight: pending.length > 0 },
+    { id: 'sent',    label: 'Sent',     count: sent.length },
   ] as const;
 
   return (
@@ -163,12 +161,12 @@ export default function NetworkPage() {
       {/* ── PEOPLE YOU MAY KNOW ─────────────────────────────────── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-text-primary">✨ People on Refrd</h2>
+          <h2 className="text-sm font-bold text-text-primary">✨ People on DirectRef</h2>
           <span className="text-xs text-text-muted">{suggestions.length} people</span>
         </div>
 
         {/* Search */}
-        <div className="flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-violet-500/40 transition-all">
+        <div className="flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
           <span className="text-text-muted text-sm">🔍</span>
           <input
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
@@ -264,7 +262,7 @@ export default function NetworkPage() {
                   'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
                   'highlight' in t && t.highlight
                     ? 'bg-warn/20 text-warn'
-                    : tab === t.id ? 'bg-violet-500/20 text-violet-300' : 'bg-border text-text-muted',
+                    : tab === t.id ? 'bg-gold-300/20 text-gold-300' : 'bg-border text-text-muted',
                 )}>
                   {t.count}
                 </span>
@@ -279,8 +277,6 @@ export default function NetworkPage() {
             <EmptyState icon="✉️" title="No pending requests" description="When someone sends you a connection request, it will appear here." />
           ) : tab === 'sent' ? (
             <EmptyState icon="📤" title="No sent requests" description="Requests you've sent that haven't been accepted yet." />
-          ) : tab === 'hasjobs' ? (
-            <EmptyState icon="💼" title="None of your contacts have posted jobs yet" description="As your connections post jobs, they'll appear here." />
           ) : (
             <EmptyState
               icon="🤝"
@@ -337,24 +333,24 @@ function ConnectionRow({ connection, viewerId, tab, isRemoving, onAccept, onDecl
       <div className="flex gap-2 shrink-0">
         {tab === 'pending' ? (
           <>
-            <Button variant="primary" size="sm" onClick={onAccept}>Accept</Button>
-            <Button variant="ghost" size="sm" onClick={onDecline}>Decline</Button>
+            <Button variant="primary" size="sm" onClick={onAccept} className="min-h-[44px] px-4">Accept</Button>
+            <Button variant="ghost" size="sm" onClick={onDecline} className="min-h-[44px]">Decline</Button>
           </>
         ) : tab === 'sent' ? (
-          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-warn/10 text-warn border border-warn/20">
+          <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-2 rounded-full bg-warn/10 text-warn border border-warn/20">
             ⏳ Pending
           </span>
         ) : (
           <>
-            <Link href="/jobs">
-              <Button variant="ghost" size="sm" className="hidden sm:inline-flex">See jobs</Button>
+            <Link href={`/jobs?contact=${person.id}&name=${encodeURIComponent(person.fullName.split(' ')[0])}`} className="hidden sm:block">
+              <Button variant="ghost" size="sm" className="min-h-[44px]">See jobs</Button>
             </Link>
             <Button
               variant="ghost"
               size="sm"
               onClick={onRemove}
               isLoading={isRemoving}
-              className="text-text-muted hover:text-crit opacity-0 group-hover:opacity-100 transition-opacity"
+              className="text-text-muted hover:text-crit min-h-[44px] sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
             >
               Remove
             </Button>

@@ -4,8 +4,8 @@ import type { JobWithReferrer } from '@/lib/types';
 
 export function ReferrerContactCard({ referrer, job }: { referrer: JobWithReferrer['referrer']; job: JobWithReferrer['job'] }) {
   return (
-    <div className="border border-violet-500/30 bg-violet-500/5 rounded-xl p-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-violet-400 mb-3">Your Contact</p>
+    <div className="border border-gold-300/30 bg-gold-300/5 rounded-xl p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-gold-400 mb-3">Your Contact</p>
       <div className="flex items-center gap-3">
         <Avatar src={referrer.avatarUrl} name={referrer.fullName} size="lg" ring />
         <div>

@@ -31,9 +31,9 @@ export function ForgotPasswordForm() {
         <div className="text-4xl mb-4">📧</div>
         <h2 className="text-lg font-bold text-text-primary mb-2">Check your inbox</h2>
         <p className="text-sm text-text-secondary mb-6">
-          If <strong>{email}</strong> has a Refrd account, we sent a reset link.
+          If <strong>{email}</strong> has a DirectRef account, we sent a reset link.
         </p>
-        <Link href="/login" className="text-violet-300 text-sm font-medium hover:text-violet-400">
+        <Link href="/login" className="text-gold-300 text-sm font-medium hover:text-gold-400">
           ← Back to login
         </Link>
       </div>

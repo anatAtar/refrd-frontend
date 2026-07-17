@@ -25,7 +25,7 @@ export default function MyApplicationsClient({ initialData }: { initialData: App
           icon="📄"
           title="No applications yet"
           description="When you send your CV to a friend's job posting, it will appear here."
-          action={{ label: 'Browse jobs', onClick: () => router.push('/feed') }}
+          action={{ label: 'Browse jobs', onClick: () => router.push('/jobs') }}
         />
       ) : (
         <div className="space-y-3">

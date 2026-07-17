@@ -37,7 +37,7 @@ export default function OnboardingInvitePage() {
   const handleWhatsApp = () => {
     const firstName = user?.fullName?.split(' ')[0] ?? 'me';
     const msg = encodeURIComponent(
-      `Hey! I'm using Refrd to share jobs at my company and help friends get hired directly.\n\nJoin via my link and we'll be connected automatically:\n${inviteUrl}`,
+      `Hey! I'm using DirectRef to share jobs at my company and help friends get hired directly.\n\nJoin via my link and we'll be connected automatically:\n${inviteUrl}`,
     );
     window.open(`https://wa.me/?text=${msg}`, '_blank');
   };
@@ -56,7 +56,7 @@ export default function OnboardingInvitePage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
       style={{
-        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123,101,232,0.12) 0%, transparent 70%), var(--color-page)',
+        background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,122,0.10) 0%, transparent 70%), var(--color-page)',
       }}
     >
       <div className="max-w-md w-full space-y-6">
@@ -71,9 +71,9 @@ export default function OnboardingInvitePage() {
 
         {/* Progress */}
         <div className="flex gap-1.5">
-          <div className="flex-1 h-1 rounded-full bg-violet-500" />
-          <div className="flex-1 h-1 rounded-full bg-violet-500" />
-          <div className="flex-1 h-1 rounded-full bg-violet-500" />
+          <div className="flex-1 h-1 rounded-full bg-gold-300" />
+          <div className="flex-1 h-1 rounded-full bg-gold-300" />
+          <div className="flex-1 h-1 rounded-full bg-gold-300" />
         </div>
 
         {/* Invite link */}
@@ -119,8 +119,8 @@ export default function OnboardingInvitePage() {
         </div>
 
         {/* Info */}
-        <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl px-4 py-3 text-sm text-text-secondary">
-          💡 Every time someone signs up via your link, you'll be <strong className="text-violet-300">auto-connected</strong> — no need to search for them.
+        <div className="bg-gold-300/10 border border-gold-300/20 rounded-xl px-4 py-3 text-sm text-text-secondary">
+          💡 Every time someone signs up via your link, you'll be <strong className="text-gold-300">auto-connected</strong> — no need to search for them.
         </div>
 
         {/* Done */}

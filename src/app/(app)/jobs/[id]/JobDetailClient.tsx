@@ -56,7 +56,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
             )}
 
             <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer"
-               className="inline-flex items-center gap-1.5 text-sm text-violet-300 hover:text-violet-400">
+               className="inline-flex items-center gap-1.5 text-sm text-gold-300 hover:text-gold-400">
               View original posting ↗
             </a>
           </div>

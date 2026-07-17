@@ -43,8 +43,8 @@ export function FileDropzone({
         className={cn(
           'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all',
           file
-            ? 'border-violet-500/60 bg-violet-500/5'
-            : 'border-border-strong hover:border-violet-500/50 hover:bg-violet-500/5',
+            ? 'border-gold-300/50 bg-gold-300/5'
+            : 'border-border-strong hover:border-gold-300/40 hover:bg-gold-300/5',
           error && 'border-crit/50',
         )}
       >
@@ -53,13 +53,13 @@ export function FileDropzone({
             <span className="text-3xl">📄</span>
             <p className="text-sm font-semibold text-text-primary">{file.name}</p>
             <p className="text-xs text-text-muted">{formatBytes(file.size)}</p>
-            <p className="text-xs text-violet-300 font-medium">Click to change</p>
+            <p className="text-xs text-gold-300 font-medium">Click to change</p>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
             <span className="text-3xl opacity-50">📎</span>
             <p className="text-sm text-text-secondary">
-              Drop your CV here, or <span className="text-violet-300 font-semibold">browse</span>
+              Drop your CV here, or <span className="text-gold-300 font-semibold">browse</span>
             </p>
             <p className="text-xs text-text-muted">PDF or Word · Max {formatBytes(maxBytes)}</p>
           </div>

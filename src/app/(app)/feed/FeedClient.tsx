@@ -35,22 +35,16 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
       <div
         className="rounded-2xl px-6 py-8 text-center relative overflow-hidden"
         style={{
-          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(123,101,232,0.18) 0%, transparent 70%), var(--color-card)',
-          border: '1px solid rgba(123,101,232,0.2)',
+          background: 'var(--color-card)',
+          border: '1px solid rgba(212,175,122,0.15)',
         }}
       >
-        {/* App name */}
-        <div
-          className="text-3xl font-black tracking-tight mb-3"
-          style={{
-            background: 'linear-gradient(160deg, #fff 0%, #C4B6FA 55%, #7B65E8 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          Refrd
+        {/* App name — two tone */}
+        <div className="text-3xl font-black tracking-tight mb-3">
+          <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Direct</span>
+          <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
         </div>
-
+        </div>
         {/* Tagline */}
         <h1 className="text-lg font-bold text-text-primary mb-2">
           Hey {firstName} 👋 Let&apos;s find your next role together
@@ -58,11 +52,11 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
 
         {/* Description */}
         <p className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto mb-5">
-          Your CV, straight to a friend inside the company.
+          Your CV, direct to the right person.
         </p>
 
         {/* How it works — 3 steps */}
-        <div className="grid grid-cols-3 gap-3 text-center mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center mb-6">
           {[
             { icon: '👥', step: '1', title: 'Connect', desc: 'Add friends who work at companies you like' },
             { icon: '🔍', step: '2', title: 'Find a role', desc: 'See jobs posted by your connections' },
@@ -71,7 +65,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
             <div key={s.step} className="bg-page/60 rounded-xl p-3 border border-border">
               <div className="text-2xl mb-1.5">{s.icon}</div>
               <div className="text-xs font-bold text-text-primary mb-0.5">{s.title}</div>
-              <div className="text-[11px] text-text-muted leading-snug">{s.desc}</div>
+              <div className="text-xs text-text-muted leading-snug">{s.desc}</div>
             </div>
           ))}
         </div>
@@ -80,19 +74,19 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
         <div className="flex gap-2 justify-center flex-wrap">
           <Link
             href="/network"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white text-sm font-semibold rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-gold-300 hover:bg-gold-500 text-white text-sm font-semibold rounded-lg transition-colors"
           >
             👥 Add friends
           </Link>
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-card-hover border border-border-strong text-text-primary text-sm font-medium rounded-lg hover:border-violet-500/50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-card-hover border border-border-strong text-text-primary text-sm font-medium rounded-lg hover:border-gold-300/40 transition-colors"
           >
             🔍 Browse all jobs
           </Link>
           <Link
             href="/jobs/post"
-            className="inline-flex items-center gap-1.5 px-4 py-2 bg-card-hover border border-border-strong text-text-primary text-sm font-medium rounded-lg hover:border-violet-500/50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-card-hover border border-border-strong text-text-primary text-sm font-medium rounded-lg hover:border-gold-300/40 transition-colors"
           >
             ＋ Post a job
           </Link>
@@ -112,7 +106,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
           </div>
 
           {/* Search */}
-          <div className="flex gap-3 items-center bg-input border border-border-strong rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-violet-500/40 transition-all mb-3">
+          <div className="flex gap-3 items-center bg-input border border-border-strong rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all mb-3">
             <span className="text-text-muted">🔍</span>
             <input
               className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
@@ -139,7 +133,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
         <div className="text-center py-6 text-text-muted text-sm">
           <p>
             Your feed is empty.{' '}
-            <Link href="/network" className="text-violet-300 hover:text-violet-400 font-medium">
+            <Link href="/network" className="text-gold-300 hover:text-gold-400 font-medium">
               Add friends
             </Link>{' '}
             to see their job postings here.
@@ -148,7 +142,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
       ) : jobs.length === 0 ? (
         <div className="text-center py-6 text-text-muted text-sm">
           No jobs match &quot;{search}&quot;.{' '}
-          <button onClick={() => setSearch('')} className="text-violet-300 hover:text-violet-400 font-medium">Clear search</button>
+          <button onClick={() => setSearch('')} className="text-gold-300 hover:text-gold-400 font-medium">Clear search</button>
         </div>
       ) : (
         <div className="space-y-4">

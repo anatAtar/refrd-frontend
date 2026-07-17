@@ -75,13 +75,13 @@ export default function NotificationsPage() {
                 'flex items-start gap-3 px-4 py-3.5 rounded-xl border transition-all',
                 n.isRead
                   ? 'bg-card border-border opacity-60'
-                  : 'bg-card border-violet-500/20 hover:border-violet-500/40 hover:bg-card-hover cursor-pointer',
+                  : 'bg-card border-gold-300/20 hover:border-gold-300/40 hover:bg-card-hover cursor-pointer',
               )}
             >
               {/* Icon */}
               <div className={cn(
                 'w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0',
-                n.isRead ? 'bg-input' : 'bg-violet-500/15',
+                n.isRead ? 'bg-input' : 'bg-gold-300/15',
               )}>
                 {TYPE_ICON[n.type] ?? '🔔'}
               </div>
@@ -101,13 +101,13 @@ export default function NotificationsPage() {
               {/* Unread dot + link */}
               <div className="flex flex-col items-end gap-2 shrink-0">
                 {!n.isRead && (
-                  <div className="w-2 h-2 rounded-full bg-violet-500" />
+                  <div className="w-2 h-2 rounded-full bg-gold-300" />
                 )}
                 {n.linkUrl && (
                   <Link
                     href={n.linkUrl}
                     onClick={(e) => e.stopPropagation()}
-                    className="text-[11px] text-violet-300 hover:text-violet-400 font-medium"
+                    className="text-[11px] text-gold-300 hover:text-gold-400 font-medium"
                   >
                     View →
                   </Link>

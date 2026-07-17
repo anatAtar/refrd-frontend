@@ -63,7 +63,7 @@ export function getInitials(name: string): string {
 export const STATUS_LABELS: Record<string, string> = {
   submitted: 'Pending',
   viewed: 'Reviewed',
-  forwarded: 'Forwarded to HR',
+  forwarded: 'Downloaded',
   rejected: 'Not a fit',
 };
 

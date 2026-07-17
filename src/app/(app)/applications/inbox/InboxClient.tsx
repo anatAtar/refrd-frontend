@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
 import type { ApplicationWithDetails } from '@/lib/types';
 
-type Tab = 'all' | 'submitted' | 'viewed' | 'forwarded' | 'rejected';
+type Tab = 'all' | 'submitted' | 'viewed' | 'rejected';
 
 export default function InboxClient({ initialData }: { initialData: ApplicationWithDetails[] }) {
   const { user } = useAuth();
@@ -21,7 +21,6 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
     all:       applications.length,
     submitted: applications.filter(a => a.application.status === 'submitted').length,
     viewed:    applications.filter(a => a.application.status === 'viewed').length,
-    forwarded: applications.filter(a => a.application.status === 'forwarded').length,
     rejected:  applications.filter(a => a.application.status === 'rejected').length,
   };
 
@@ -30,11 +29,10 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
     : applications.filter(a => a.application.status === tab);
 
   const TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: 'all',       label: 'All',           icon: '📥' },
-    { id: 'submitted', label: 'Pending',        icon: '⏳' },
-    { id: 'viewed',    label: 'Reviewed',       icon: '👀' },
-    { id: 'forwarded', label: 'Forwarded',      icon: '✅' },
-    { id: 'rejected',  label: 'Not a fit',      icon: '✕'  },
+    { id: 'all',       label: 'All',        icon: '📥' },
+    { id: 'submitted', label: 'Pending',    icon: '⏳' },
+    { id: 'viewed',    label: 'Reviewed',   icon: '👀' },
+    { id: 'rejected',  label: 'Not a fit',  icon: '✕'  },
   ];
 
   return (
@@ -42,15 +40,15 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
       <div>
         <h1 className="text-2xl font-bold text-text-primary mb-1">CV Inbox</h1>
         <p className="text-sm text-text-secondary">
-          Friends who want to work at <strong className="text-violet-300">{user?.companyName ?? 'your company'}</strong>
+          Friends who want to work at <strong className="text-gold-300">{user?.companyName ?? 'your company'}</strong>
         </p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        <StatTile label="Total CVs"       value={counts.all}       icon="📥" />
-        <StatTile label="Awaiting Review" value={counts.submitted + counts.viewed} icon="⏳" />
-        <StatTile label="Forwarded to HR" value={counts.forwarded} icon="✅" accent />
+      <div className="grid grid-cols-3 gap-3">
+        <StatTile label="Total CVs"      value={counts.all}       icon="📥" />
+        <StatTile label="Awaiting Review" value={counts.submitted} icon="⏳" />
+        <StatTile label="Reviewed"        value={counts.viewed}    icon="👀" accent />
       </div>
 
       {/* Tabs */}
@@ -71,7 +69,7 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
             {counts[t.id] > 0 && (
               <span className={cn(
                 'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                tab === t.id ? 'bg-violet-500/20 text-violet-300' : 'bg-border text-text-muted',
+                tab === t.id ? 'bg-gold-300/20 text-gold-300' : 'bg-border text-text-muted',
               )}>
                 {counts[t.id]}
               </span>
@@ -87,17 +85,17 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon={tab === 'rejected' ? '✕' : tab === 'forwarded' ? '✅' : '📭'}
+          icon={tab === 'rejected' ? '✕' : '📭'}
           title={
-            tab === 'all' ? 'No CVs yet' :
+            tab === 'all'      ? 'No CVs yet' :
             tab === 'rejected' ? 'No declined applications' :
-            tab === 'forwarded' ? 'No forwarded applications yet' :
-            'Nothing here'
+            tab === 'viewed'   ? 'No reviewed applications yet' :
+            'No pending applications'
           }
           description={
             tab === 'all'
-              ? 'When friends apply for jobs you\'ve posted, their CVs will appear here.'
-              : `No applications with status "${tab}".`
+              ? "When friends apply for jobs you've posted, their CVs will appear here."
+              : `No applications with this status.`
           }
         />
       ) : (

@@ -26,8 +26,8 @@ export function Avatar({ src, name, size = 'md', ring, className }: AvatarProps)
       className={cn(
         'rounded-full flex items-center justify-center shrink-0 select-none overflow-hidden',
         sizeMap[size],
-        ring && 'ring-2 ring-violet-500 ring-offset-2 ring-offset-page',
-        !src && 'bg-violet-700/40 text-violet-300 font-bold',
+        ring && 'ring-2 ring-gold-300 ring-offset-2 ring-offset-page',
+        !src && 'bg-gold-500/40 text-gold-300 font-bold',
         className,
       )}
     >

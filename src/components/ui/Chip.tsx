@@ -15,8 +15,8 @@ export function Chip({ label, active, onToggle, icon }: ChipProps) {
       className={cn(
         'inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all cursor-pointer whitespace-nowrap',
         active
-          ? 'bg-violet-500/15 border-violet-500/40 text-violet-300'
-          : 'bg-input border-border-strong text-text-secondary hover:border-violet-500/30 hover:text-text-primary',
+          ? 'bg-gold-300/15 border-gold-300/40 text-gold-300'
+          : 'bg-input border-border-strong text-text-secondary hover:border-gold-300/30 hover:text-text-primary',
       )}
     >
       {icon && <span>{icon}</span>}

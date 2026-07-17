@@ -76,7 +76,7 @@ export function RegisterForm() {
       <div className="text-center mb-6">
         {/* Inviter banner */}
         {inviterName ? (
-          <div className="flex items-center gap-3 bg-violet-500/10 border border-violet-500/20 rounded-xl px-4 py-3 mb-4 text-left">
+          <div className="flex items-center gap-3 bg-gold-300/10 border border-gold-300/20 rounded-xl px-4 py-3 mb-4 text-left">
             <Avatar src={inviterAvatar} name={inviterName} size="sm" />
             <div>
               <p className="text-sm font-semibold text-text-primary">{inviterName} invited you!</p>
@@ -112,7 +112,7 @@ export function RegisterForm() {
 
       <p className="text-center text-sm text-text-muted">
         Already have an account?{' '}
-        <Link href="/login" className="text-violet-300 hover:text-violet-400 font-medium">Log in</Link>
+        <Link href="/login" className="text-gold-300 hover:text-gold-400 font-medium">Log in</Link>
       </p>
     </form>
   );

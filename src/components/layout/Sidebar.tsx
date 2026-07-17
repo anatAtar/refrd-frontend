@@ -29,15 +29,13 @@ export function Sidebar() {
     <aside className="hidden md:flex flex-col w-56 shrink-0 bg-card border-r border-border h-screen sticky top-0">
       {/* Logo */}
       <div className="px-5 h-14 flex items-center border-b border-border">
-        <span
-          className="text-xl font-black tracking-tight"
-          style={{
-            background: 'linear-gradient(135deg, #9F87F5, #C4B6FA)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          Refrd
+        <span className="text-xl font-black tracking-tight shrink-0">
+          <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Direct
+          </span>
+          <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Ref
+          </span>
         </span>
       </div>
 
@@ -56,14 +54,14 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                 active
-                  ? 'bg-violet-500/15 text-violet-300'
+                  ? 'bg-gold-300/15 text-gold-300'
                   : 'text-text-muted hover:text-text-primary hover:bg-card-hover',
               )}
             >
               <span className="text-base">{item.icon}</span>
               <span className="flex-1">{item.label}</span>
               {showBadge && (
-                <span className="text-[10px] font-bold bg-violet-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                <span className="text-[10px] font-bold bg-gold-300 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}

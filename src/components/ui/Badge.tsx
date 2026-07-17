@@ -9,7 +9,7 @@ interface BadgeProps {
 }
 
 const variantMap: Record<BadgeVariant, string> = {
-  violet: 'bg-violet-500/15 text-violet-300 border-violet-500/25',
+  violet: 'bg-gold-300/15 text-gold-300 border-gold-300/25',
   teal:   'bg-teal/15 text-teal border-teal/25',
   amber:  'bg-amber/15 text-amber border-amber/25',
   rose:   'bg-rose/15 text-rose border-rose/25',

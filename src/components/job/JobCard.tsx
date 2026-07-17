@@ -31,10 +31,10 @@ export function JobCard({ data }: JobCardProps) {
   const [sendCVOpen, setSendCVOpen] = useState(false);
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
-  const isOwnPosting  = user?.id === job.referrerId;
-  const appStatus     = appMap.get(job.id);
+  const isOwnPosting   = user?.id === job.referrerId;
+  const appStatus      = appMap.get(job.id);
   const alreadyApplied = !!appStatus;
-  const indicator     = appStatus ? STATUS_INDICATORS[appStatus] : null;
+  const indicator      = appStatus ? STATUS_INDICATORS[appStatus] : null;
 
   return (
     <>
@@ -46,7 +46,7 @@ export function JobCard({ data }: JobCardProps) {
           </div>
           <div className="flex-1 min-w-0">
             <Link href={`/jobs/${job.id}`} className="block">
-              <h3 className="font-bold text-text-primary text-sm leading-snug hover:text-violet-300 transition-colors">
+              <h3 className="font-bold text-text-primary text-sm leading-snug hover:text-gold-300 transition-colors">
                 {job.title}
               </h3>
             </Link>
@@ -92,10 +92,10 @@ export function JobCard({ data }: JobCardProps) {
         </div>
 
         {/* Contact row */}
-        <div className="flex items-center gap-2 bg-violet-500/8 border border-violet-500/15 rounded-lg px-3 py-2">
+        <div className="flex items-center gap-2 bg-gold-300/8 border border-gold-300/15 rounded-lg px-3 py-2">
           <Avatar src={referrer.avatarUrl} name={referrer.fullName} size="xs" />
           <span className="text-xs text-text-secondary">
-            <span className="text-violet-300 font-semibold">{referrer.fullName}</span> works here
+            <span className="text-gold-300 font-semibold">{referrer.fullName}</span> works here
           </span>
           <span className="ml-auto text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
         </div>
@@ -114,14 +114,14 @@ export function JobCard({ data }: JobCardProps) {
                '✓ CV sent'}
             </Button>
           ) : job.isActive ? (
-            <Button variant="primary" size="sm" className="flex-1" onClick={() => setSendCVOpen(true)}>
+            <Button variant="primary" size="sm" className="flex-1 min-h-[44px]" onClick={() => setSendCVOpen(true)}>
               Send CV to {referrer.fullName.split(' ')[0]}
             </Button>
           ) : (
-            <Button variant="ghost" size="sm" className="flex-1" disabled>Job closed</Button>
+            <Button variant="ghost" size="sm" className="flex-1 min-h-[44px]" disabled>Job closed</Button>
           )}
           <Link href={`/jobs/${job.id}`}>
-            <Button variant="secondary" size="sm">Details</Button>
+            <Button variant="secondary" size="sm" className="min-h-[44px]">Details</Button>
           </Link>
         </div>
       </Card>

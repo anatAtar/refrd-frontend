@@ -53,7 +53,7 @@ export default function MyJobsPage() {
             <Card key={job.id} className="p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <Link href={`/jobs/${job.id}`} className="font-bold text-text-primary text-sm hover:text-violet-300">
+                  <Link href={`/jobs/${job.id}`} className="font-bold text-text-primary text-sm hover:text-gold-300">
                     {job.title}
                   </Link>
                   <p className="text-xs text-text-secondary mt-0.5">{job.companyName} · {job.location ?? 'Remote'}</p>

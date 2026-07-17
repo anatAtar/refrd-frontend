@@ -28,9 +28,13 @@ export const applicationsApi = {
   forward: (id: string, body: { hrEmail: string; referrerNote?: string }) =>
     api.post(`/api/applications/${id}/forward`, body),
 
-  /** CV download URL — used in <a href> or window.open */
+  /** CV download URL — forces file save */
   cvUrl: (id: string) =>
     `${process.env.NEXT_PUBLIC_API_URL}/api/applications/${id}/cv`,
+
+  /** CV preview URL — opens inline in browser (PDF displays, Word downloads) */
+  cvPreviewUrl: (id: string) =>
+    `${process.env.NEXT_PUBLIC_API_URL}/api/applications/${id}/cv/preview`,
 };
 
 /** Server Component: fetch inbox */
