@@ -26,7 +26,7 @@ export function Sidebar() {
   const { count: unreadCount } = useUnreadCount();
 
   return (
-    <aside className="hidden md:flex flex-col w-56 shrink-0 h-screen sticky top-0" style={{ background: '#120E09', borderRight: '1px solid rgba(212,175,122,0.08)' }}>
+    <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0" style={{ background: '#120E09', borderRight: '1px solid rgba(212,175,122,0.08)' }}>
       {/* Logo */}
       <div className="px-4 h-16 flex items-center gap-3" style={{ borderBottom: '1px solid rgba(212,175,122,0.08)' }}>
         {/* Arrow icon */}
