@@ -44,7 +44,6 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
           <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Direct</span>
           <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
         </div>
-        </div>
         {/* Tagline */}
         <h1 className="text-lg font-bold text-text-primary mb-2">
           Hey {firstName} 👋 Let&apos;s find your next role together
@@ -52,7 +51,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
 
         {/* Description */}
         <p className="text-sm text-text-secondary leading-relaxed max-w-md mx-auto mb-5">
-          Your CV, direct to the right person.
+          Direct to your next job.
         </p>
 
         {/* How it works — 3 steps */}
@@ -60,7 +59,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
           {[
             { icon: '👥', step: '1', title: 'Connect', desc: 'Add friends who work at companies you like' },
             { icon: '🔍', step: '2', title: 'Find a role', desc: 'See jobs posted by your connections' },
-            { icon: '📄', step: '3', title: 'Send your CV', desc: 'It goes straight to your friend inside' },
+            { icon: '📄', step: '3', title: 'Send your CV', desc: 'Direct to a contact inside the company' },
           ].map((s) => (
             <div key={s.step} className="bg-page/60 rounded-xl p-3 border border-border">
               <div className="text-2xl mb-1.5">{s.icon}</div>

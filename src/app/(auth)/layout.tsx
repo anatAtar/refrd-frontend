@@ -20,7 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               Ref
             </span>
           </div>
-          <p className="text-sm text-text-muted">Your CV, direct to the right person</p>
+          <p className="text-sm text-text-muted">Direct to your next job</p>
         </div>
 
         {/* Card */}

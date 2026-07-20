@@ -28,15 +28,28 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-56 shrink-0 bg-card border-r border-border h-screen sticky top-0">
       {/* Logo */}
-      <div className="px-5 h-14 flex items-center border-b border-border">
-        <span className="text-xl font-black tracking-tight shrink-0">
-          <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Direct
+      <div className="px-4 h-16 flex items-center gap-3 border-b border-border">
+        {/* Arrow icon */}
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-base font-black shrink-0"
+          style={{
+            background: 'linear-gradient(135deg,rgba(212,175,122,0.2),rgba(212,175,122,0.06))',
+            border: '1px solid rgba(212,175,122,0.25)',
+            color: '#D4AF7A',
+          }}
+        >
+          →
+        </div>
+        {/* Name + tagline */}
+        <div className="flex flex-col gap-0.5">
+          <span className="text-lg font-black tracking-tight leading-none">
+            <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Direct</span>
+            <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
           </span>
-          <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Ref
+          <span className="text-[9px] font-medium text-text-muted leading-none">
+            Direct to your next job
           </span>
-        </span>
+        </div>
       </div>
 
       {/* Nav items */}
