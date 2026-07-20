@@ -10,10 +10,10 @@ export function TopBar() {
   const { count: unreadCount } = useUnreadCount();
 
   return (
-    <header className="sticky top-0 z-40 bg-page/90 backdrop-blur border-b border-border h-14 flex items-center px-4 gap-2 md:hidden">
+    <header className="sticky top-0 z-40 backdrop-blur border-b h-14 flex items-center px-4 gap-2 md:hidden" style={{ background: 'rgba(242,242,242,0.92)', borderColor: 'rgba(26,18,9,0.08)' }}>
       <span className="text-lg font-black tracking-tight flex-1">
-        <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Direct</span>
-        <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
+        <span style={{ background: 'linear-gradient(160deg,#1A1209,#2A1A09)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Direct</span>
+        <span style={{ background: 'linear-gradient(160deg,#C49A5A,#A87D3A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
       </span>
 
       {/* Bell — 44px touch target */}

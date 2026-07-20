@@ -7,7 +7,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         className="min-h-screen flex flex-col items-center justify-center px-4"
         style={{
           background:
-            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,122,0.10) 0%, transparent 70%), var(--color-page)',
+            'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212,175,122,0.15) 0%, transparent 70%), #F2F2F2',
         }}
       >
         {/* Logo */}
@@ -24,7 +24,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Card */}
-        <div className="w-full max-w-md bg-card border border-border rounded-2xl p-8">
+        <div className="w-full max-w-md bg-white border rounded-2xl p-8 shadow-sm" style={{ borderColor: 'rgba(26,18,9,0.10)' }}>
           {children}
         </div>
       </div>

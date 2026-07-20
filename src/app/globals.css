@@ -1,18 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── Surfaces ──────────────────────────────────── */
-  --color-page:          #0A0A0A;
-  --color-card:          #111111;
-  --color-card-hover:    #171717;
-  --color-input:         #0E0E0E;
-  --color-border:        rgba(255, 255, 255, 0.07);
-  --color-border-strong: rgba(255, 255, 255, 0.13);
+  /* ── Sidebar surfaces (warm dark) ──────────────── */
+  --color-sidebar:       #120E09;
+  --color-sidebar-card:  #1A1410;
+  --color-sidebar-border: rgba(212, 175, 122, 0.08);
+
+  /* ── Main content surfaces (light grey) ────────── */
+  --color-page:          #F2F2F2;
+  --color-card:          #FFFFFF;
+  --color-card-hover:    #EBEBEB;
+  --color-input:         #E8E8E8;
+  --color-border:        rgba(26, 18, 9, 0.08);
+  --color-border-strong: rgba(26, 18, 9, 0.13);
 
   /* ── Text ──────────────────────────────────────── */
-  --color-text-primary:   #F2F2F2;
-  --color-text-secondary: #8A8A8A;
-  --color-text-muted:     #4A4A4A;
+  --color-text-primary:   #1A1A1A;
+  --color-text-secondary: #666666;
+  --color-text-muted:     #999999;
 
   /* ── Brand — Warm Gold ─────────────────────────── */
   --color-gold-100: #FAF0DC;
@@ -20,35 +25,27 @@
   --color-gold-300: #D4AF7A;
   --color-gold-400: #C49A5A;
   --color-gold-500: #A87D3A;
-  --color-gold-glow: rgba(212, 175, 122, 0.15);
+  --color-gold-glow: rgba(212, 175, 122, 0.20);
 
   /* Keep violet names mapped to gold so existing classes work */
-  --color-violet-300: #F0D9A8;
-  --color-violet-400: #D4AF7A;
-  --color-violet-500: #C49A5A;
-  --color-violet-600: #A87D3A;
-  --color-violet-700: #8A6228;
-  --color-violet-glow: rgba(212, 175, 122, 0.12);
-
-  /* Gold utilities (new class names) */
-  --color-gold-100: #FAF0DC;
-  --color-gold-200: #F0D9A8;
-  --color-gold-300: #D4AF7A;
-  --color-gold-400: #C49A5A;
-  --color-gold-500: #A87D3A;
-  --color-gold-glow: rgba(212, 175, 122, 0.15);
+  --color-violet-300: #C49A5A;
+  --color-violet-400: #B88A4A;
+  --color-violet-500: #A87D3A;
+  --color-violet-600: #8A6228;
+  --color-violet-700: #6A4A18;
+  --color-violet-glow: rgba(212, 175, 122, 0.15);
 
   /* ── Series / data ─────────────────────────────── */
-  --color-teal:  #239E6E;
-  --color-amber: #B87A08;
-  --color-rose:  #C54B4B;
-  --color-blue:  #4E70D4;
+  --color-teal:  #0D7A52;
+  --color-amber: #8A5A00;
+  --color-rose:  #A03030;
+  --color-blue:  #2A50A4;
 
   /* ── Status ────────────────────────────────────── */
-  --color-good:    #0ca30c;
-  --color-warn:    #fab219;
-  --color-serious: #ec835a;
-  --color-crit:    #d03b3b;
+  --color-good:    #0a7a0a;
+  --color-warn:    #b08010;
+  --color-serious: #c05a20;
+  --color-crit:    #a02020;
 
   /* ── Radii ─────────────────────────────────────── */
   --radius-sm:   6px;
@@ -75,7 +72,7 @@
   }
 
   ::-webkit-scrollbar        { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track  { background: var(--color-card); }
+  ::-webkit-scrollbar-track  { background: var(--color-card-hover); }
   ::-webkit-scrollbar-thumb  { background: var(--color-text-muted); border-radius: 999px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
 
@@ -84,7 +81,7 @@
   a { color: inherit; text-decoration: none; }
 
   :focus-visible {
-    outline: 2px solid var(--color-gold-300);
+    outline: 2px solid var(--color-gold-400);
     outline-offset: 2px;
   }
 }

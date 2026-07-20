@@ -115,7 +115,7 @@ export default function JobsPage() {
           onChange={(e) => { setSearch(e.target.value); setShowMobileFilters(false); }}
           autoFocus
         />
-        {search && <button onClick={() => setSearch('')} className="text-text-muted hover:text-text-primary text-lg leading-none px-1">×</button>}
+        {search && <button onClick={() => setSearch('')} className="flex items-center justify-center w-7 h-7 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors text-sm font-bold">×</button>}
       </div>
 
       {hasFilters && (
@@ -224,7 +224,7 @@ export default function JobsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              {search && <button onClick={() => setSearch('')} className="text-text-muted text-lg leading-none px-1">×</button>}
+              {search && <button onClick={() => setSearch('')} className="flex items-center justify-center w-8 h-8 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors font-bold">×</button>}
             </div>
             <button
               onClick={() => setShowMobileFilters(true)}
@@ -308,9 +308,15 @@ function FilterRow({ label, count, active, onToggle }: {
 // ── Active filter chip ───────────────────────────────────────────────────────
 function ActiveChip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[11px] font-medium bg-gold-300/15 text-gold-300 border border-gold-300/25 px-2 py-0.5 rounded-full">
+    <span className="inline-flex items-center gap-2 text-xs font-semibold bg-gold-300/15 text-gold-300 border border-gold-300/25 pl-3 pr-1.5 py-1.5 rounded-full">
       {label}
-      <button onClick={onRemove} className="hover:text-white ml-0.5 leading-none">×</button>
+      <button
+        onClick={onRemove}
+        className="flex items-center justify-center w-5 h-5 rounded-full bg-gold-300/25 hover:bg-gold-300/50 text-gold-300 transition-colors font-bold text-sm leading-none"
+        aria-label={`Remove ${label} filter`}
+      >
+        ×
+      </button>
     </span>
   );
 }
