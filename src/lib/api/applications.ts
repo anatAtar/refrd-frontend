@@ -1,5 +1,5 @@
 import { api, serverFetch } from './client';
-import type { ApiResponse, ApplicationWithDetails } from '../types';
+import type { ApiResponse, ApplicationWithDetails, ApplicationMessage } from '../types';
 
 export const applicationsApi = {
   /** Submit a CV (multipart) */
@@ -35,6 +35,16 @@ export const applicationsApi = {
   /** CV preview URL — opens inline in browser (PDF displays, Word downloads) */
   cvPreviewUrl: (id: string) =>
     `${process.env.NEXT_PUBLIC_API_URL}/api/applications/${id}/cv/preview`,
+
+  /** Fetch the message thread for an application */
+  getMessages: (id: string) =>
+    api.get<{ data: { messages: ApplicationMessage[]; unreadCount: number } }>(
+      `/api/applications/${id}/messages`,
+    ),
+
+  /** Send a message in an application thread */
+  sendMessage: (id: string, content: string) =>
+    api.post<{ data: ApplicationMessage }>(`/api/applications/${id}/messages`, { content }),
 };
 
 /** Server Component: fetch inbox */

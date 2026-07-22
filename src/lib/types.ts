@@ -108,3 +108,14 @@ export interface ApiResponse<T> {
   data: T;
   message?: string;
 }
+
+export interface ApplicationMessage {
+  id: string;
+  applicationId: string;
+  senderId: string;
+  senderName: string;
+  senderAvatarUrl: string | null;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}

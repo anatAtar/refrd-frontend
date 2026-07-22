@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import useSWR from 'swr';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { MessageThread } from '@/components/application/MessageThread';
 import { applicationsApi } from '@/lib/api/applications';
 import { STATUS_LABELS, STATUS_COLORS, formatBytes, timeAgo, jobCode } from '@/lib/utils';
 import { ApiError } from '@/lib/api/client';
@@ -20,6 +22,15 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
   const { application, job, seeker } = data;
   const [declining, setDeclining]           = useState(false);
   const [confirmDecline, setConfirmDecline] = useState(false);
+  const [msgOpen, setMsgOpen]               = useState(false);
+
+  // Lightweight unread count poll — shares SWR key with MessageThread so opening clears badge
+  const { data: msgData, mutate: mutateMsgs } = useSWR(
+    `messages-${application.id}`,
+    () => applicationsApi.getMessages(application.id).then((r) => r.data),
+    { refreshInterval: 30_000, revalidateOnFocus: false },
+  );
+  const unreadCount = msgData?.unreadCount ?? 0;
 
   const cvUrl        = applicationsApi.cvUrl(application.id);
   const cvPreviewUrl = applicationsApi.cvPreviewUrl(application.id);
@@ -85,7 +96,7 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
           {/* Actions — always show all options (can view multiple times) */}
           {!isDone && (
             <div className="mt-3 space-y-2">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {/* View — always available */}
                 <Button variant="secondary" size="sm" onClick={handleView} className="shrink-0">
                   👁️ View
@@ -97,6 +108,21 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
                     📥 Download CV
                   </Button>
                 </a>
+
+                {/* Message */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="relative shrink-0"
+                  onClick={() => setMsgOpen(true)}
+                >
+                  💬 Message
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-crit text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
 
                 {/* Not a fit */}
                 {!confirmDecline && (
@@ -126,15 +152,37 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
             </div>
           )}
 
-          {/* Done state */}
+          {/* Done state — still allow messaging */}
           {isDone && (
-            <div className="mt-3">
+            <div className="mt-3 flex items-center gap-2">
               <Badge variant="muted">✕ Not a fit</Badge>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="relative ml-auto shrink-0"
+                onClick={() => setMsgOpen(true)}
+              >
+                💬 Message
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-crit text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                    {unreadCount}
+                  </span>
+                )}
+              </Button>
             </div>
           )}
 
         </div>
       </div>
+
+      {/* Message thread dialog */}
+      <MessageThread
+        applicationId={application.id}
+        otherPartyName={seeker?.fullName ?? 'Applicant'}
+        open={msgOpen}
+        onClose={() => setMsgOpen(false)}
+        onRead={() => mutateMsgs()}
+      />
     </Card>
   );
 }

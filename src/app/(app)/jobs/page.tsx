@@ -13,8 +13,9 @@ import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
 
 function useAllJobs() {
-  return useSWR('jobs/browse/all', () =>
+  return useSWR('jobs/browse/v2', () =>
     jobsApi.search({}).then((r) => r.data),
+    { revalidateOnMount: true },
   );
 }
 
@@ -41,7 +42,7 @@ export default function JobsPage() {
     setSelectedContactName(n ?? '');
   }, [searchParams]);
 
-  const { data: allJobs = [], isLoading } = useAllJobs();
+  const { data: allJobs = [], isLoading, error: jobsError } = useAllJobs();
 
   // ── Derived facets ──────────────────────────────────────────────────────
   const facets = useMemo(() => {
@@ -157,7 +158,7 @@ export default function JobsPage() {
       {facets.contacts.length > 0 && (
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">
-            Your Contacts <span className="font-normal normal-case tracking-normal">({facets.contacts.length})</span>
+            Referrers <span className="font-normal normal-case tracking-normal">({facets.contacts.length})</span>
           </p>
           <div className="space-y-0.5">
             {facets.contacts.map(([id, info]) => (
@@ -264,6 +265,18 @@ export default function JobsPage() {
         <div className="p-4">
           {isLoading ? (
             <div className="space-y-3">{[...Array(5)].map((_, i) => <JobCardSkeleton key={i} />)}</div>
+          ) : jobsError ? (
+            <div className="text-center py-16">
+              <div className="text-4xl mb-3">⚠️</div>
+              <p className="text-sm font-semibold text-text-primary mb-1">Couldn&apos;t load jobs</p>
+              <p className="text-xs text-text-muted">Check your connection and try refreshing</p>
+            </div>
+          ) : filtered.length === 0 && allJobs.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-4xl mb-3">📭</div>
+              <p className="text-sm font-semibold text-text-primary mb-1">No open roles yet</p>
+              <p className="text-xs text-text-muted">Check back soon — new roles are added all the time</p>
+            </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-4xl mb-3">😔</div>
