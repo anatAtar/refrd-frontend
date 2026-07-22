@@ -29,16 +29,24 @@ export function Sidebar() {
     <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0" style={{ background: '#120E09', borderRight: '1px solid rgba(212,175,122,0.08)' }}>
       {/* Logo */}
       <div className="px-4 h-16 flex items-center gap-3" style={{ borderBottom: '1px solid rgba(212,175,122,0.08)' }}>
-        {/* Arrow icon */}
+        {/* R → Arrow icon */}
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-base font-black shrink-0"
+          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
           style={{
-            background: 'rgba(212,175,122,0.15)',
-            border: '1px solid rgba(212,175,122,0.30)',
-            color: '#D4AF7A',
+            background: 'rgba(212,175,122,0.12)',
+            border: '1px solid rgba(212,175,122,0.28)',
           }}
         >
-          →
+          <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* R vertical bar */}
+            <rect x="9" y="6" width="5" height="36" rx="2" fill="#D4AF7A"/>
+            {/* R bump */}
+            <path d="M14 6 H24 Q34 6 34 17 Q34 28 24 28 H14" fill="none" stroke="#D4AF7A" strokeWidth="5" strokeLinejoin="round"/>
+            {/* R leg → arrow */}
+            <line x1="24" y1="28" x2="37" y2="42" stroke="#F0D9A8" strokeWidth="4.5" strokeLinecap="round"/>
+            {/* arrowhead */}
+            <polyline points="28,42 37,42 37,33" stroke="#F0D9A8" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
         </div>
         {/* Name + tagline */}
         <div className="flex flex-col gap-0.5">
@@ -47,7 +55,7 @@ export function Sidebar() {
             <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
           </span>
           <span className="text-[9px] font-medium text-text-muted leading-none">
-            Direct to your next job
+            Find your next job
           </span>
         </div>
       </div>
@@ -65,15 +73,15 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                active
-                  ? 'text-gold-300'
-                  : 'hover:bg-white/5',
+                'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group',
+                active ? '' : 'hover:bg-white/5',
               )}
               style={{
-                color: active ? '#D4AF7A' : '#5A4A2A',
+                color: active ? '#D4AF7A' : '#A89070',
                 background: active ? 'rgba(212,175,122,0.12)' : undefined,
               }}
+              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#D4AF7A'; }}
+              onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#A89070'; }}
             >
               <span className="text-base">{item.icon}</span>
               <span className="flex-1">{item.label}</span>
@@ -91,7 +99,7 @@ export function Sidebar() {
       <div className="p-3" style={{ borderTop: '1px solid rgba(212,175,122,0.08)' }}>
         {user && (
           <div className="px-3 py-2 mb-1">
-            <p className="text-xs font-semibold truncate" style={{ color: '#F5EDD8' }}>{user.fullName}</p>
+            <p className="text-xs font-semibold truncate" style={{ color: "#F0E8D8" }}>{user.fullName}</p>
             <p className="text-xs truncate" style={{ color: '#5A4A2A' }}>{user.companyName ?? user.email}</p>
           </div>
         )}

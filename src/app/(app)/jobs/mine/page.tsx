@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { jobsApi } from '@/lib/api/jobs';
-import { timeAgo, formatCurrency } from '@/lib/utils';
+import { timeAgo } from '@/lib/utils';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -59,9 +59,6 @@ export default function MyJobsPage() {
                   <p className="text-xs text-text-secondary mt-0.5">{job.companyName} · {job.location ?? 'Remote'}</p>
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     {job.isActive ? <Badge variant="good">Active</Badge> : <Badge variant="muted">Inactive</Badge>}
-                    {job.bonusAmount && (
-                      <Badge variant="amber">💰 {formatCurrency(job.bonusAmount, job.bonusCurrency ?? 'USD')} bonus</Badge>
-                    )}
                     <span className="text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
                   </div>
                 </div>

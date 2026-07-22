@@ -35,39 +35,43 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
         {/* ── LEFT ─────────────────────────────────────────────── */}
         <div className="space-y-5">
 
-          {/* Greeting */}
-          <div className="rounded-2xl px-6 py-5" style={{ background: '#FFFFFF', border: '1px solid rgba(26,18,9,0.08)', boxShadow: '0 1px 4px rgba(26,18,9,0.06)' }}>
-            <h1 className="text-xl font-bold text-text-primary mb-1">Hey {firstName} 👋 Welcome to DirectRef</h1>
-            <p className="text-sm text-text-secondary">Send your CV directly to a contact inside the company</p>
-          </div>
+          {/* Greeting + Stats — dark banner */}
+          <div className="rounded-2xl overflow-hidden" style={{ background: '#120E09', border: '1px solid rgba(212,175,122,0.12)' }}>
+            {/* Top: greeting */}
+            <div className="px-6 pt-6 pb-4">
+              <h1 className="text-xl font-bold mb-1" style={{ color: '#F5EDD8' }}>
+                Hey {firstName} 👋 Welcome to{' '}
+                <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Direct</span>
+                <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
+              </h1>
+              <p className="text-sm" style={{ color: '#6A5A3A' }}>Send your CV directly to a contact inside the company</p>
+            </div>
 
-          {/* My Activity */}
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-text-muted mb-3">My Activity</h2>
-            <div className="grid grid-cols-3 gap-3">
-              <Link href="/jobs/mine" className="rounded-xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md" style={{ background: '#FFFFFF', border: '1px solid rgba(26,18,9,0.08)' }}>
-                <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">📌</span>
-                  {pendingCVs > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(176,128,16,0.12)', color: '#b08010', border: '1px solid rgba(176,128,16,0.2)' }}>{pendingCVs} new</span>}
+            {/* Bottom: stats strip */}
+            <div className="grid grid-cols-3" style={{ borderTop: '1px solid rgba(212,175,122,0.08)' }}>
+              <Link href="/jobs/mine" className="px-5 py-4 transition-colors hover:bg-white/5" style={{ borderRight: '1px solid rgba(212,175,122,0.08)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">📌</span>
+                  {pendingCVs > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(176,128,16,0.2)', color: '#D4AF7A', border: '1px solid rgba(212,175,122,0.2)' }}>{pendingCVs} new</span>}
                 </div>
-                <div className="text-2xl font-bold text-text-primary">{activeJobs}</div>
-                <div className="text-xs text-text-secondary mt-0.5">Jobs posted</div>
-                {totalCVs > 0 && <div className="text-xs text-text-muted mt-0.5">{totalCVs} CVs received</div>}
+                <div className="text-2xl font-bold" style={{ color: '#F5EDD8' }}>{activeJobs}</div>
+                <div className="text-xs mt-0.5" style={{ color: '#6A5A3A' }}>Jobs posted</div>
               </Link>
 
-              <Link href="/applications/inbox" className="rounded-xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md" style={{ background: '#FFFFFF', border: '1px solid rgba(26,18,9,0.08)' }}>
-                <div className="flex items-start justify-between mb-3">
-                  <span className="text-2xl">📥</span>
-                  {pendingCVs > 0 && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(176,128,16,0.12)', color: '#b08010', border: '1px solid rgba(176,128,16,0.2)' }}>{pendingCVs} pending</span>}
+              <Link href="/applications/inbox" className="px-5 py-4 transition-colors hover:bg-white/5" style={{ borderRight: '1px solid rgba(212,175,122,0.08)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">📥</span>
                 </div>
-                <div className="text-2xl font-bold text-text-primary">{totalCVs}</div>
-                <div className="text-xs text-text-secondary mt-0.5">CVs received</div>
+                <div className="text-2xl font-bold" style={{ color: '#F5EDD8' }}>{totalCVs}</div>
+                <div className="text-xs mt-0.5" style={{ color: '#6A5A3A' }}>CVs received</div>
               </Link>
 
-              <Link href="/applications" className="rounded-xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-md" style={{ background: '#FFFFFF', border: '1px solid rgba(26,18,9,0.08)' }}>
-                <div className="text-2xl mb-3">📋</div>
-                <div className="text-2xl font-bold text-text-primary">{myAppsSent}</div>
-                <div className="text-xs text-text-secondary mt-0.5">CVs sent</div>
+              <Link href="/applications" className="px-5 py-4 transition-colors hover:bg-white/5">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">📋</span>
+                </div>
+                <div className="text-2xl font-bold" style={{ color: '#F5EDD8' }}>{myAppsSent}</div>
+                <div className="text-xs mt-0.5" style={{ color: '#6A5A3A' }}>CVs sent</div>
               </Link>
             </div>
           </div>
