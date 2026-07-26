@@ -16,10 +16,11 @@ function isTokenAlive(token: string | undefined): boolean {
   if (!token) return false;
   try {
     // JWT uses base64url — convert to standard base64 before decoding
-    const base64 = token.split('.')[1]
+    const part = token.split('.')[1];
+    const base64 = part
       .replace(/-/g, '+')
       .replace(/_/g, '/')
-      .padEnd(Math.ceil(token.split('.')[1].length / 4) * 4, '=');
+      .padEnd(Math.ceil(part.length / 4) * 4, '=');
     const payload = JSON.parse(atob(base64));
     // exp is in seconds; give a 10s buffer for clock skew
     return typeof payload.exp === 'number' && payload.exp * 1000 > Date.now() + 10_000;
@@ -28,7 +29,7 @@ function isTokenAlive(token: string | undefined): boolean {
   }
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
