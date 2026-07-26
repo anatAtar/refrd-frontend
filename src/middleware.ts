@@ -15,7 +15,12 @@ const PUBLIC_PATHS = [
 function isTokenAlive(token: string | undefined): boolean {
   if (!token) return false;
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    // JWT uses base64url — convert to standard base64 before decoding
+    const base64 = token.split('.')[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(Math.ceil(token.split('.')[1].length / 4) * 4, '=');
+    const payload = JSON.parse(atob(base64));
     // exp is in seconds; give a 10s buffer for clock skew
     return typeof payload.exp === 'number' && payload.exp * 1000 > Date.now() + 10_000;
   } catch {
