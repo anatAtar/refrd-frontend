@@ -108,15 +108,15 @@ export function JobCard({ data }: JobCardProps) {
             </Link>
           ) : alreadyApplied ? (
             <>
-              <Button variant="secondary" size="sm" className="flex-1 gap-1.5" disabled>
-                {appStatus === 'forwarded' ? '🎉 Forwarded to HR' :
+              <Link href={`/jobs/${job.id}`} className="flex-1">
+                <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
+              </Link>
+              <Button variant="ghost" size="sm" className="min-h-[44px] text-text-muted shrink-0 gap-1" disabled>
+                {appStatus === 'forwarded' ? '🎉 Forwarded' :
                  appStatus === 'viewed'    ? '👀 Reviewed' :
                  appStatus === 'rejected'  ? '✕ Not a fit' :
                  '✓ CV sent'}
               </Button>
-              <Link href={`/jobs/${job.id}`}>
-                <Button variant="ghost" size="sm" className="min-h-[44px]">Details</Button>
-              </Link>
             </>
           ) : job.isActive ? (
             <>
