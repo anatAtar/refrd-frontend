@@ -127,28 +127,13 @@ export default function JobsPage() {
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // ── Filter panel (shared between desktop sidebar + mobile drawer) ───────
+  // ── Filter panel — sidebar only (no search box here on desktop) ────────
   const FilterPanel = () => (
     <div className="p-4 space-y-6">
 
-      {/* ── Main search ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-3 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
-        <span className="text-text-muted">🔍</span>
-        <input
-          className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
-          placeholder="Search by role, company, location…"
-          value={search}
-          onChange={(e) => { setSearch(e.target.value); setShowMobileFilters(false); }}
-          autoFocus
-        />
-        {search && (
-          <button onClick={() => setSearch('')} className="flex items-center justify-center w-6 h-6 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors text-sm font-bold shrink-0">×</button>
-        )}
-      </div>
-
-      {/* ── Active filter count + clear ──────────────────────────────── */}
+      {/* ── Active filter count + clear (mobile only — desktop top bar handles it) */}
       {hasFilters && (
-        <div className="flex items-center justify-between">
+        <div className="flex md:hidden items-center justify-between">
           <span className="text-xs text-text-secondary font-medium">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
           <button onClick={() => { clearAll(); setShowMobileFilters(false); }} className="text-xs text-gold-300 hover:text-gold-400 font-medium">Clear all</button>
         </div>
@@ -266,8 +251,7 @@ export default function JobsPage() {
             <div className="flex items-center justify-between px-4 pt-4 pb-2">
               <span className="text-sm font-bold text-text-primary">Filter Jobs</span>
               <button onClick={() => setShowMobileFilters(false)} className="text-text-muted hover:text-text-primary p-2 -mr-2 text-lg">×</button>
-            </div>
-            <FilterPanel />
+            </div>            <FilterPanel />
             <div className="px-4 pb-6">
               <button
                 onClick={() => setShowMobileFilters(false)}
@@ -281,21 +265,36 @@ export default function JobsPage() {
       )}
 
       {/* ── DESKTOP FILTER SIDEBAR ───────────────────────────────────── */}
-      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-border overflow-y-auto">
+      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-border overflow-y-auto">
         <FilterPanel />
       </aside>
 
       {/* ── JOB LIST ─────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto">
         {/* Sticky top bar */}
-        <div className="sticky top-0 z-10 bg-page/90 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-2">
-          {/* Mobile: search + filter button */}
+        <div className="sticky top-0 z-10 bg-page/90 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
+
+          {/* ── Search box — full width in the top bar on desktop ── */}
+          <div className="hidden md:flex flex-1 items-center gap-2 bg-input border border-border-strong rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
+            <span className="text-text-muted shrink-0">🔍</span>
+            <input
+              className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
+              placeholder="Search by role, company, location, referrer…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="flex items-center justify-center w-6 h-6 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors text-sm font-bold shrink-0">×</button>
+            )}
+          </div>
+
+          {/* ── Mobile: search + filter button ── */}
           <div className="flex md:hidden items-center gap-2 flex-1 min-w-0">
             <div className="flex-1 flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40">
               <span className="text-text-muted shrink-0">🔍</span>
               <input
                 className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
-                placeholder="Search by role, company, location…"
+                placeholder="Search roles, companies…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -314,11 +313,22 @@ export default function JobsPage() {
             </button>
           </div>
 
-          {/* Desktop: count + active filter chips */}
-          <h1 className="hidden md:block text-sm font-bold text-text-primary shrink-0">
-            {hasFilters ? `${filtered.length} jobs` : `${allJobs.length} open roles`}
-          </h1>
-          <div className="hidden md:flex gap-2 flex-wrap flex-1">
+          {/* ── Desktop: result count + active chips ── */}
+          <div className="hidden md:flex items-center gap-2 shrink-0">
+            <span className="text-sm font-bold text-text-primary whitespace-nowrap">
+              {hasFilters ? `${filtered.length} jobs` : `${allJobs.length} open roles`}
+            </span>
+            {hasFilters && (
+              <button onClick={clearAll} className="text-xs text-gold-300 hover:text-gold-400 font-medium whitespace-nowrap">
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Active filter chips row (desktop) */}
+        {hasFilters && (
+          <div className="hidden md:flex gap-2 flex-wrap px-4 py-2 border-b border-border bg-page/60">
             {[...selectedRoles].map((r) => <ActiveChip key={r} label={r} onRemove={() => toggleRole(r)} />)}
             {[...selectedCompanies].map((c) => <ActiveChip key={c} label={c} onRemove={() => toggleCompany(c)} />)}
             {[...selectedTypes].map((t) => <ActiveChip key={t} label={t} onRemove={() => toggleType(t)} />)}
@@ -329,7 +339,7 @@ export default function JobsPage() {
               />
             )}
           </div>
-        </div>
+        )}
 
         {/* Job results */}
         <div className="p-4">
