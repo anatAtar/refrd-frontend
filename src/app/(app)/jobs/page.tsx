@@ -142,9 +142,14 @@ export default function JobsPage() {
       {/* ── Roles (from DB) ─────────────────────────────────────────── */}
       {facets.roles.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">
-            Roles <span className="font-normal normal-case tracking-normal">({facets.roles.length})</span>
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+              Roles <span className="font-normal normal-case tracking-normal">({facets.roles.length})</span>
+            </p>
+            {selectedRoles.size > 0 && (
+              <button onClick={() => setSelectedRoles(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
+            )}
+          </div>
           {facets.roles.length > 5 && (
             <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
               <span className="text-text-muted text-[11px]">🔍</span>
@@ -173,9 +178,14 @@ export default function JobsPage() {
       {/* ── Companies (from DB) ─────────────────────────────────────── */}
       {facets.companies.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">
-            Companies <span className="font-normal normal-case tracking-normal">({facets.companies.length})</span>
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+              Companies <span className="font-normal normal-case tracking-normal">({facets.companies.length})</span>
+            </p>
+            {selectedCompanies.size > 0 && (
+              <button onClick={() => setSelectedCompanies(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
+            )}
+          </div>
           {facets.companies.length > 5 && (
             <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
               <span className="text-text-muted text-[11px]">🔍</span>
@@ -204,7 +214,12 @@ export default function JobsPage() {
       {/* ── Job Type (from DB) ──────────────────────────────────────── */}
       {facets.types.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">Job Type</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Job Type</p>
+            {selectedTypes.size > 0 && (
+              <button onClick={() => setSelectedTypes(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
+            )}
+          </div>
           <div className="space-y-0.5">
             {facets.types.map(([type, count]) => (
               <FilterRow key={type} label={type} count={count} active={selectedTypes.has(type)} onToggle={() => toggleType(type)} />
@@ -216,9 +231,14 @@ export default function JobsPage() {
       {/* ── Referrers ───────────────────────────────────────────────── */}
       {facets.contacts.length > 0 && (
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">
-            Referrers <span className="font-normal normal-case tracking-normal">({facets.contacts.length})</span>
-          </p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+              Referrers <span className="font-normal normal-case tracking-normal">({facets.contacts.length})</span>
+            </p>
+            {selectedContact && (
+              <button onClick={() => { setSelectedContact(null); setSelectedContactName(''); }} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
+            )}
+          </div>
           <div className="space-y-0.5">
             {facets.contacts.map(([id, info]) => (
               <button
