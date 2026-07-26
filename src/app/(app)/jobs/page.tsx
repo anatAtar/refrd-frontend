@@ -10,7 +10,6 @@ import { Avatar } from '@/components/ui/Avatar';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { cn } from '@/lib/utils';
 import type { JobWithReferrer } from '@/lib/types';
-import Link from 'next/link';
 
 function useAllJobs() {
   return useSWR('jobs/browse/v2', () =>
@@ -23,18 +22,23 @@ export default function JobsPage() {
   const searchParams = useSearchParams();
   const [search, setSearch]                       = useState('');
   const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
+  const [selectedRoles, setSelectedRoles]         = useState<Set<string>>(new Set());
   const [selectedTypes, setSelectedTypes]         = useState<Set<string>>(new Set());
   const [selectedContact, setSelectedContact]     = useState<string | null>(
     searchParams.get('contact') ?? null,
   );
-  // Name from URL for the chip label (used when contact has no jobs in the list)
   const [selectedContactName, setSelectedContactName] = useState<string>(
     searchParams.get('name') ?? '',
   );
-  const [showAllCompanies, setShowAllCompanies]   = useState(false);
+
+  // Inline list-search states (filter what's shown in sidebar sections, not the jobs)
+  const [companySearch, setCompanySearch]   = useState('');
+  const [roleSearch, setRoleSearch]         = useState('');
+
+  const [showAllCompanies, setShowAllCompanies] = useState(false);
+  const [showAllRoles, setShowAllRoles]         = useState(false);
   const debounced = useDebounce(search, 300);
 
-  // If the URL param changes (e.g. browser back/forward), sync state
   useEffect(() => {
     const c = searchParams.get('contact');
     const n = searchParams.get('name');
@@ -44,35 +48,52 @@ export default function JobsPage() {
 
   const { data: allJobs = [], isLoading, error: jobsError } = useAllJobs();
 
-  // ── Derived facets ──────────────────────────────────────────────────────
+  // ── Derived facets (all from DB data) ──────────────────────────────────
   const facets = useMemo(() => {
     const companies = new Map<string, number>();
+    const roles     = new Map<string, number>();
     const types     = new Map<string, number>();
     const contacts  = new Map<string, { fullName: string; avatarUrl: string | null; count: number }>();
 
     allJobs.forEach((item) => {
       companies.set(item.job.companyName, (companies.get(item.job.companyName) ?? 0) + 1);
+      roles.set(item.job.title, (roles.get(item.job.title) ?? 0) + 1);
       if (item.job.jobType) {
         types.set(item.job.jobType, (types.get(item.job.jobType) ?? 0) + 1);
       }
       const { id, fullName, avatarUrl } = item.referrer;
-      if (!contacts.has(id)) {
-        contacts.set(id, { fullName, avatarUrl, count: 0 });
-      }
+      if (!contacts.has(id)) contacts.set(id, { fullName, avatarUrl, count: 0 });
       contacts.get(id)!.count += 1;
     });
 
     return {
       companies: [...companies.entries()].sort((a, b) => b[1] - a[1]),
+      roles:     [...roles.entries()].sort((a, b) => b[1] - a[1]),
       types:     [...types.entries()].sort((a, b) => b[1] - a[1]),
       contacts:  [...contacts.entries()].sort((a, b) => b[1].count - a[1].count),
     };
   }, [allJobs]);
 
-  // ── Filtered jobs ───────────────────────────────────────────────────────
+  // ── Filtered sidebar lists (inline search within each section) ──────────
+  const visibleCompanies = useMemo(() => {
+    const filtered = companySearch
+      ? facets.companies.filter(([name]) => name.toLowerCase().includes(companySearch.toLowerCase()))
+      : facets.companies;
+    return showAllCompanies ? filtered : filtered.slice(0, 7);
+  }, [facets.companies, companySearch, showAllCompanies]);
+
+  const visibleRoles = useMemo(() => {
+    const filtered = roleSearch
+      ? facets.roles.filter(([title]) => title.toLowerCase().includes(roleSearch.toLowerCase()))
+      : facets.roles;
+    return showAllRoles ? filtered : filtered.slice(0, 7);
+  }, [facets.roles, roleSearch, showAllRoles]);
+
+  // ── Filtered job list ───────────────────────────────────────────────────
   const filtered = useMemo(() => {
     return allJobs.filter((item) => {
       if (selectedCompanies.size > 0 && !selectedCompanies.has(item.job.companyName)) return false;
+      if (selectedRoles.size > 0 && !selectedRoles.has(item.job.title)) return false;
       if (selectedTypes.size > 0 && item.job.jobType && !selectedTypes.has(item.job.jobType)) return false;
       if (selectedContact && item.referrer.id !== selectedContact) return false;
       if (debounced) {
@@ -81,69 +102,121 @@ export default function JobsPage() {
           item.job.title.toLowerCase().includes(q) ||
           item.job.companyName.toLowerCase().includes(q) ||
           item.referrer.fullName.toLowerCase().includes(q) ||
-          (item.job.location ?? '').toLowerCase().includes(q)
+          (item.job.location ?? '').toLowerCase().includes(q) ||
+          (item.job.jobType ?? '').toLowerCase().includes(q)
         );
       }
       return true;
     });
-  }, [allJobs, selectedCompanies, selectedTypes, selectedContact, debounced]);
+  }, [allJobs, selectedCompanies, selectedRoles, selectedTypes, selectedContact, debounced]);
 
-  const hasFilters = selectedCompanies.size > 0 || selectedTypes.size > 0 || !!selectedContact || !!debounced;
+  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedTypes.size > 0 || !!selectedContact || !!debounced;
 
-  const toggleCompany = (name: string) =>
+  const toggleCompany  = (name: string) =>
     setSelectedCompanies((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n; });
-
-  const toggleType = (type: string) =>
+  const toggleRole     = (title: string) =>
+    setSelectedRoles((prev) => { const n = new Set(prev); n.has(title) ? n.delete(title) : n.add(title); return n; });
+  const toggleType     = (type: string) =>
     setSelectedTypes((prev) => { const n = new Set(prev); n.has(type) ? n.delete(type) : n.add(type); return n; });
 
   const clearAll = () => {
-    setSelectedCompanies(new Set()); setSelectedTypes(new Set());
+    setSelectedCompanies(new Set()); setSelectedRoles(new Set()); setSelectedTypes(new Set());
     setSelectedContact(null); setSelectedContactName(''); setSearch('');
+    setCompanySearch(''); setRoleSearch('');
   };
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const visibleCompanies = showAllCompanies ? facets.companies : facets.companies.slice(0, 7);
 
-  // Shared filter panel content (used on desktop sidebar + mobile drawer)
+  // ── Filter panel (shared between desktop sidebar + mobile drawer) ───────
   const FilterPanel = () => (
     <div className="p-4 space-y-6">
-      <div className="flex items-center gap-2 bg-input border border-border-strong rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
-        <span className="text-text-muted text-sm">🔍</span>
+
+      {/* ── Main search ─────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-3 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
+        <span className="text-text-muted">🔍</span>
         <input
           className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
-          placeholder="Search roles…"
+          placeholder="Search by role, company, location…"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setShowMobileFilters(false); }}
           autoFocus
         />
-        {search && <button onClick={() => setSearch('')} className="flex items-center justify-center w-7 h-7 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors text-sm font-bold">×</button>}
+        {search && (
+          <button onClick={() => setSearch('')} className="flex items-center justify-center w-6 h-6 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors text-sm font-bold shrink-0">×</button>
+        )}
       </div>
 
+      {/* ── Active filter count + clear ──────────────────────────────── */}
       {hasFilters && (
         <div className="flex items-center justify-between">
-          <span className="text-xs text-text-secondary font-medium">{filtered.length} results</span>
+          <span className="text-xs text-text-secondary font-medium">{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
           <button onClick={() => { clearAll(); setShowMobileFilters(false); }} className="text-xs text-gold-300 hover:text-gold-400 font-medium">Clear all</button>
         </div>
       )}
 
+      {/* ── Roles (from DB) ─────────────────────────────────────────── */}
+      {facets.roles.length > 0 && (
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">
+            Roles <span className="font-normal normal-case tracking-normal">({facets.roles.length})</span>
+          </p>
+          {facets.roles.length > 5 && (
+            <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
+              <span className="text-text-muted text-[11px]">🔍</span>
+              <input
+                className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
+                placeholder="Filter roles…"
+                value={roleSearch}
+                onChange={(e) => setRoleSearch(e.target.value)}
+              />
+              {roleSearch && <button onClick={() => setRoleSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
+            </div>
+          )}
+          <div className="space-y-0.5">
+            {visibleRoles.map(([title, count]) => (
+              <FilterRow key={title} label={title} count={count} active={selectedRoles.has(title)} onToggle={() => toggleRole(title)} />
+            ))}
+          </div>
+          {!roleSearch && facets.roles.length > 7 && (
+            <button onClick={() => setShowAllRoles((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
+              {showAllRoles ? '↑ Show less' : `+ ${facets.roles.length - 7} more`}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ── Companies (from DB) ─────────────────────────────────────── */}
       {facets.companies.length > 0 && (
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">
             Companies <span className="font-normal normal-case tracking-normal">({facets.companies.length})</span>
           </p>
+          {facets.companies.length > 5 && (
+            <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
+              <span className="text-text-muted text-[11px]">🔍</span>
+              <input
+                className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
+                placeholder="Filter companies…"
+                value={companySearch}
+                onChange={(e) => setCompanySearch(e.target.value)}
+              />
+              {companySearch && <button onClick={() => setCompanySearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
+            </div>
+          )}
           <div className="space-y-0.5">
             {visibleCompanies.map(([name, count]) => (
               <FilterRow key={name} label={name} count={count} active={selectedCompanies.has(name)} onToggle={() => toggleCompany(name)} />
             ))}
-            {facets.companies.length > 7 && (
-              <button onClick={() => setShowAllCompanies((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
-                {showAllCompanies ? '↑ Show less' : `+ ${facets.companies.length - 7} more`}
-              </button>
-            )}
           </div>
+          {!companySearch && facets.companies.length > 7 && (
+            <button onClick={() => setShowAllCompanies((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
+              {showAllCompanies ? '↑ Show less' : `+ ${facets.companies.length - 7} more`}
+            </button>
+          )}
         </div>
       )}
 
+      {/* ── Job Type (from DB) ──────────────────────────────────────── */}
       {facets.types.length > 0 && (
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">Job Type</p>
@@ -155,6 +228,7 @@ export default function JobsPage() {
         </div>
       )}
 
+      {/* ── Referrers ───────────────────────────────────────────────── */}
       {facets.contacts.length > 0 && (
         <div>
           <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-2">
@@ -207,7 +281,7 @@ export default function JobsPage() {
       )}
 
       {/* ── DESKTOP FILTER SIDEBAR ───────────────────────────────────── */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-border overflow-y-auto">
+      <aside className="hidden md:flex flex-col w-60 shrink-0 border-r border-border overflow-y-auto">
         <FilterPanel />
       </aside>
 
@@ -217,20 +291,20 @@ export default function JobsPage() {
         <div className="sticky top-0 z-10 bg-page/90 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-2">
           {/* Mobile: search + filter button */}
           <div className="flex md:hidden items-center gap-2 flex-1 min-w-0">
-            <div className="flex-1 flex items-center gap-2 bg-input border border-border-strong rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-gold-300/40">
-              <span className="text-text-muted text-sm shrink-0">🔍</span>
+            <div className="flex-1 flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40">
+              <span className="text-text-muted shrink-0">🔍</span>
               <input
                 className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
-                placeholder="Search jobs…"
+                placeholder="Search by role, company, location…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              {search && <button onClick={() => setSearch('')} className="flex items-center justify-center w-8 h-8 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors font-bold">×</button>}
+              {search && <button onClick={() => setSearch('')} className="flex items-center justify-center w-7 h-7 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors font-bold shrink-0">×</button>}
             </div>
             <button
               onClick={() => setShowMobileFilters(true)}
               className={cn(
-                'flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-colors shrink-0',
+                'flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-colors shrink-0',
                 hasFilters
                   ? 'bg-gold-300/15 text-gold-300 border-gold-300/30'
                   : 'bg-input text-text-secondary border-border-strong',
@@ -240,11 +314,12 @@ export default function JobsPage() {
             </button>
           </div>
 
-          {/* Desktop: just the count + chips */}
+          {/* Desktop: count + active filter chips */}
           <h1 className="hidden md:block text-sm font-bold text-text-primary shrink-0">
             {hasFilters ? `${filtered.length} jobs` : `${allJobs.length} open roles`}
           </h1>
           <div className="hidden md:flex gap-2 flex-wrap flex-1">
+            {[...selectedRoles].map((r) => <ActiveChip key={r} label={r} onRemove={() => toggleRole(r)} />)}
             {[...selectedCompanies].map((c) => <ActiveChip key={c} label={c} onRemove={() => toggleCompany(c)} />)}
             {[...selectedTypes].map((t) => <ActiveChip key={t} label={t} onRemove={() => toggleType(t)} />)}
             {selectedContact && (
@@ -254,11 +329,6 @@ export default function JobsPage() {
               />
             )}
           </div>
-
-          <Link href="/jobs/post"
-            className="shrink-0 text-xs px-3 py-2.5 min-h-[40px] bg-gold-300 hover:bg-gold-400 text-[#0A0A0A] font-semibold rounded-lg transition-colors whitespace-nowrap">
-            + Post
-          </Link>
         </div>
 
         {/* Job results */}
@@ -312,7 +382,7 @@ function FilterRow({ label, count, active, onToggle }: {
       )}>
         {active && <span className="text-white text-[8px] font-bold">✓</span>}
       </span>
-      <span className="flex-1 truncate capitalize">{label}</span>
+      <span className="flex-1 truncate">{label}</span>
       <span className="text-text-muted text-[10px]">{count}</span>
     </button>
   );
