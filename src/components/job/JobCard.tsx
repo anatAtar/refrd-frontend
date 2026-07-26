@@ -107,22 +107,40 @@ export function JobCard({ data }: JobCardProps) {
               <Button variant="secondary" size="sm" className="w-full">Manage this job</Button>
             </Link>
           ) : alreadyApplied ? (
-            <Button variant="secondary" size="sm" className="flex-1 gap-1.5" disabled>
-              {appStatus === 'forwarded' ? '🎉 Forwarded to HR' :
-               appStatus === 'viewed'    ? '👀 Reviewed' :
-               appStatus === 'rejected'  ? '✕ Not a fit' :
-               '✓ CV sent'}
-            </Button>
+            <>
+              <Button variant="secondary" size="sm" className="flex-1 gap-1.5" disabled>
+                {appStatus === 'forwarded' ? '🎉 Forwarded to HR' :
+                 appStatus === 'viewed'    ? '👀 Reviewed' :
+                 appStatus === 'rejected'  ? '✕ Not a fit' :
+                 '✓ CV sent'}
+              </Button>
+              <Link href={`/jobs/${job.id}`}>
+                <Button variant="ghost" size="sm" className="min-h-[44px]">Details</Button>
+              </Link>
+            </>
           ) : job.isActive ? (
-            <Button variant="primary" size="sm" className="flex-1 min-h-[44px]" onClick={() => setSendCVOpen(true)}>
-              Send CV to {referrer.fullName.split(' ')[0]}
-            </Button>
+            <>
+              {/* Details is the primary action — Send CV is reachable but minor */}
+              <Link href={`/jobs/${job.id}`} className="flex-1">
+                <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
+              </Link>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="min-h-[44px] text-text-muted hover:text-text-primary shrink-0"
+                onClick={() => setSendCVOpen(true)}
+              >
+                Send CV
+              </Button>
+            </>
           ) : (
-            <Button variant="ghost" size="sm" className="flex-1 min-h-[44px]" disabled>Job closed</Button>
+            <>
+              <Button variant="ghost" size="sm" className="flex-1 min-h-[44px]" disabled>Job closed</Button>
+              <Link href={`/jobs/${job.id}`}>
+                <Button variant="ghost" size="sm" className="min-h-[44px]">Details</Button>
+              </Link>
+            </>
           )}
-          <Link href={`/jobs/${job.id}`}>
-            <Button variant="secondary" size="sm" className="min-h-[44px]">Details</Button>
-          </Link>
         </div>
       </Card>
 
