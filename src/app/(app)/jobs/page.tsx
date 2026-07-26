@@ -392,7 +392,7 @@ function FilterRow({ label, count, active, onToggle }: {
       )}>
         {active && <span className="text-white text-[8px] font-bold">✓</span>}
       </span>
-      <span className="flex-1 truncate">{label}</span>
+      <span className="flex-1 truncate" title={label}>{label}</span>
       <span className="text-text-muted text-[10px]">{count}</span>
     </button>
   );
