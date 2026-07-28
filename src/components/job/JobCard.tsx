@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/Button';
 import { SendCVModal } from '@/components/application/SendCVModal';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useMyApplicationsMap } from '@/lib/hooks/useApplications';
+import { savedJobsApi } from '@/lib/api/savedJobs';
 import { timeAgo, jobCode } from '@/lib/utils';
 import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
+import useSWR from 'swr';
 
 interface JobCardProps {
   data: JobWithReferrer;
@@ -35,6 +37,29 @@ export function JobCard({ data }: JobCardProps) {
   const appStatus      = appMap.get(job.id);
   const alreadyApplied = !!appStatus;
   const indicator      = appStatus ? STATUS_INDICATORS[appStatus] : null;
+
+  // Save/unsave — use same SWR key as ApplicationsClient Saved tab
+  const { data: savedData, mutate: mutateSaved } = useSWR(
+    'saved-jobs',
+    () => savedJobsApi.getAll().then(r => r.data),
+    { revalidateOnFocus: false },
+  );
+  const isSaved = (savedData ?? []).some(s => s.job.id === job.id);
+  const toggleSave = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      if (isSaved) {
+        await savedJobsApi.unsave(job.id);
+        mutateSaved((savedData ?? []).filter(s => s.job.id !== job.id), false);
+      } else {
+        await savedJobsApi.save(job.id);
+        mutateSaved(); // revalidate to get full job data back
+      }
+    } catch {
+      mutateSaved(); // revert on error
+    }
+  };
 
   return (
     <>
@@ -120,7 +145,6 @@ export function JobCard({ data }: JobCardProps) {
             </>
           ) : job.isActive ? (
             <>
-              {/* Details is the primary action — Send CV is reachable but minor */}
               <Link href={`/jobs/${job.id}`} className="flex-1">
                 <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
               </Link>
@@ -140,6 +164,19 @@ export function JobCard({ data }: JobCardProps) {
                 <Button variant="ghost" size="sm" className="min-h-[44px]">Details</Button>
               </Link>
             </>
+          )}
+          {/* Save button — always visible unless own posting */}
+          {!isOwnPosting && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="min-h-[44px] shrink-0 transition-colors"
+              style={{ color: isSaved ? '#D4AF7A' : undefined }}
+              onClick={toggleSave}
+              title={isSaved ? 'Remove from saved' : 'Save job'}
+            >
+              {isSaved ? '★' : '☆'}
+            </Button>
           )}
         </div>
       </Card>

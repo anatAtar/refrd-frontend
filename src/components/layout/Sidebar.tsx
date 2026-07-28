@@ -8,14 +8,12 @@ import { useUnreadCount } from '@/lib/hooks/useNotifications';
 import { Button } from '@/components/ui/Button';
 
 const NAV_ITEMS = [
-  { href: '/feed',                  icon: '🏠', label: 'Home'            },
-  { href: '/jobs',                  icon: '🔍', label: 'Browse Jobs'     },
-  { href: '/network',               icon: '👥', label: 'My Network'      },
-  { href: '/notifications',         icon: '🔔', label: 'Notifications'   },
-  { href: '/applications',          icon: '📋', label: 'My Applications' },
-  { href: '/applications/inbox',    icon: '📥', label: 'CV Inbox'        },
-  { href: '/jobs/mine',             icon: '📌', label: 'Jobs I Posted'   },
-  { href: '/jobs/post',             icon: '＋',  label: 'Post a Job'     },
+  { href: '/feed',         icon: '⌂',  label: 'Home'            },
+  { href: '/jobs',         icon: '⌕',  label: 'Browse Jobs'     },
+  { href: '/applications', icon: '↗',  label: 'My Applications' },
+  { href: '/network',      icon: '⊞',  label: 'My Network'      },
+  { href: '/notifications',icon: '✉',  label: 'Notifications'   },
+  { href: '/jobs/post',    icon: '＋',  label: 'Post a Job'      },
 ];
 
 const EXACT_ROUTES = ['/applications', '/jobs'];
@@ -98,10 +96,10 @@ export function Sidebar() {
       {/* Bottom: user + settings */}
       <div className="p-3" style={{ borderTop: '1px solid rgba(212,175,122,0.08)' }}>
         {user && (
-          <div className="px-3 py-2 mb-1">
+          <Link href="/settings" className="px-3 py-2 mb-1 rounded-lg hover:bg-white/5 transition-colors block">
             <p className="text-xs font-semibold truncate" style={{ color: "#F0E8D8" }}>{user.fullName}</p>
             <p className="text-xs truncate" style={{ color: '#5A4A2A' }}>{user.companyName ?? user.email}</p>
-          </div>
+          </Link>
         )}
         <Link
           href="/settings"

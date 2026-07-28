@@ -1,9 +1,13 @@
 import { cookies } from 'next/headers';
-import { getServerMyApplications } from '@/lib/api/applications';
-import MyApplicationsClient from './MyApplicationsClient';
+import { getServerMyApplications, getServerInbox } from '@/lib/api/applications';
+import ApplicationsClient from './ApplicationsClient';
 
 export default async function ApplicationsPage() {
   const cookieStore = await cookies();
-  const initialData = await getServerMyApplications(cookieStore.toString());
-  return <MyApplicationsClient initialData={initialData} />;
+  const cookieHeader = cookieStore.toString();
+  const [initialSent, initialReceived] = await Promise.all([
+    getServerMyApplications(cookieHeader),
+    getServerInbox(cookieHeader),
+  ]);
+  return <ApplicationsClient initialSent={initialSent} initialReceived={initialReceived} />;
 }

@@ -14,6 +14,8 @@ export interface User {
   onboarded: boolean;
   inviteCode: string | null;
   invitedById: string | null;
+  desiredRole: string | null;
+  preferredLocation: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -96,6 +98,18 @@ export interface PublicUser {
   companyName: string | null;
   isReferrer: boolean;
   createdAt: string;
+}
+
+export interface SavedJob {
+  savedAt: string;
+  job: Job;
+  referrer: {
+    id: string;
+    fullName: string;
+    avatarUrl: string | null;
+    companyName: string | null;
+    headline: string | null;
+  };
 }
 
 export interface ApiError {
