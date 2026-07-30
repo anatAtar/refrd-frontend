@@ -29,6 +29,7 @@ export interface Job {
   location: string | null;
   description: string | null;
   jobType: string | null;
+  workMode: string | null;
   salaryRange: string | null;
   bonusAmount: string | null;
   bonusCurrency: string | null;

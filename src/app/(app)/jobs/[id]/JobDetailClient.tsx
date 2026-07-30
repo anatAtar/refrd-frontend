@@ -42,6 +42,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
 
             <div className="flex flex-wrap gap-2">
               {job.jobType    && <Badge variant="muted">{job.jobType}</Badge>}
+              {job.workMode   && <Badge variant="teal">{job.workMode}</Badge>}
               {!job.isActive  && <Badge variant="rose">Closed</Badge>}
               {isOwnPosting   && <Badge variant="violet">Your posting</Badge>}
               {alreadyApplied && <Badge variant="good">CV Sent ✓</Badge>}

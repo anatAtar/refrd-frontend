@@ -113,6 +113,7 @@ export function JobCard({ data }: JobCardProps) {
         {/* Tags */}
         <div className="flex flex-wrap gap-1.5">
           {job.jobType    && <Badge variant="muted">{job.jobType}</Badge>}
+          {job.workMode   && <Badge variant="teal">{job.workMode}</Badge>}
         </div>
 
         {/* Contact row */}

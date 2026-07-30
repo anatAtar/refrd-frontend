@@ -337,7 +337,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                       <h3 style={{ fontSize: 16.5, fontWeight: 700, margin: 0, color: 'oklch(0.24 0.008 60)' }}>{j.job.title}</h3>
                       {/* Row 3: meta */}
                       <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
-                        {[j.job.location, j.job.jobType, timeAgo(j.job.createdAt)].filter(Boolean).join(' · ')}
+                        {[j.job.location, j.job.jobType, j.job.workMode, timeAgo(j.job.createdAt)].filter(Boolean).join(' · ')}
                       </p>
                   {/* Row 4: referrer footer */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid oklch(0.93 0.004 70)', paddingTop: 14 }}>

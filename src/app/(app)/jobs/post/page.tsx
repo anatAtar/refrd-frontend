@@ -27,7 +27,7 @@ export default function PostJobPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     sourceUrl: '', title: '', companyName: '',
-    location: '', description: '', jobType: '',
+    location: '', description: '', jobType: '', workMode: '',
   });
 
   const set = (key: string) => (
@@ -73,13 +73,14 @@ export default function PostJobPage() {
         location:    form.location    || undefined,
         description: form.description || undefined,
         jobType:     form.jobType     || undefined,
+        workMode:    form.workMode    || undefined,
         salaryRange: undefined,
       });
       toast.success('Job posted!');
       mutate();
       // Reset form
       setUrl(''); setScraped(false);
-      setForm({ sourceUrl: '', title: '', companyName: '', location: '', description: '', jobType: '' });
+      setForm({ sourceUrl: '', title: '', companyName: '', location: '', description: '', jobType: '', workMode: '' });
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to post job');
     } finally {
@@ -158,6 +159,15 @@ export default function PostJobPage() {
                 <option value="part-time">Part-time</option>
                 <option value="contract">Contract</option>
                 <option value="internship">Internship</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-text-secondary mb-1.5">Work mode</label>
+              <select value={form.workMode} onChange={set('workMode')} className="w-full bg-input border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-gold-300/40">
+                <option value="">— Select mode —</option>
+                <option value="remote">Remote</option>
+                <option value="hybrid">Hybrid</option>
+                <option value="onsite">On-site</option>
               </select>
             </div>
             <Textarea label="Description" value={form.description} onChange={set('description')} placeholder="What does this role involve?" rows={5} />

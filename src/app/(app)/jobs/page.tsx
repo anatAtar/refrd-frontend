@@ -26,11 +26,13 @@ interface FilterPanelProps {
     roles:     [string, number][];
     companies: [string, number][];
     types:     [string, number][];
+    workModes: [string, number][];
     contacts:  [string, { fullName: string; avatarUrl: string | null; count: number }][];
   };
   selectedRoles:     Set<string>;
   selectedCompanies: Set<string>;
   selectedTypes:     Set<string>;
+  selectedWorkModes: Set<string>;
   selectedContact:   string | null;
   roleSearch:     string;
   companySearch:  string;
@@ -41,6 +43,7 @@ interface FilterPanelProps {
   setSelectedRoles:     (s: Set<string>) => void;
   setSelectedCompanies: (s: Set<string>) => void;
   setSelectedTypes:     (s: Set<string>) => void;
+  setSelectedWorkModes: (s: Set<string>) => void;
   setSelectedContact:   (id: string | null) => void;
   setSelectedContactName: (n: string) => void;
   setRoleSearch:    (v: string) => void;
@@ -50,21 +53,22 @@ interface FilterPanelProps {
   toggleRole:    (t: string) => void;
   toggleCompany: (n: string) => void;
   toggleType:    (t: string) => void;
+  toggleWorkMode: (t: string) => void;
   clearAll: () => void;
   onCloseMobile: () => void;
 }
 
 function FilterPanel({
   hasFilters, filteredCount, facets,
-  selectedRoles, selectedCompanies, selectedTypes, selectedContact,
+  selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedContact,
   roleSearch, companySearch,
   visibleRoles, visibleCompanies,
   showAllRoles, showAllCompanies,
-  setSelectedRoles, setSelectedCompanies, setSelectedTypes,
+  setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes,
   setSelectedContact, setSelectedContactName,
   setRoleSearch, setCompanySearch,
   setShowAllRoles, setShowAllCompanies,
-  toggleRole, toggleCompany, toggleType,
+  toggleRole, toggleCompany, toggleType, toggleWorkMode,
   clearAll, onCloseMobile,
 }: FilterPanelProps) {
   return (
@@ -167,6 +171,23 @@ function FilterPanel({
         </div>
       )}
 
+      {/* ── Work Mode ── */}
+      {facets.workModes.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Work Mode</p>
+            {selectedWorkModes.size > 0 && (
+              <button onClick={() => setSelectedWorkModes(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
+            )}
+          </div>
+          <div className="space-y-0.5">
+            {facets.workModes.map(([mode, count]) => (
+              <FilterRow key={mode} label={mode} count={count} active={selectedWorkModes.has(mode)} onToggle={() => toggleWorkMode(mode)} />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Referrers ── */}
       {facets.contacts.length > 0 && (
         <div>
@@ -206,6 +227,7 @@ export default function JobsPage() {
   const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
   const [selectedRoles, setSelectedRoles]         = useState<Set<string>>(new Set());
   const [selectedTypes, setSelectedTypes]         = useState<Set<string>>(new Set());
+  const [selectedWorkModes, setSelectedWorkModes] = useState<Set<string>>(new Set());
   const [selectedContact, setSelectedContact]     = useState<string | null>(
     searchParams.get('contact') ?? null,
   );
@@ -232,12 +254,14 @@ export default function JobsPage() {
     const companies = new Map<string, number>();
     const roles     = new Map<string, number>();
     const types     = new Map<string, number>();
+    const workModes = new Map<string, number>();
     const contacts  = new Map<string, { fullName: string; avatarUrl: string | null; count: number }>();
 
     allJobs.forEach((item) => {
       companies.set(item.job.companyName, (companies.get(item.job.companyName) ?? 0) + 1);
       roles.set(item.job.title, (roles.get(item.job.title) ?? 0) + 1);
       if (item.job.jobType) types.set(item.job.jobType, (types.get(item.job.jobType) ?? 0) + 1);
+      if (item.job.workMode) workModes.set(item.job.workMode, (workModes.get(item.job.workMode) ?? 0) + 1);
       const { id, fullName, avatarUrl } = item.referrer;
       if (!contacts.has(id)) contacts.set(id, { fullName, avatarUrl, count: 0 });
       contacts.get(id)!.count += 1;
@@ -247,6 +271,7 @@ export default function JobsPage() {
       companies: [...companies.entries()].sort((a, b) => b[1] - a[1]),
       roles:     [...roles.entries()].sort((a, b) => b[1] - a[1]),
       types:     [...types.entries()].sort((a, b) => b[1] - a[1]),
+      workModes: [...workModes.entries()].sort((a, b) => b[1] - a[1]),
       contacts:  [...contacts.entries()].sort((a, b) => b[1].count - a[1].count),
     };
   }, [allJobs]);
@@ -270,6 +295,7 @@ export default function JobsPage() {
       if (selectedCompanies.size > 0 && !selectedCompanies.has(item.job.companyName)) return false;
       if (selectedRoles.size > 0 && !selectedRoles.has(item.job.title)) return false;
       if (selectedTypes.size > 0 && item.job.jobType && !selectedTypes.has(item.job.jobType)) return false;
+      if (selectedWorkModes.size > 0 && item.job.workMode && !selectedWorkModes.has(item.job.workMode)) return false;
       if (selectedContact && item.referrer.id !== selectedContact) return false;
       if (debounced) {
         const q = debounced.toLowerCase();
@@ -283,9 +309,9 @@ export default function JobsPage() {
       }
       return true;
     });
-  }, [allJobs, selectedCompanies, selectedRoles, selectedTypes, selectedContact, debounced]);
+  }, [allJobs, selectedCompanies, selectedRoles, selectedTypes, selectedWorkModes, selectedContact, debounced]);
 
-  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedTypes.size > 0 || !!selectedContact || !!debounced;
+  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedTypes.size > 0 || selectedWorkModes.size > 0 || !!selectedContact || !!debounced;
 
   const toggleCompany = (name: string) =>
     setSelectedCompanies((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n; });
@@ -293,9 +319,12 @@ export default function JobsPage() {
     setSelectedRoles((prev) => { const n = new Set(prev); n.has(title) ? n.delete(title) : n.add(title); return n; });
   const toggleType = (type: string) =>
     setSelectedTypes((prev) => { const n = new Set(prev); n.has(type) ? n.delete(type) : n.add(type); return n; });
+  const toggleWorkMode = (mode: string) =>
+    setSelectedWorkModes((prev) => { const n = new Set(prev); n.has(mode) ? n.delete(mode) : n.add(mode); return n; });
 
   const clearAll = () => {
     setSelectedCompanies(new Set()); setSelectedRoles(new Set()); setSelectedTypes(new Set());
+    setSelectedWorkModes(new Set());
     setSelectedContact(null); setSelectedContactName(''); setSearch('');
     setCompanySearch(''); setRoleSearch('');
   };
@@ -303,60 +332,62 @@ export default function JobsPage() {
   // Shared props for both sidebar and mobile drawer instances
   const filterPanelProps: FilterPanelProps = {
     hasFilters, filteredCount: filtered.length, facets,
-    selectedRoles, selectedCompanies, selectedTypes, selectedContact,
+    selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedContact,
     roleSearch, companySearch,
     visibleRoles, visibleCompanies,
     showAllRoles, showAllCompanies,
-    setSelectedRoles, setSelectedCompanies, setSelectedTypes,
+    setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes,
     setSelectedContact, setSelectedContactName,
     setRoleSearch, setCompanySearch,
     setShowAllRoles, setShowAllCompanies,
-    toggleRole, toggleCompany, toggleType,
+    toggleRole, toggleCompany, toggleType, toggleWorkMode,
     clearAll,
     onCloseMobile: () => setShowMobileFilters(false),
   };
 
   return (
-    <div className="flex h-[calc(100vh-56px)] overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-56px)] overflow-hidden">
 
-      {/* ── MOBILE FILTER DRAWER ── */}
-      {showMobileFilters && (
-        <div className="md:hidden fixed inset-0 z-50 flex flex-col">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setShowMobileFilters(false)} />
-          <div className="relative mt-auto bg-card border-t border-border rounded-t-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-4 pt-4 pb-2">
-              <span className="text-sm font-bold text-text-primary">Filter Jobs</span>
-              <button onClick={() => setShowMobileFilters(false)} className="text-text-muted hover:text-text-primary p-2 -mr-2 text-lg">×</button>
-            </div>
-            <FilterPanel {...filterPanelProps} />
-            <div className="px-4 pb-6">
-              <button
-                onClick={() => setShowMobileFilters(false)}
-                className="w-full py-3 bg-gold-300 text-[#0A0A0A] font-semibold rounded-xl text-sm"
-              >
-                Show {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-              </button>
+      {/* Page header — full width, above the sidebar + list so both start aligned */}
+      <div className="px-4 pt-4 pb-3 border-b border-border shrink-0">
+        <h1 className="text-2xl font-bold text-text-primary mb-0.5">Browse Jobs</h1>
+        <p className="text-sm text-text-secondary">
+          {isLoading ? 'Loading…' : `${allJobs.length} open role${allJobs.length !== 1 ? 's' : ''} from your network`}
+        </p>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+
+        {/* ── MOBILE FILTER DRAWER ── */}
+        {showMobileFilters && (
+          <div className="md:hidden fixed inset-0 z-50 flex flex-col">
+            <div className="absolute inset-0 bg-black/60" onClick={() => setShowMobileFilters(false)} />
+            <div className="relative mt-auto bg-card border-t border-border rounded-t-2xl max-h-[80vh] overflow-y-auto">
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <span className="text-sm font-bold text-text-primary">Filter Jobs</span>
+                <button onClick={() => setShowMobileFilters(false)} className="text-text-muted hover:text-text-primary p-2 -mr-2 text-lg">×</button>
+              </div>
+              <FilterPanel {...filterPanelProps} />
+              <div className="px-4 pb-6">
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="w-full py-3 bg-gold-300 text-[#0A0A0A] font-semibold rounded-xl text-sm"
+                >
+                  Show {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* ── DESKTOP FILTER SIDEBAR ── */}
-      <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-border overflow-y-auto">
-        <FilterPanel {...filterPanelProps} />
-      </aside>
+        {/* ── DESKTOP FILTER SIDEBAR ── */}
+        <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-border overflow-y-auto">
+          <FilterPanel {...filterPanelProps} />
+        </aside>
 
-      {/* ── JOB LIST ── */}
-      <main className="flex-1 overflow-y-auto">
-        {/* Page header */}
-        <div className="px-4 pt-4 pb-3 border-b border-border">
-          <h1 className="text-2xl font-bold text-text-primary mb-0.5">Browse Jobs</h1>
-          <p className="text-sm text-text-secondary">
-            {isLoading ? 'Loading…' : `${allJobs.length} open role${allJobs.length !== 1 ? 's' : ''} from your network`}
-          </p>
-        </div>
-
-        {/* Sticky top bar */}
+        {/* ── JOB LIST ── */}
+        <main className="flex-1 overflow-y-auto">
+          {/* Sticky top bar */}
         <div className="sticky top-0 z-10 bg-page/90 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
 
           {/* Desktop search */}
@@ -417,6 +448,7 @@ export default function JobsPage() {
             {[...selectedRoles].map((r) => <ActiveChip key={r} label={r} onRemove={() => toggleRole(r)} />)}
             {[...selectedCompanies].map((c) => <ActiveChip key={c} label={c} onRemove={() => toggleCompany(c)} />)}
             {[...selectedTypes].map((t) => <ActiveChip key={t} label={t} onRemove={() => toggleType(t)} />)}
+            {[...selectedWorkModes].map((m) => <ActiveChip key={m} label={m} onRemove={() => toggleWorkMode(m)} />)}
             {selectedContact && (
               <ActiveChip
                 label={facets.contacts.find(([id]) => id === selectedContact)?.[1].fullName.split(' ')[0] ?? selectedContactName}
@@ -453,6 +485,7 @@ export default function JobsPage() {
           )}
         </div>
       </main>
+      </div>
     </div>
   );
 }
