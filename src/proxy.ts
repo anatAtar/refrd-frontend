@@ -29,7 +29,39 @@ function isTokenAlive(token: string | undefined): boolean {
   }
 }
 
+const SITE_PASSWORD = process.env.SITE_PASSWORD;
+
+/** Basic-auth gate that fronts the whole site while it's not public yet.
+ *  Successful auth is remembered via a cookie so users aren't re-prompted
+ *  on every request. */
+function checkSiteGate(req: NextRequest): NextResponse | null {
+  if (!SITE_PASSWORD) return null;
+  if (req.cookies.get('site-access')?.value === SITE_PASSWORD) return null;
+
+  const auth = req.headers.get('authorization');
+  if (auth?.startsWith('Basic ')) {
+    const [, pwd] = atob(auth.split(' ')[1]).split(':');
+    if (pwd === SITE_PASSWORD) {
+      const res = NextResponse.next();
+      res.cookies.set('site-access', SITE_PASSWORD, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 60 * 60 * 24 * 30,
+      });
+      return res;
+    }
+  }
+
+  return new NextResponse('Not available yet', {
+    status: 401,
+    headers: { 'WWW-Authenticate': 'Basic realm="DirectRef"' },
+  });
+}
+
 export function proxy(req: NextRequest) {
+  const gateResponse = checkSiteGate(req);
+  if (gateResponse) return gateResponse;
+
   const { pathname } = req.nextUrl;
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
