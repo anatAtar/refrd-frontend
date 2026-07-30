@@ -348,6 +348,14 @@ export default function JobsPage() {
 
       {/* ── JOB LIST ── */}
       <main className="flex-1 overflow-y-auto">
+        {/* Page header */}
+        <div className="px-4 pt-4 pb-3 border-b border-border">
+          <h1 className="text-2xl font-bold text-text-primary mb-0.5">Browse Jobs</h1>
+          <p className="text-sm text-text-secondary">
+            {isLoading ? 'Loading…' : `${allJobs.length} open role${allJobs.length !== 1 ? 's' : ''} from your network`}
+          </p>
+        </div>
+
         {/* Sticky top bar */}
         <div className="sticky top-0 z-10 bg-page/90 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
 

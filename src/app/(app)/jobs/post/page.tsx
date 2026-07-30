@@ -27,7 +27,7 @@ export default function PostJobPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     sourceUrl: '', title: '', companyName: '',
-    location: '', description: '', jobType: '', salaryRange: '',
+    location: '', description: '', jobType: '',
   });
 
   const set = (key: string) => (
@@ -73,13 +73,13 @@ export default function PostJobPage() {
         location:    form.location    || undefined,
         description: form.description || undefined,
         jobType:     form.jobType     || undefined,
-        salaryRange: form.salaryRange || undefined,
+        salaryRange: undefined,
       });
       toast.success('Job posted!');
       mutate();
       // Reset form
       setUrl(''); setScraped(false);
-      setForm({ sourceUrl: '', title: '', companyName: '', location: '', description: '', jobType: '', salaryRange: '' });
+      setForm({ sourceUrl: '', title: '', companyName: '', location: '', description: '', jobType: '' });
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to post job');
     } finally {
@@ -160,7 +160,6 @@ export default function PostJobPage() {
                 <option value="internship">Internship</option>
               </select>
             </div>
-            <Input label="Salary range (optional)" value={form.salaryRange} onChange={set('salaryRange')} placeholder="₪30,000 – ₪45,000/month" />
             <Textarea label="Description" value={form.description} onChange={set('description')} placeholder="What does this role involve?" rows={5} />
             <div className="flex gap-3 pt-2">
               <Button type="button" variant="ghost" onClick={() => setScraped(false)} className="flex-1">← Back</Button>
