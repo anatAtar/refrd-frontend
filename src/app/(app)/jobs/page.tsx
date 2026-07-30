@@ -27,50 +27,99 @@ interface FilterPanelProps {
     companies: [string, number][];
     types:     [string, number][];
     workModes: [string, number][];
+    locations: [string, number][];
     contacts:  [string, { fullName: string; avatarUrl: string | null; count: number }][];
   };
   selectedRoles:     Set<string>;
   selectedCompanies: Set<string>;
   selectedTypes:     Set<string>;
   selectedWorkModes: Set<string>;
+  selectedLocations: Set<string>;
   selectedContact:   string | null;
-  roleSearch:     string;
-  companySearch:  string;
-  visibleRoles:     [string, number][];
-  visibleCompanies: [string, number][];
-  showAllRoles:     boolean;
-  showAllCompanies: boolean;
   setSelectedRoles:     (s: Set<string>) => void;
   setSelectedCompanies: (s: Set<string>) => void;
   setSelectedTypes:     (s: Set<string>) => void;
   setSelectedWorkModes: (s: Set<string>) => void;
+  setSelectedLocations: (s: Set<string>) => void;
   setSelectedContact:   (id: string | null) => void;
   setSelectedContactName: (n: string) => void;
-  setRoleSearch:    (v: string) => void;
-  setCompanySearch: (v: string) => void;
-  setShowAllRoles:     (v: boolean | ((p: boolean) => boolean)) => void;
-  setShowAllCompanies: (v: boolean | ((p: boolean) => boolean)) => void;
   toggleRole:    (t: string) => void;
   toggleCompany: (n: string) => void;
   toggleType:    (t: string) => void;
   toggleWorkMode: (t: string) => void;
+  toggleLocation: (t: string) => void;
   clearAll: () => void;
   onCloseMobile: () => void;
 }
 
+// ── Reusable filter group: header + always-visible search box + checkbox list ──
+function FilterGroup({ title, items, selected, onToggle, onClear, searchPlaceholder }: {
+  title: string;
+  items: [string, number][];
+  selected: Set<string>;
+  onToggle: (value: string) => void;
+  onClear: () => void;
+  searchPlaceholder: string;
+}) {
+  const [search, setSearch] = useState('');
+  const [showAll, setShowAll] = useState(false);
+
+  const visible = useMemo(() => {
+    const f = search
+      ? items.filter(([label]) => label.toLowerCase().includes(search.toLowerCase()))
+      : items;
+    return showAll ? f : f.slice(0, 7);
+  }, [items, search, showAll]);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+          {title} <span className="font-normal normal-case tracking-normal">({items.length})</span>
+        </p>
+        {selected.size > 0 && (
+          <button onClick={onClear} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
+        )}
+      </div>
+      <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
+        <span className="text-text-muted text-[11px]">🔍</span>
+        <input
+          className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
+          placeholder={searchPlaceholder}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        {search && <button onClick={() => setSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
+      </div>
+      <div className="space-y-0.5">
+        {visible.map(([label, count]) => (
+          <FilterRow key={label} label={label} count={count} active={selected.has(label)} onToggle={() => onToggle(label)} />
+        ))}
+      </div>
+      {!search && items.length > 7 && (
+        <button onClick={() => setShowAll((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
+          {showAll ? '↑ Show less' : `+ ${items.length - 7} more`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function FilterPanel({
   hasFilters, filteredCount, facets,
-  selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedContact,
-  roleSearch, companySearch,
-  visibleRoles, visibleCompanies,
-  showAllRoles, showAllCompanies,
-  setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes,
+  selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations, selectedContact,
+  setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes, setSelectedLocations,
   setSelectedContact, setSelectedContactName,
-  setRoleSearch, setCompanySearch,
-  setShowAllRoles, setShowAllCompanies,
-  toggleRole, toggleCompany, toggleType, toggleWorkMode,
+  toggleRole, toggleCompany, toggleType, toggleWorkMode, toggleLocation,
   clearAll, onCloseMobile,
 }: FilterPanelProps) {
+  const [referrerSearch, setReferrerSearch] = useState('');
+  const visibleContacts = referrerSearch
+    ? facets.contacts.filter(([, info]) => info.fullName.toLowerCase().includes(referrerSearch.toLowerCase()))
+    : facets.contacts;
+
   return (
     <div className="p-4 space-y-6">
 
@@ -82,111 +131,11 @@ function FilterPanel({
         </div>
       )}
 
-      {/* ── Roles ── */}
-      {facets.roles.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-              Roles <span className="font-normal normal-case tracking-normal">({facets.roles.length})</span>
-            </p>
-            {selectedRoles.size > 0 && (
-              <button onClick={() => setSelectedRoles(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
-            )}
-          </div>
-          {facets.roles.length > 5 && (
-            <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
-              <span className="text-text-muted text-[11px]">🔍</span>
-              <input
-                className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
-                placeholder="Filter roles…"
-                value={roleSearch}
-                onChange={(e) => setRoleSearch(e.target.value)}
-              />
-              {roleSearch && <button onClick={() => setRoleSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
-            </div>
-          )}
-          <div className="space-y-0.5">
-            {visibleRoles.map(([title, count]) => (
-              <FilterRow key={title} label={title} count={count} active={selectedRoles.has(title)} onToggle={() => toggleRole(title)} />
-            ))}
-          </div>
-          {!roleSearch && facets.roles.length > 7 && (
-            <button onClick={() => setShowAllRoles((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
-              {showAllRoles ? '↑ Show less' : `+ ${facets.roles.length - 7} more`}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ── Companies ── */}
-      {facets.companies.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-              Companies <span className="font-normal normal-case tracking-normal">({facets.companies.length})</span>
-            </p>
-            {selectedCompanies.size > 0 && (
-              <button onClick={() => setSelectedCompanies(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
-            )}
-          </div>
-          {facets.companies.length > 5 && (
-            <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
-              <span className="text-text-muted text-[11px]">🔍</span>
-              <input
-                className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
-                placeholder="Filter companies…"
-                value={companySearch}
-                onChange={(e) => setCompanySearch(e.target.value)}
-              />
-              {companySearch && <button onClick={() => setCompanySearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
-            </div>
-          )}
-          <div className="space-y-0.5">
-            {visibleCompanies.map(([name, count]) => (
-              <FilterRow key={name} label={name} count={count} active={selectedCompanies.has(name)} onToggle={() => toggleCompany(name)} />
-            ))}
-          </div>
-          {!companySearch && facets.companies.length > 7 && (
-            <button onClick={() => setShowAllCompanies((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
-              {showAllCompanies ? '↑ Show less' : `+ ${facets.companies.length - 7} more`}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* ── Job Type ── */}
-      {facets.types.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Job Type</p>
-            {selectedTypes.size > 0 && (
-              <button onClick={() => setSelectedTypes(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
-            )}
-          </div>
-          <div className="space-y-0.5">
-            {facets.types.map(([type, count]) => (
-              <FilterRow key={type} label={type} count={count} active={selectedTypes.has(type)} onToggle={() => toggleType(type)} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── Work Mode ── */}
-      {facets.workModes.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Work Mode</p>
-            {selectedWorkModes.size > 0 && (
-              <button onClick={() => setSelectedWorkModes(new Set())} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
-            )}
-          </div>
-          <div className="space-y-0.5">
-            {facets.workModes.map(([mode, count]) => (
-              <FilterRow key={mode} label={mode} count={count} active={selectedWorkModes.has(mode)} onToggle={() => toggleWorkMode(mode)} />
-            ))}
-          </div>
-        </div>
-      )}
+      <FilterGroup title="Roles" items={facets.roles} selected={selectedRoles} onToggle={toggleRole} onClear={() => setSelectedRoles(new Set())} searchPlaceholder="Filter roles…" />
+      <FilterGroup title="Companies" items={facets.companies} selected={selectedCompanies} onToggle={toggleCompany} onClear={() => setSelectedCompanies(new Set())} searchPlaceholder="Filter companies…" />
+      <FilterGroup title="Job Type" items={facets.types} selected={selectedTypes} onToggle={toggleType} onClear={() => setSelectedTypes(new Set())} searchPlaceholder="Filter job types…" />
+      <FilterGroup title="Work Mode" items={facets.workModes} selected={selectedWorkModes} onToggle={toggleWorkMode} onClear={() => setSelectedWorkModes(new Set())} searchPlaceholder="Filter work modes…" />
+      <FilterGroup title="Location" items={facets.locations} selected={selectedLocations} onToggle={toggleLocation} onClear={() => setSelectedLocations(new Set())} searchPlaceholder="Filter locations…" />
 
       {/* ── Referrers ── */}
       {facets.contacts.length > 0 && (
@@ -199,8 +148,18 @@ function FilterPanel({
               <button onClick={() => { setSelectedContact(null); setSelectedContactName(''); }} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
             )}
           </div>
+          <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
+            <span className="text-text-muted text-[11px]">🔍</span>
+            <input
+              className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
+              placeholder="Filter referrers…"
+              value={referrerSearch}
+              onChange={(e) => setReferrerSearch(e.target.value)}
+            />
+            {referrerSearch && <button onClick={() => setReferrerSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
+          </div>
           <div className="space-y-0.5">
-            {facets.contacts.map(([id, info]) => (
+            {visibleContacts.map(([id, info]) => (
               <button
                 key={id}
                 onClick={() => { setSelectedContact(selectedContact === id ? null : id); onCloseMobile(); }}
@@ -228,16 +187,13 @@ export default function JobsPage() {
   const [selectedRoles, setSelectedRoles]         = useState<Set<string>>(new Set());
   const [selectedTypes, setSelectedTypes]         = useState<Set<string>>(new Set());
   const [selectedWorkModes, setSelectedWorkModes] = useState<Set<string>>(new Set());
+  const [selectedLocations, setSelectedLocations] = useState<Set<string>>(new Set());
   const [selectedContact, setSelectedContact]     = useState<string | null>(
     searchParams.get('contact') ?? null,
   );
   const [selectedContactName, setSelectedContactName] = useState<string>(
     searchParams.get('name') ?? '',
   );
-  const [companySearch, setCompanySearch] = useState('');
-  const [roleSearch, setRoleSearch]       = useState('');
-  const [showAllCompanies, setShowAllCompanies] = useState(false);
-  const [showAllRoles, setShowAllRoles]         = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const debounced = useDebounce(search, 300);
 
@@ -255,6 +211,7 @@ export default function JobsPage() {
     const roles     = new Map<string, number>();
     const types     = new Map<string, number>();
     const workModes = new Map<string, number>();
+    const locations = new Map<string, number>();
     const contacts  = new Map<string, { fullName: string; avatarUrl: string | null; count: number }>();
 
     allJobs.forEach((item) => {
@@ -262,6 +219,7 @@ export default function JobsPage() {
       roles.set(item.job.title, (roles.get(item.job.title) ?? 0) + 1);
       if (item.job.jobType) types.set(item.job.jobType, (types.get(item.job.jobType) ?? 0) + 1);
       if (item.job.workMode) workModes.set(item.job.workMode, (workModes.get(item.job.workMode) ?? 0) + 1);
+      if (item.job.location) locations.set(item.job.location, (locations.get(item.job.location) ?? 0) + 1);
       const { id, fullName, avatarUrl } = item.referrer;
       if (!contacts.has(id)) contacts.set(id, { fullName, avatarUrl, count: 0 });
       contacts.get(id)!.count += 1;
@@ -272,23 +230,10 @@ export default function JobsPage() {
       roles:     [...roles.entries()].sort((a, b) => b[1] - a[1]),
       types:     [...types.entries()].sort((a, b) => b[1] - a[1]),
       workModes: [...workModes.entries()].sort((a, b) => b[1] - a[1]),
+      locations: [...locations.entries()].sort((a, b) => b[1] - a[1]),
       contacts:  [...contacts.entries()].sort((a, b) => b[1].count - a[1].count),
     };
   }, [allJobs]);
-
-  const visibleCompanies = useMemo(() => {
-    const f = companySearch
-      ? facets.companies.filter(([n]) => n.toLowerCase().includes(companySearch.toLowerCase()))
-      : facets.companies;
-    return showAllCompanies ? f : f.slice(0, 7);
-  }, [facets.companies, companySearch, showAllCompanies]);
-
-  const visibleRoles = useMemo(() => {
-    const f = roleSearch
-      ? facets.roles.filter(([t]) => t.toLowerCase().includes(roleSearch.toLowerCase()))
-      : facets.roles;
-    return showAllRoles ? f : f.slice(0, 7);
-  }, [facets.roles, roleSearch, showAllRoles]);
 
   const filtered = useMemo(() => {
     return allJobs.filter((item) => {
@@ -296,6 +241,7 @@ export default function JobsPage() {
       if (selectedRoles.size > 0 && !selectedRoles.has(item.job.title)) return false;
       if (selectedTypes.size > 0 && item.job.jobType && !selectedTypes.has(item.job.jobType)) return false;
       if (selectedWorkModes.size > 0 && item.job.workMode && !selectedWorkModes.has(item.job.workMode)) return false;
+      if (selectedLocations.size > 0 && item.job.location && !selectedLocations.has(item.job.location)) return false;
       if (selectedContact && item.referrer.id !== selectedContact) return false;
       if (debounced) {
         const q = debounced.toLowerCase();
@@ -309,9 +255,9 @@ export default function JobsPage() {
       }
       return true;
     });
-  }, [allJobs, selectedCompanies, selectedRoles, selectedTypes, selectedWorkModes, selectedContact, debounced]);
+  }, [allJobs, selectedCompanies, selectedRoles, selectedTypes, selectedWorkModes, selectedLocations, selectedContact, debounced]);
 
-  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedTypes.size > 0 || selectedWorkModes.size > 0 || !!selectedContact || !!debounced;
+  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedTypes.size > 0 || selectedWorkModes.size > 0 || selectedLocations.size > 0 || !!selectedContact || !!debounced;
 
   const toggleCompany = (name: string) =>
     setSelectedCompanies((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n; });
@@ -321,26 +267,22 @@ export default function JobsPage() {
     setSelectedTypes((prev) => { const n = new Set(prev); n.has(type) ? n.delete(type) : n.add(type); return n; });
   const toggleWorkMode = (mode: string) =>
     setSelectedWorkModes((prev) => { const n = new Set(prev); n.has(mode) ? n.delete(mode) : n.add(mode); return n; });
+  const toggleLocation = (location: string) =>
+    setSelectedLocations((prev) => { const n = new Set(prev); n.has(location) ? n.delete(location) : n.add(location); return n; });
 
   const clearAll = () => {
     setSelectedCompanies(new Set()); setSelectedRoles(new Set()); setSelectedTypes(new Set());
-    setSelectedWorkModes(new Set());
+    setSelectedWorkModes(new Set()); setSelectedLocations(new Set());
     setSelectedContact(null); setSelectedContactName(''); setSearch('');
-    setCompanySearch(''); setRoleSearch('');
   };
 
   // Shared props for both sidebar and mobile drawer instances
   const filterPanelProps: FilterPanelProps = {
     hasFilters, filteredCount: filtered.length, facets,
-    selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedContact,
-    roleSearch, companySearch,
-    visibleRoles, visibleCompanies,
-    showAllRoles, showAllCompanies,
-    setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes,
+    selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations, selectedContact,
+    setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes, setSelectedLocations,
     setSelectedContact, setSelectedContactName,
-    setRoleSearch, setCompanySearch,
-    setShowAllRoles, setShowAllCompanies,
-    toggleRole, toggleCompany, toggleType, toggleWorkMode,
+    toggleRole, toggleCompany, toggleType, toggleWorkMode, toggleLocation,
     clearAll,
     onCloseMobile: () => setShowMobileFilters(false),
   };
@@ -449,6 +391,7 @@ export default function JobsPage() {
             {[...selectedCompanies].map((c) => <ActiveChip key={c} label={c} onRemove={() => toggleCompany(c)} />)}
             {[...selectedTypes].map((t) => <ActiveChip key={t} label={t} onRemove={() => toggleType(t)} />)}
             {[...selectedWorkModes].map((m) => <ActiveChip key={m} label={m} onRemove={() => toggleWorkMode(m)} />)}
+            {[...selectedLocations].map((l) => <ActiveChip key={l} label={l} onRemove={() => toggleLocation(l)} />)}
             {selectedContact && (
               <ActiveChip
                 label={facets.contacts.find(([id]) => id === selectedContact)?.[1].fullName.split(' ')[0] ?? selectedContactName}
