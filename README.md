@@ -1,18 +1,18 @@
-# Refrd — Frontend
+# DirectRef — Frontend
 
 > Referral-first job network. Your CV, straight to a friend inside the company.
 
 ## Prerequisites
 
 - [Node.js 20+](https://nodejs.org)
-- Backend running — see [refrd-backend](https://github.com/anatAtar/refrd-backend)
+- Backend running — see [backend](https://github.com/directref/backend)
 
 ## Setup
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/anatAtar/refrd-frontend.git
-cd refrd-frontend
+git clone https://github.com/directref/frontend.git
+cd frontend
 ```
 
 ### 2. Install dependencies
@@ -45,12 +45,12 @@ Always start the **backend first**, then the frontend:
 
 ```bash
 # Terminal 1 — backend
-cd refrd-backend
+cd backend
 npm run docker:up   # first time only
 npm run dev
 
 # Terminal 2 — frontend
-cd refrd-frontend
+cd frontend
 npm run dev -- -p 3001
 ```
 
@@ -91,4 +91,4 @@ npm run dev -- -p 3001
 
 ## Related
 
-👉 Backend repo: https://github.com/anatAtar/refrd-backend
+👉 Backend repo: https://github.com/directref/backend
