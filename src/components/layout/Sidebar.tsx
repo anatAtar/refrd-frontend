@@ -71,7 +71,7 @@ export function Sidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 group',
+                'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150 group',
                 active ? '' : 'hover:bg-white/5',
               )}
               style={{
@@ -98,16 +98,15 @@ export function Sidebar() {
         {user && (
           <Link
             href="/settings"
-            className="px-3 py-2 mb-1 rounded-lg hover:bg-white/5 transition-colors block"
-            style={{ color: '#A89070' }}
+            className="px-2 py-2.5 mb-1 rounded-lg hover:bg-white/5 transition-colors block"
           >
-            <p className="text-xs font-semibold truncate" style={{ color: 'inherit' }}>{user.fullName}</p>
-            <p className="text-xs truncate" style={{ color: 'inherit' }}>{user.companyName ?? user.email}</p>
+            <p className="text-[13px] font-semibold truncate" style={{ color: '#F0E8D8' }}>{user.fullName}</p>
+            <p className="text-[13px] truncate" style={{ color: '#A89070' }}>Profile & preferences</p>
           </Link>
         )}
         <button
           onClick={logout}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-white/5"
+          className="w-full flex items-center gap-2.5 px-2 py-[9px] rounded-lg text-[13px] font-semibold transition-colors hover:bg-white/5"
           style={{ color: '#A89070' }}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
