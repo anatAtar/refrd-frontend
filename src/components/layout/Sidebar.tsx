@@ -93,28 +93,27 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom: user + settings */}
+      {/* Bottom: user + logout */}
       <div className="p-3" style={{ borderTop: '1px solid rgba(212,175,122,0.08)' }}>
         {user && (
-          <Link href="/settings" className="px-3 py-2 mb-1 rounded-lg hover:bg-white/5 transition-colors block">
-            <p className="text-xs font-semibold truncate" style={{ color: "#F0E8D8" }}>{user.fullName}</p>
-            <p className="text-xs truncate" style={{ color: '#5A4A2A' }}>{user.companyName ?? user.email}</p>
+          <Link
+            href="/settings"
+            className="px-3 py-2 mb-1 rounded-lg hover:bg-white/5 transition-colors block"
+            style={{ color: '#A89070' }}
+          >
+            <p className="text-xs font-semibold truncate" style={{ color: 'inherit' }}>{user.fullName}</p>
+            <p className="text-xs truncate" style={{ color: 'inherit' }}>{user.companyName ?? user.email}</p>
           </Link>
         )}
-        <Link
-          href="/settings"
-          className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-white/5"
-          style={{ color: '#5A4A2A' }}
-        >
-          <span className="text-base">⚙️</span>
-          Settings
-        </Link>
         <button
           onClick={logout}
           className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-white/5"
-          style={{ color: '#5A4A2A' }}
+          style={{ color: '#A89070' }}
         >
-          <span>🚪</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2v10" />
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+          </svg>
           Log out
         </button>
       </div>
