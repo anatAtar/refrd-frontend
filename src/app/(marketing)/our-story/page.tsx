@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
-import { getInitials } from '@/lib/utils';
 import { mkt } from '../tokens';
 
 const description =
@@ -34,8 +34,8 @@ const jsonLd = {
 };
 
 const founders = [
-  { name: 'Shai Atar', title: 'Co-Founder, DirectRef', linkedin: 'https://www.linkedin.com/in/shai-atar/' },
-  { name: 'Anat Atar Lachmish', title: 'Co-Founder, DirectRef', linkedin: 'https://www.linkedin.com/in/anat-atar-lachmish-a07690b7/' },
+  { name: 'Shai Atar', title: 'Co-Founder, DirectRef', linkedin: 'https://www.linkedin.com/in/shai-atar/', photo: '/founders/shai-atar.jpg' },
+  { name: 'Anat Atar Lachmish', title: 'Co-Founder, DirectRef', linkedin: 'https://www.linkedin.com/in/anat-atar-lachmish-a07690b7/', photo: '/founders/anat-atar-lachmish.jpg' },
 ];
 
 export default function OurStoryPage() {
@@ -65,12 +65,13 @@ export default function OurStoryPage() {
               className="rounded-[20px] p-7 flex flex-col items-center text-center gap-3.5"
               style={{ background: mkt.cardBg, border: `1px solid ${mkt.border}` }}
             >
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold"
-                style={{ background: `linear-gradient(135deg, ${mkt.accentSeeker}, ${mkt.accentReferral})`, color: '#1a1206' }}
-              >
-                {getInitials(founder.name)}
-              </div>
+              <Image
+                src={founder.photo}
+                alt={founder.name}
+                width={96}
+                height={96}
+                className="w-24 h-24 rounded-full object-cover"
+              />
               <div>
                 <h3 className="text-[17px] font-bold mb-1" style={{ color: mkt.textPrimary }}>{founder.name}</h3>
                 <p className="text-[13.5px] mb-2.5" style={{ color: mkt.textSecondary }}>{founder.title}</p>
