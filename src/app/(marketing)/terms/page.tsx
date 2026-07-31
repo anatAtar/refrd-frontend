@@ -1,10 +1,36 @@
+import type { Metadata } from 'next';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import { LegalLayout, LegalH2, LegalH3, LegalP, LegalUl, LegalLi, LegalStrong } from '@/components/marketing/LegalLayout';
 import { mkt } from '../tokens';
 
-export const metadata = {
+const description =
+  'Read the terms governing your use of DirectRef, the platform connecting job seekers with verified employee referrers at tech companies.';
+
+export const metadata: Metadata = {
   title: 'Terms of Service — DirectRef',
+  description,
+  alternates: { canonical: '/terms' },
+  openGraph: {
+    title: 'Terms of Service — DirectRef',
+    description,
+    url: '/terms',
+    siteName: 'DirectRef',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Terms of Service — DirectRef',
+    description,
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Terms of Service — DirectRef',
+  description,
+  url: 'https://direct-ref.com/terms',
 };
 
 const toc = [
@@ -39,6 +65,7 @@ const tdClass = 'py-2.5 px-3';
 export default function TermsPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <MarketingHeader variant="sub" />
       <LegalLayout title="Terms of Service" effectiveDate="Effective [EFFECTIVE DATE] · Last updated [EFFECTIVE DATE]" toc={toc}>
         <LegalH2 id="short">The short version</LegalH2>

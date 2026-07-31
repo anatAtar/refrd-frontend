@@ -1,10 +1,36 @@
+import type { Metadata } from 'next';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import { getInitials } from '@/lib/utils';
 import { mkt } from '../tokens';
 
-export const metadata = {
+const description =
+  'Meet the founders of DirectRef and learn why we built a platform that connects job seekers directly with verified employees at top tech companies.';
+
+export const metadata: Metadata = {
   title: 'Our Story — DirectRef',
+  description,
+  alternates: { canonical: '/our-story' },
+  openGraph: {
+    title: 'Our Story — DirectRef',
+    description,
+    url: '/our-story',
+    siteName: 'DirectRef',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Our Story — DirectRef',
+    description,
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Our Story — DirectRef',
+  description,
+  url: 'https://direct-ref.com/our-story',
 };
 
 const founders = [
@@ -15,6 +41,7 @@ const founders = [
 export default function OurStoryPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <MarketingHeader variant="sub" />
 
       <section className="max-w-[760px] mx-auto px-8 pt-16 pb-10">

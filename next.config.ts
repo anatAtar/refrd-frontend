@@ -5,6 +5,17 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname),
   },
+  async redirects() {
+    return [
+      // Canonical host is the apex domain — www redirects to it in one hop.
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.direct-ref.com' }],
+        destination: 'https://direct-ref.com/:path*',
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

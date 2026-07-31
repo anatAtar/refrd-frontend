@@ -1,10 +1,36 @@
+import type { Metadata } from 'next';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import { LegalLayout, LegalH2, LegalH3, LegalP, LegalUl, LegalLi, LegalStrong, LegalCallout } from '@/components/marketing/LegalLayout';
 import { mkt } from '../tokens';
 
-export const metadata = {
+const description =
+  'Learn how DirectRef collects, uses, and protects your personal data, including your CV, when you use our referral platform.';
+
+export const metadata: Metadata = {
   title: 'Privacy Policy — DirectRef',
+  description,
+  alternates: { canonical: '/privacy' },
+  openGraph: {
+    title: 'Privacy Policy — DirectRef',
+    description,
+    url: '/privacy',
+    siteName: 'DirectRef',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy — DirectRef',
+    description,
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: 'Privacy Policy — DirectRef',
+  description,
+  url: 'https://direct-ref.com/privacy',
 };
 
 const toc = [
@@ -34,6 +60,7 @@ const thStyle = { borderBottom: `2px solid ${mkt.accentSeeker}`, color: mkt.text
 export default function PrivacyPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <MarketingHeader variant="sub" />
       <LegalLayout title="Privacy Policy" effectiveDate="Effective [EFFECTIVE DATE] · Last updated [EFFECTIVE DATE]" toc={toc}>
         <LegalH2 id="s1">1. Who we are</LegalH2>

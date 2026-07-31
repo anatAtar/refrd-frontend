@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { safeNextPath } from '@/lib/utils';
 
 const PUBLIC_PATHS = [
   '/login',
@@ -11,7 +12,25 @@ const PUBLIC_PATHS = [
 ];
 
 // Marketing pages: reachable regardless of auth state, no redirect either way.
-const NEUTRAL_PATHS = ['/', '/our-story', '/terms', '/privacy'];
+const NEUTRAL_PATHS = ['/our-story', '/terms', '/privacy'];
+
+// The actual authenticated app — everything under src/app/(app)/. Matched
+// as an allowlist (rather than "everything not public") so a genuinely
+// nonexistent URL falls through to Next's own routing and 404s, instead of
+// silently being redirected to /login like a real protected page.
+const PROTECTED_PREFIXES = [
+  '/feed',
+  '/jobs',
+  '/applications',
+  '/network',
+  '/notifications',
+  '/settings',
+  '/onboarding',
+];
+
+function matchesPrefix(pathname: string, prefixes: string[]): boolean {
+  return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
 
 /** Decode the exp claim from a JWT without verifying the signature.
  *  Returns true if the token exists and has not expired. */
@@ -69,27 +88,39 @@ export function proxy(req: NextRequest) {
 
   if (NEUTRAL_PATHS.some((p) => pathname === p)) return NextResponse.next();
 
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
-  const token    = req.cookies.get('access_token')?.value;
-  const alive    = isTokenAlive(token);
+  // The marketing home page is public, but — like the login/register pages —
+  // an already-authenticated visitor gets bounced into the app instead.
+  const isPublic    = pathname === '/' || matchesPrefix(pathname, PUBLIC_PATHS);
+  const isProtected = matchesPrefix(pathname, PROTECTED_PREFIXES);
+  const token       = req.cookies.get('access_token')?.value;
+  const alive       = isTokenAlive(token);
 
-  // Unauthenticated (no valid token) hitting a protected page → login
-  if (!alive && !isPublic) {
+  // Unauthenticated (no valid token) hitting a protected app route → login,
+  // remembering where they were headed so we can return them there.
+  if (!alive && isProtected) {
+    const requested = safeNextPath(`${pathname}${req.nextUrl.search}`, '/feed');
     const url = req.nextUrl.clone();
     url.pathname = '/login';
+    url.search = '';
+    url.searchParams.set('next', requested);
     return NextResponse.redirect(url);
   }
 
-  // Authenticated with a live token hitting a public auth page → feed
+  // Authenticated with a live token hitting the home page or a public auth
+  // page → feed
   if (alive && isPublic) {
     const url = req.nextUrl.clone();
     url.pathname = '/feed';
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  // Forward the pathname so server components (e.g. the (app) layout's own
+  // session check) can build a `next=` target without their own request access.
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-pathname', `${pathname}${req.nextUrl.search}`);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|public|api/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|public|api/).*)'],
 };

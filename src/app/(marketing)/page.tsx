@@ -1,8 +1,30 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import { MarketingHeader } from '@/components/marketing/MarketingHeader';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
 import { FaqAccordion } from '@/components/marketing/FaqAccordion';
 import { mkt } from './tokens';
+
+const description =
+  'Skip the black hole of job boards. DirectRef connects you directly with verified employees at top Israeli tech companies who can refer you internally.';
+
+export const metadata: Metadata = {
+  title: 'DirectRef — Get Referred by Verified Tech Insiders',
+  description,
+  alternates: { canonical: '/' },
+  openGraph: {
+    title: 'DirectRef — Get Referred by Verified Tech Insiders',
+    description,
+    url: '/',
+    siteName: 'DirectRef',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DirectRef — Get Referred by Verified Tech Insiders',
+    description,
+  },
+};
 
 const seekerPoints = [
   'Get your resume directly to hiring managers without relying on job portals.',
@@ -55,9 +77,25 @@ const faqItems = [
   },
 ];
 
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'DirectRef',
+    url: 'https://direct-ref.com',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'DirectRef',
+    url: 'https://direct-ref.com',
+  },
+];
+
 export default function LandingPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <MarketingHeader variant="home" />
 
       {/* HERO */}

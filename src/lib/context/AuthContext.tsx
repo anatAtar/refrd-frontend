@@ -4,12 +4,13 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useRouter } from 'next/navigation';
 import { authApi } from '../api/auth';
 import { usersApi } from '../api/users';
+import { safeNextPath } from '../utils';
 import type { User } from '../types';
 
 interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, next?: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -36,12 +37,12 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
     return () => window.removeEventListener('auth:logout', handler);
   }, [router]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, next?: string) => {
     setIsLoading(true);
     try {
       const res = await authApi.login({ email, password });
       setUser(res.data);
-      router.push('/feed');
+      router.push(safeNextPath(next, '/feed'));
     } finally {
       setIsLoading(false);
     }

@@ -9,7 +9,13 @@ import { Button } from '@/components/ui/Button';
 import { OAuthButton } from './OAuthButton';
 import { ApiError } from '@/lib/api/client';
 
-export function LoginForm() {
+interface LoginFormProps {
+  /** Where to send the user after a successful login, e.g. the page they
+   *  were redirected from. Validated in AuthContext before use. */
+  next?: string;
+}
+
+export function LoginForm({ next }: LoginFormProps) {
   const [email, setEmail]               = useState('');
   const [password, setPassword]         = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,7 +26,7 @@ export function LoginForm() {
     e.preventDefault();
     setError('');
     try {
-      await login(email, password);
+      await login(email, password, next);
     } catch (err) {
       const msg = err instanceof ApiError ? err.message : 'Something went wrong';
       setError(msg);

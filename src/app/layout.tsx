@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { SWRProvider } from '@/components/SWRProvider';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://direct-ref.com'),
   title: 'DirectRef — Find your next job',
   description: 'Skip the black hole. Connect with friends at top companies, find open roles, and send your CV directly — no cold applications.',
 };

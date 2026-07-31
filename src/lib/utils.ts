@@ -1,6 +1,15 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+/** Validate a `next=` post-login redirect target: same-origin path only.
+ *  Rejects protocol-relative ("//host") and absolute URLs to prevent an
+ *  open redirect via a crafted `?next=` value. */
+export function safeNextPath(next: string | null | undefined, fallback: string): string {
+  if (!next) return fallback;
+  if (!next.startsWith('/') || next.startsWith('//')) return fallback;
+  return next;
+}
+
 /** Merge Tailwind classes safely */
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
