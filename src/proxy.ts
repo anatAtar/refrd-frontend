@@ -10,6 +10,9 @@ const PUBLIC_PATHS = [
   '/join',
 ];
 
+// Marketing pages: reachable regardless of auth state, no redirect either way.
+const NEUTRAL_PATHS = ['/', '/our-story', '/terms', '/privacy'];
+
 /** Decode the exp claim from a JWT without verifying the signature.
  *  Returns true if the token exists and has not expired. */
 function isTokenAlive(token: string | undefined): boolean {
@@ -63,6 +66,8 @@ export function proxy(req: NextRequest) {
   if (gateResponse) return gateResponse;
 
   const { pathname } = req.nextUrl;
+
+  if (NEUTRAL_PATHS.some((p) => pathname === p)) return NextResponse.next();
 
   const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
   const token    = req.cookies.get('access_token')?.value;
