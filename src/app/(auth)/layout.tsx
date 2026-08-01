@@ -1,4 +1,5 @@
 import { AuthProvider } from '@/lib/context/AuthContext';
+import { LogoMark } from '@/components/ui/Logo';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,12 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             className="w-14 h-14 rounded-2xl flex items-center justify-center"
             style={{ background: 'rgba(212,175,122,0.12)', border: '1px solid rgba(212,175,122,0.30)' }}
           >
-            <svg width="32" height="32" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="9" y="6" width="5" height="36" rx="2" fill="#D4AF7A"/>
-              <path d="M14 6 H24 Q34 6 34 17 Q34 28 24 28 H14" fill="none" stroke="#D4AF7A" strokeWidth="5" strokeLinejoin="round"/>
-              <line x1="24" y1="28" x2="37" y2="42" stroke="#C8A060" strokeWidth="4.5" strokeLinecap="round"/>
-              <polyline points="28,42 37,42 37,33" stroke="#C8A060" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            </svg>
+            <LogoMark size={32} />
           </div>
           {/* Name + tagline */}
           <div className="text-center">
