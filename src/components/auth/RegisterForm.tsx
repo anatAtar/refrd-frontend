@@ -91,7 +91,10 @@ export function RegisterForm() {
         )}
       </div>
 
-      <OAuthButton />
+      <div className="space-y-2.5">
+        <OAuthButton provider="google" />
+        <OAuthButton provider="linkedin" />
+      </div>
 
       <div className="flex items-center gap-3 my-4">
         <div className="flex-1 h-px bg-border" />
