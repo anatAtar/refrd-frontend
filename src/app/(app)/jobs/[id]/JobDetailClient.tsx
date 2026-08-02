@@ -103,22 +103,23 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
       </div>
 
       {!isOwnPosting && !alreadyApplied && (
-        <>
-          <SendCVModal
-            open={sendCVOpen}
-            onClose={() => setSendCVOpen(false)}
-            onSuccess={(referrer) => setSentTo(referrer)}
-            job={job}
-            referrers={referrers}
-          />
-          <SendCVSuccessModal
-            open={!!sentTo}
-            onClose={() => setSentTo(null)}
-            referrerFirstName={sentTo?.fullName.split(' ')[0] ?? ''}
-            jobTitle={job.title}
-          />
-        </>
+        <SendCVModal
+          open={sendCVOpen}
+          onClose={() => setSendCVOpen(false)}
+          onSuccess={(referrer) => setSentTo(referrer)}
+          job={job}
+          referrers={referrers}
+        />
       )}
+      {/* Not gated on alreadyApplied — submitting flips that to true
+          immediately (optimisticAddApplication), which would otherwise
+          unmount this in the same render it's meant to open in. */}
+      <SendCVSuccessModal
+        open={!!sentTo}
+        onClose={() => setSentTo(null)}
+        referrerFirstName={sentTo?.fullName.split(' ')[0] ?? ''}
+        jobTitle={job.title}
+      />
     </>
   );
 }

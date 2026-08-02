@@ -11,14 +11,13 @@ const rubik = Rubik({ subsets: ['latin'], weight: ['400', '500', '600', '700'] }
 // as var(...) at runtime, so overriding them here cascades to every
 // descendant that uses those utility classes.
 //
+// text-primary/text-secondary are intentionally NOT overridden here anymore
+// — the app went to pure black body text globally, and this subtree should
+// follow that rather than keep the spec's warm dark-gray tone.
+//
 // Known limitation: Radix Dialog portals (Send CV / success modals) render
-// outside this subtree in the DOM, so they won't pick up this override —
-// they'll keep the app's global near-black text color. The delta is subtle
-// (both are near-black, just warm- vs neutral-toned) so this was judged not
-// worth a portal-aware theming workaround.
+// outside this subtree in the DOM, so they won't pick up these overrides.
 const specTokens: CSSProperties = {
-  ['--color-text-primary' as string]: 'oklch(0.24 0.008 60)',
-  ['--color-text-secondary' as string]: 'oklch(0.47 0.008 60)',
   ['--color-text-muted' as string]: 'oklch(0.62 0.008 60)',
   ['--color-border' as string]: 'oklch(0.93 0.004 70)',
   ['--color-border-strong' as string]: 'oklch(0.88 0.004 70)',

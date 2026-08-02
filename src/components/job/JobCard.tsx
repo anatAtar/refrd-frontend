@@ -201,21 +201,24 @@ export function JobCard({ data }: JobCardProps) {
       </Card>
 
       {!isOwnPosting && !alreadyApplied && (
-        <>
-          <SendCVModal
-            open={sendCVOpen}
-            onClose={() => setSendCVOpen(false)}
-            onSuccess={(r) => setSentTo(r)}
-            job={job}
-            referrers={referrers}
-          />
-          <SendCVSuccessModal
-            open={!!sentTo}
-            onClose={() => setSentTo(null)}
-            referrerFirstName={sentTo?.fullName.split(' ')[0] ?? ''}
-            jobTitle={job.title}
-          />
-        </>
+        <SendCVModal
+          open={sendCVOpen}
+          onClose={() => setSendCVOpen(false)}
+          onSuccess={(r) => setSentTo(r)}
+          job={job}
+          referrers={referrers}
+        />
+      )}
+      {/* Not gated on alreadyApplied — submitting flips that to true
+          immediately (optimisticAddApplication), which would otherwise
+          unmount this in the same render it's meant to open in. */}
+      {!isOwnPosting && (
+        <SendCVSuccessModal
+          open={!!sentTo}
+          onClose={() => setSentTo(null)}
+          referrerFirstName={sentTo?.fullName.split(' ')[0] ?? ''}
+          jobTitle={job.title}
+        />
       )}
     </>
   );

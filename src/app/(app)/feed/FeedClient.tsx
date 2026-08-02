@@ -118,7 +118,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
       <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 4px' }}>
         Welcome back, {firstName}
       </h1>
-      <p style={{ fontSize: 14.5, color: 'oklch(0.47 0.008 60)', margin: '0 0 24px' }}>
+      <p style={{ fontSize: 14.5, color: '#000000', margin: '0 0 24px' }}>
         Here's where things stand.
       </p>
 
@@ -135,11 +135,11 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: 'oklch(0.24 0.008 60)' }}>{appsSent}</p>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: '#000000' }}>{appsSent}</p>
                 <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Apps sent</p>
               </div>
               <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: awaitingResp > 0 ? 'oklch(0.72 0.13 85)' : 'oklch(0.24 0.008 60)' }}>{awaitingResp}</p>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: awaitingResp > 0 ? 'oklch(0.72 0.13 85)' : '#000000' }}>{awaitingResp}</p>
                 <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Awaiting response</p>
               </div>
             </div>
@@ -163,11 +163,11 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: 'oklch(0.24 0.008 60)' }}>{activeJobs}</p>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: '#000000' }}>{activeJobs}</p>
                 <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Jobs posted</p>
               </div>
               <div style={{ background: pendingCVs > 0 ? 'oklch(0.88 0.09 85)' : 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: pendingCVs > 0 ? 'oklch(0.3 0.06 85)' : 'oklch(0.24 0.008 60)' }}>{pendingCVs}</p>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: pendingCVs > 0 ? 'oklch(0.3 0.06 85)' : '#000000' }}>{pendingCVs}</p>
                 <p style={{ fontSize: 11.5, color: pendingCVs > 0 ? 'oklch(0.4 0.06 85)' : 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>CVs to review</p>
               </div>
             </div>
@@ -219,8 +219,8 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                     className="hover:bg-card-hover transition-colors"
                   >
                     <div>
-                      <p style={{ fontSize: 14.5, fontWeight: 600, margin: '0 0 4px', color: 'oklch(0.24 0.008 60)' }}>{a.job.title}</p>
-                      <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                      <p style={{ fontSize: 14.5, fontWeight: 600, margin: '0 0 4px', color: '#000000' }}>{a.job.title}</p>
+                      <p style={{ fontSize: 13, color: '#000000', margin: 0 }}>
                         {a.job.companyName} · via {a.referrer?.fullName} · {timeAgo(a.application.createdAt)}
                       </p>
                     </div>
@@ -249,8 +249,8 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                   className="hover:bg-card-hover transition-colors"
                 >
                   <div>
-                    <p style={{ fontSize: 14.5, fontWeight: 600, margin: '0 0 4px', color: 'oklch(0.24 0.008 60)' }}>{j.title}</p>
-                    <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                    <p style={{ fontSize: 14.5, fontWeight: 600, margin: '0 0 4px', color: '#000000' }}>{j.title}</p>
+                    <p style={{ fontSize: 13, color: '#000000', margin: 0 }}>
                       {j.companyName} · Posted {timeAgo(j.createdAt)}
                     </p>
                   </div>
@@ -276,8 +276,8 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                 <Link href="/jobs" style={{ fontSize: 13.5, fontWeight: 600, color: 'oklch(0.5 0.02 60)', textDecoration: 'none' }}>Browse all jobs →</Link>
               </div>
               <p style={{ fontSize: 13, color: 'oklch(0.62 0.008 60)', margin: '0 0 16px' }}>
-                {user?.desiredRole && <><strong style={{ color: 'oklch(0.24 0.008 60)' }}>{user.desiredRole}</strong>{user?.preferredLocation ? ' · ' : ''}</>}
-                {user?.preferredLocation && <strong style={{ color: 'oklch(0.24 0.008 60)' }}>{user.preferredLocation}</strong>}
+                {user?.desiredRole && <><strong style={{ color: '#000000' }}>{user.desiredRole}</strong>{user?.preferredLocation ? ' · ' : ''}</>}
+                {user?.preferredLocation && <strong style={{ color: '#000000' }}>{user.preferredLocation}</strong>}
                 {' · '}
                 <Link href="/settings" style={{ color: 'oklch(0.72 0.13 85)', fontWeight: 600, textDecoration: 'none' }}>Edit preferences →</Link>
               </p>
@@ -317,7 +317,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                       {/* Row 1: company icon + name + button */}
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 38, height: 38, borderRadius: 10, background: 'oklch(0.94 0.004 70)', color: 'oklch(0.47 0.008 60)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <div style={{ width: 38, height: 38, borderRadius: 10, background: 'oklch(0.94 0.004 70)', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                               <rect x="4" y="3" width="16" height="18" rx="1" />
                               <rect x="8" y="7" width="2.5" height="2.5" fill="currentColor" stroke="none" />
@@ -337,9 +337,9 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                         </Link>
                       </div>
                       {/* Row 2: job title */}
-                      <h3 style={{ fontSize: 16.5, fontWeight: 700, margin: 0, color: 'oklch(0.24 0.008 60)' }}>{j.job.title}</h3>
+                      <h3 style={{ fontSize: 16.5, fontWeight: 700, margin: 0, color: '#000000' }}>{j.job.title}</h3>
                       {/* Row 3: meta */}
-                      <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                      <p style={{ fontSize: 13, color: '#000000', margin: 0 }}>
                         {[j.job.location, j.job.jobType, j.job.workMode, timeAgo(j.job.createdAt)].filter(Boolean).join(' · ')}
                       </p>
                   {/* Row 4: referrer footer */}
@@ -350,7 +350,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                     </div>
                     <button
                       onClick={toggleSave}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid oklch(0.93 0.004 70)', background: isSaved ? 'oklch(0.88 0.09 85)' : 'transparent', color: isSaved ? 'oklch(0.3 0.06 85)' : 'oklch(0.47 0.008 60)', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid oklch(0.93 0.004 70)', background: isSaved ? 'oklch(0.88 0.09 85)' : 'transparent', color: isSaved ? 'oklch(0.3 0.06 85)' : '#000000', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer' }}
                     >
                       {isSaved ? '★ Saved' : '☆ Save'}
                     </button>
@@ -400,7 +400,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                         >
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · {a.job.companyName}</p>
-                            <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                            <p style={{ fontSize: 13, color: '#000000', margin: 0 }}>
                               Waiting on {a.referrer?.fullName} to respond
                             </p>
                             <TimelineBar createdAt={a.application.createdAt} />
@@ -427,7 +427,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                           >
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · your posting</p>
-                              <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                              <p style={{ fontSize: 13, color: '#000000', margin: 0 }}>
                                 {a.seeker?.fullName}'s CV needs a decision from you
                               </p>
                               <TimelineBar createdAt={a.application.createdAt} />

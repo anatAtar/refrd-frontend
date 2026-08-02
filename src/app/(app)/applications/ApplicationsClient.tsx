@@ -25,7 +25,7 @@ const BG     = '#fff';
 // ─── Building icon (matches design) ──────────────────────────────────────────
 function BuildingIcon() {
   return (
-    <div style={{ width: 38, height: 38, borderRadius: 10, background: 'oklch(0.94 0.004 70)', color: 'oklch(0.47 0.008 60)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+    <div style={{ width: 38, height: 38, borderRadius: 10, background: 'oklch(0.94 0.004 70)', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
         <rect x="4" y="3" width="16" height="18" rx="1" />
         <rect x="8"   y="7"  width="2.5" height="2.5" fill="currentColor" stroke="none" />
@@ -84,7 +84,7 @@ function SentTab({ apps }: { apps: ApplicationWithDetails[] }) {
               <BuildingIcon />
               <div>
                 <span style={{ fontSize: 15, fontWeight: 700 }}>{a.job.companyName}</span>
-                <h3 style={{ fontSize: 16.5, fontWeight: 600, margin: '4px 0 0', color: 'oklch(0.24 0.008 60)' }}>{a.job.title}</h3>
+                <h3 style={{ fontSize: 16.5, fontWeight: 600, margin: '4px 0 0', color: '#000000' }}>{a.job.title}</h3>
               </div>
             </div>
             <StatusBadge status={a.application.status} />
@@ -237,7 +237,7 @@ function SavedTab() {
         >
           <div style={{ minWidth: 0 }}>
             <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 4px' }}>{s.job.title}</p>
-            <p style={{ fontSize: 13.5, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+            <p style={{ fontSize: 13.5, color: '#000000', margin: 0 }}>
               {s.job.companyName}{s.job.location ? ` · ${s.job.location}` : ''}
             </p>
           </div>
@@ -311,7 +311,7 @@ export default function ApplicationsClient({
     <div style={{ padding: '32px 40px 60px' }}>
       {/* Header */}
       <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{titles[tab]}</h1>
-      <p style={{ fontSize: 14.5, color: 'oklch(0.47 0.008 60)', margin: '0 0 24px' }}>
+      <p style={{ fontSize: 14.5, color: '#000000', margin: '0 0 24px' }}>
         {subtitles[tab]}
       </p>
 
