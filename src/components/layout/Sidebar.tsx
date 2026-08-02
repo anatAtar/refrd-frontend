@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/context/AuthContext';
@@ -43,10 +43,16 @@ function isActive(pathname: string, search: string, href: string) {
 
 const REFERRER_ROUTES = ['/jobs/post', '/applications/inbox'];
 
+const DEFAULT_ROUTE: Record<Mode, string> = {
+  seeker:   '/jobs',
+  referrer: '/jobs/post',
+};
+
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = searchParams.toString();
+  const router = useRouter();
   const { user, logout } = useAuth();
   const { count: unreadCount } = useUnreadCount();
   const { data: inbox } = useSWR('sidebar/inbox', () => applicationsApi.inbox().then(r => r.data));
@@ -56,6 +62,12 @@ export function Sidebar() {
     REFERRER_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/')) ? 'referrer' : 'seeker',
   );
   const items = mode === 'seeker' ? SEEKER_ITEMS : REFERRER_ITEMS;
+
+  const switchMode = (next: Mode) => {
+    if (next === mode) return;
+    setMode(next);
+    router.push(DEFAULT_ROUTE[next]);
+  };
 
   return (
     <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0" style={{ background: '#120E09', borderRight: '1px solid rgba(212,175,122,0.08)' }}>
@@ -105,7 +117,7 @@ export function Sidebar() {
         {/* Mode switcher */}
         <div className="flex gap-0.5 p-[3px] rounded-[10px] mb-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,122,0.08)' }}>
           <button
-            onClick={() => setMode('seeker')}
+            onClick={() => switchMode('seeker')}
             className="flex-1 py-2 px-1.5 rounded-lg text-[12.5px] font-bold transition-colors"
             style={{
               background: mode === 'seeker' ? '#D4AF7A' : 'transparent',
@@ -115,7 +127,7 @@ export function Sidebar() {
             Job Seeker
           </button>
           <button
-            onClick={() => setMode('referrer')}
+            onClick={() => switchMode('referrer')}
             className="flex-1 py-2 px-1.5 rounded-lg text-[12.5px] font-bold transition-colors"
             style={{
               background: mode === 'referrer' ? '#D4AF7A' : 'transparent',
