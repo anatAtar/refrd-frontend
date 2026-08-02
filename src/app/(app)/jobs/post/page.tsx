@@ -122,8 +122,8 @@ export default function PostJobPage() {
                   className="flex-1"
                   onKeyDown={(e) => e.key === 'Enter' && handleScrape()}
                 />
-                <Button variant="primary" onClick={handleScrape} disabled={isScraping || !url}>
-                  {isScraping ? <LoadingSpinner size="sm" /> : 'Auto-fill'}
+                <Button variant="primary" onClick={handleScrape} disabled={isScraping || !url} className="h-[42px] px-6 shrink-0">
+                  {isScraping ? <LoadingSpinner size="sm" /> : 'Autofill'}
                 </Button>
               </div>
               <p className="text-xs text-text-muted">
@@ -198,27 +198,30 @@ export default function PostJobPage() {
           </div>
         ) : (
           <div className="space-y-3 max-w-2xl">
-            {jobs.map((job) => (
-              <Card key={job.id} className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <Link href={`/jobs/${jobSlug(job.title, job.id)}`} className="font-bold text-text-primary text-sm hover:text-gold-300">
-                      {job.title}
-                    </Link>
-                    <p className="text-xs text-text-secondary mt-0.5">{job.companyName} · {job.location ?? 'Remote'}</p>
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      {job.isActive ? <Badge variant="good">Active</Badge> : <Badge variant="muted">Inactive</Badge>}
-                      <span className="text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
+            {jobs.map((job) => {
+              const href = `/jobs/${jobSlug(job.title, job.id)}`;
+              return (
+                <Card key={job.id} hover className="p-4" onClick={() => router.push(href)}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <Link href={href} className="font-bold text-text-primary text-sm hover:text-gold-300" onClick={(e) => e.stopPropagation()}>
+                        {job.title}
+                      </Link>
+                      <p className="text-xs text-text-secondary mt-0.5">{job.companyName} · {job.location ?? 'Remote'}</p>
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        {job.isActive ? <Badge variant="good">Active</Badge> : <Badge variant="muted">Inactive</Badge>}
+                        <span className="text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
+                      </div>
                     </div>
+                    {job.isActive && (
+                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleDeactivate(job.id); }}>
+                        Deactivate
+                      </Button>
+                    )}
                   </div>
-                  {job.isActive && (
-                    <Button variant="ghost" size="sm" onClick={() => handleDeactivate(job.id)}>
-                      Deactivate
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>

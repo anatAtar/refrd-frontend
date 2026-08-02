@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/Badge';
 import { CompanyIcon } from '@/components/job/CompanyIcon';
+import { JobDescription } from '@/components/job/JobDescription';
 import { Button } from '@/components/ui/Button';
 import { ReferrerContactCard } from '@/components/job/ReferrerContactCard';
 import { SendCVModal } from '@/components/application/SendCVModal';
@@ -61,7 +62,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
             {job.description && (
               <div>
                 <h2 className="text-sm font-bold uppercase tracking-wide text-text-muted mb-3">About the Role</h2>
-                <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">{job.description}</p>
+                <JobDescription description={job.description} />
               </div>
             )}
 
