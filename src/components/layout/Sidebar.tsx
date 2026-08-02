@@ -1,28 +1,61 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import useSWR from 'swr';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useUnreadCount } from '@/lib/hooks/useNotifications';
-import { Button } from '@/components/ui/Button';
+import { applicationsApi } from '@/lib/api/applications';
 import { LogoMark } from '@/components/ui/Logo';
 
-const NAV_ITEMS = [
-  { href: '/feed',         icon: '⌂',  label: 'Home'            },
-  { href: '/jobs',         icon: '⌕',  label: 'Browse Jobs'     },
-  { href: '/applications', icon: '↗',  label: 'My Applications' },
-  { href: '/network',      icon: '⊞',  label: 'My Network'      },
-  { href: '/notifications',icon: '✉',  label: 'Notifications'   },
-  { href: '/jobs/post',    icon: '＋',  label: 'Post a Job'      },
+type Mode = 'seeker' | 'referrer';
+
+const SEEKER_ITEMS = [
+  { href: '/jobs',                    icon: '⌕', label: 'Browse Jobs' },
+  { href: '/applications?tab=sent',   icon: '↗', label: 'Sent CV'     },
+  { href: '/applications?tab=saved',  icon: '★', label: 'Saved Jobs'  },
+];
+
+const REFERRER_ITEMS = [
+  { href: '/jobs/post',           icon: '＋', label: 'Post a Job' },
+  { href: '/applications/inbox',  icon: '▤', label: 'CV Inbox'   },
+];
+
+const GENERAL_ITEMS = [
+  { href: '/network',       icon: '⊞', label: 'My Network'    },
+  { href: '/notifications', icon: '✉', label: 'Notifications' },
 ];
 
 const EXACT_ROUTES = ['/applications', '/jobs'];
 
+function isActive(pathname: string, search: string, href: string) {
+  const [path, query] = href.split('?');
+  if (!EXACT_ROUTES.includes(path) && pathname.startsWith(path + '/')) return true;
+  if (pathname !== path) return false;
+  if (!query) return true;
+  // Distinguish links that share a pathname but differ by ?tab=, e.g. Sent CV vs Saved Jobs
+  const wantedTab = new URLSearchParams(query).get('tab');
+  const currentTab = new URLSearchParams(search).get('tab');
+  return wantedTab === null || wantedTab === currentTab;
+}
+
+const REFERRER_ROUTES = ['/jobs/post', '/applications/inbox'];
+
 export function Sidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
   const { user, logout } = useAuth();
   const { count: unreadCount } = useUnreadCount();
+  const { data: inbox } = useSWR('sidebar/inbox', () => applicationsApi.inbox().then(r => r.data));
+  const pendingCVs = (inbox ?? []).filter(a => a.application.status === 'submitted').length;
+
+  const [mode, setMode] = useState<Mode>(
+    REFERRER_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/')) ? 'referrer' : 'seeker',
+  );
+  const items = mode === 'seeker' ? SEEKER_ITEMS : REFERRER_ITEMS;
 
   return (
     <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0" style={{ background: '#120E09', borderRight: '1px solid rgba(212,175,122,0.08)' }}>
@@ -49,39 +82,112 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Nav items */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
-          const active = EXACT_ROUTES.includes(item.href)
-            ? pathname === item.href
-            : pathname === item.href || pathname.startsWith(item.href + '/');
-          const showBadge = item.href === '/notifications' && unreadCount > 0;
+      {/* Nav */}
+      <nav className="flex-1 py-3 px-2 overflow-y-auto">
+        {/* Home — always visible, outside the mode switch */}
+        <div className="mb-3.5">
+          <Link
+            href="/feed"
+            className={cn(
+              'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150',
+              isActive(pathname, search, '/feed') ? '' : 'hover:bg-white/5',
+            )}
+            style={{
+              color: isActive(pathname, search, '/feed') ? '#D4AF7A' : '#A89070',
+              background: isActive(pathname, search, '/feed') ? 'rgba(212,175,122,0.12)' : undefined,
+            }}
+          >
+            <span className="text-base w-[18px] text-center shrink-0">⌂</span>
+            <span className="flex-1">Home</span>
+          </Link>
+        </div>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150 group',
-                active ? '' : 'hover:bg-white/5',
-              )}
-              style={{
-                color: active ? '#D4AF7A' : '#A89070',
-                background: active ? 'rgba(212,175,122,0.12)' : undefined,
-              }}
-              onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#D4AF7A'; }}
-              onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.color = '#A89070'; }}
-            >
-              <span className="text-base">{item.icon}</span>
-              <span className="flex-1">{item.label}</span>
-              {showBadge && (
-                <span className="text-[10px] font-bold bg-gold-300 text-[#0A0A0A] px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+        {/* Mode switcher */}
+        <div className="flex gap-0.5 p-[3px] rounded-[10px] mb-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,122,0.08)' }}>
+          <button
+            onClick={() => setMode('seeker')}
+            className="flex-1 py-2 px-1.5 rounded-lg text-[12.5px] font-bold transition-colors"
+            style={{
+              background: mode === 'seeker' ? '#D4AF7A' : 'transparent',
+              color: mode === 'seeker' ? '#0A0A0A' : '#A89070',
+            }}
+          >
+            Job Seeker
+          </button>
+          <button
+            onClick={() => setMode('referrer')}
+            className="flex-1 py-2 px-1.5 rounded-lg text-[12.5px] font-bold transition-colors"
+            style={{
+              background: mode === 'referrer' ? '#D4AF7A' : 'transparent',
+              color: mode === 'referrer' ? '#0A0A0A' : '#A89070',
+            }}
+          >
+            Referrer
+          </button>
+        </div>
+
+        {/* Mode-specific items */}
+        <div className="mb-3.5 mt-2.5">
+          {items.map((item) => {
+            const active = isActive(pathname, search, item.href);
+            const showBadge = item.href === '/applications/inbox' && pendingCVs > 0;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150',
+                  active ? '' : 'hover:bg-white/5',
+                )}
+                style={{
+                  color: active ? '#D4AF7A' : '#A89070',
+                  background: active ? 'rgba(212,175,122,0.12)' : undefined,
+                }}
+              >
+                <span className="text-base w-[18px] text-center shrink-0">{item.icon}</span>
+                <span className="flex-1">{item.label}</span>
+                {showBadge && (
+                  <span className="text-[10px] font-bold bg-gold-300 text-[#0A0A0A] px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {pendingCVs > 9 ? '9+' : pendingCVs}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* General — shared by both */}
+        <div>
+          <p className="text-[10.5px] font-extrabold uppercase tracking-widest px-2.5 pb-2" style={{ color: 'rgba(168,144,112,0.55)' }}>
+            General
+          </p>
+          {GENERAL_ITEMS.map((item) => {
+            const active = isActive(pathname, search, item.href);
+            const showBadge = item.href === '/notifications' && unreadCount > 0;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150',
+                  active ? '' : 'hover:bg-white/5',
+                )}
+                style={{
+                  color: active ? '#D4AF7A' : '#A89070',
+                  background: active ? 'rgba(212,175,122,0.12)' : undefined,
+                }}
+              >
+                <span className="text-base w-[18px] text-center shrink-0">{item.icon}</span>
+                <span className="flex-1">{item.label}</span>
+                {showBadge && (
+                  <span className="text-[10px] font-bold bg-gold-300 text-[#0A0A0A] px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Bottom: user + logout */}
