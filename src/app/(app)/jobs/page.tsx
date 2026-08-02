@@ -6,7 +6,6 @@ import { useSearchParams } from 'next/navigation';
 import { jobsApi } from '@/lib/api/jobs';
 import { JobCard } from '@/components/job/JobCard';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
-import { Avatar } from '@/components/ui/Avatar';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { useAuth } from '@/lib/context/AuthContext';
 import { cn } from '@/lib/utils';
@@ -36,14 +35,11 @@ interface FilterPanelProps {
   selectedTypes:     Set<string>;
   selectedWorkModes: Set<string>;
   selectedLocations: Set<string>;
-  selectedContact:   string | null;
   setSelectedRoles:     (s: Set<string>) => void;
   setSelectedCompanies: (s: Set<string>) => void;
   setSelectedTypes:     (s: Set<string>) => void;
   setSelectedWorkModes: (s: Set<string>) => void;
   setSelectedLocations: (s: Set<string>) => void;
-  setSelectedContact:   (id: string | null) => void;
-  setSelectedContactName: (n: string) => void;
   toggleRole:    (t: string) => void;
   toggleCompany: (n: string) => void;
   toggleType:    (t: string) => void;
@@ -53,17 +49,19 @@ interface FilterPanelProps {
   onCloseMobile: () => void;
 }
 
-// ── Reusable filter group: header + always-visible search box + checkbox list ──
-function FilterGroup({ title, items, selected, onToggle, onClear, searchPlaceholder }: {
+// ── Reusable filter group: collapsible header + optional search + checkbox list ──
+function FilterGroup({ title, items, selected, onToggle, onClear, searchPlaceholder, showSearch = true }: {
   title: string;
   items: [string, number][];
   selected: Set<string>;
   onToggle: (value: string) => void;
   onClear: () => void;
   searchPlaceholder: string;
+  showSearch?: boolean;
 }) {
   const [search, setSearch] = useState('');
   const [showAll, setShowAll] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   const visible = useMemo(() => {
     const f = search
@@ -77,32 +75,43 @@ function FilterGroup({ title, items, selected, onToggle, onClear, searchPlacehol
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted"
+        >
+          <span className={cn('transition-transform text-[8px]', expanded ? 'rotate-90' : '')}>▶</span>
           {title} <span className="font-normal normal-case tracking-normal">({items.length})</span>
-        </p>
+        </button>
         {selected.size > 0 && (
           <button onClick={onClear} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
         )}
       </div>
-      <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
-        <span className="text-text-muted text-[11px]">🔍</span>
-        <input
-          className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
-          placeholder={searchPlaceholder}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        {search && <button onClick={() => setSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
-      </div>
-      <div className="space-y-0.5">
-        {visible.map(([label, count]) => (
-          <FilterRow key={label} label={label} count={count} active={selected.has(label)} onToggle={() => onToggle(label)} />
-        ))}
-      </div>
-      {!search && items.length > 7 && (
-        <button onClick={() => setShowAll((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
-          {showAll ? '↑ Show less' : `+ ${items.length - 7} more`}
-        </button>
+      {expanded && (
+        <>
+          {showSearch && (
+            <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
+              <span className="text-text-muted text-[11px]">🔍</span>
+              <input
+                className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
+                placeholder={searchPlaceholder}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+              {search && <button onClick={() => setSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
+            </div>
+          )}
+          <div className="space-y-0.5">
+            {visible.map(([label, count]) => (
+              <FilterRow key={label} label={label} count={count} active={selected.has(label)} onToggle={() => onToggle(label)} />
+            ))}
+          </div>
+          {!search && items.length > 7 && (
+            <button onClick={() => setShowAll((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
+              {showAll ? '↑ Show less' : `+ ${items.length - 7} more`}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
@@ -110,17 +119,11 @@ function FilterGroup({ title, items, selected, onToggle, onClear, searchPlacehol
 
 function FilterPanel({
   hasFilters, filteredCount, facets,
-  selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations, selectedContact,
+  selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations,
   setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes, setSelectedLocations,
-  setSelectedContact, setSelectedContactName,
   toggleRole, toggleCompany, toggleType, toggleWorkMode, toggleLocation,
   clearAll, onCloseMobile,
 }: FilterPanelProps) {
-  const [referrerSearch, setReferrerSearch] = useState('');
-  const visibleContacts = referrerSearch
-    ? facets.contacts.filter(([, info]) => info.fullName.toLowerCase().includes(referrerSearch.toLowerCase()))
-    : facets.contacts;
-
   return (
     <div className="p-4 space-y-6">
 
@@ -135,48 +138,8 @@ function FilterPanel({
       <FilterGroup title="Roles" items={facets.roles} selected={selectedRoles} onToggle={toggleRole} onClear={() => setSelectedRoles(new Set())} searchPlaceholder="Filter roles…" />
       <FilterGroup title="Companies" items={facets.companies} selected={selectedCompanies} onToggle={toggleCompany} onClear={() => setSelectedCompanies(new Set())} searchPlaceholder="Filter companies…" />
       <FilterGroup title="Job Type" items={facets.types} selected={selectedTypes} onToggle={toggleType} onClear={() => setSelectedTypes(new Set())} searchPlaceholder="Filter job types…" />
-      <FilterGroup title="Work Mode" items={facets.workModes} selected={selectedWorkModes} onToggle={toggleWorkMode} onClear={() => setSelectedWorkModes(new Set())} searchPlaceholder="Filter work modes…" />
+      <FilterGroup title="Work Mode" items={facets.workModes} selected={selectedWorkModes} onToggle={toggleWorkMode} onClear={() => setSelectedWorkModes(new Set())} searchPlaceholder="Filter work modes…" showSearch={false} />
       <FilterGroup title="Location" items={facets.locations} selected={selectedLocations} onToggle={toggleLocation} onClear={() => setSelectedLocations(new Set())} searchPlaceholder="Filter locations…" />
-
-      {/* ── Referrers ── */}
-      {facets.contacts.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-text-muted">
-              Referrers <span className="font-normal normal-case tracking-normal">({facets.contacts.length})</span>
-            </p>
-            {selectedContact && (
-              <button onClick={() => { setSelectedContact(null); setSelectedContactName(''); }} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
-            )}
-          </div>
-          <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
-            <span className="text-text-muted text-[11px]">🔍</span>
-            <input
-              className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
-              placeholder="Filter referrers…"
-              value={referrerSearch}
-              onChange={(e) => setReferrerSearch(e.target.value)}
-            />
-            {referrerSearch && <button onClick={() => setReferrerSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
-          </div>
-          <div className="space-y-0.5">
-            {visibleContacts.map(([id, info]) => (
-              <button
-                key={id}
-                onClick={() => { setSelectedContact(selectedContact === id ? null : id); onCloseMobile(); }}
-                className={cn(
-                  'w-full flex items-center gap-2 px-2 py-2 rounded-md text-xs transition-colors text-left min-h-[44px]',
-                  selectedContact === id ? 'bg-gold-300/15 text-gold-300' : 'text-text-secondary hover:text-text-primary hover:bg-card-hover',
-                )}
-              >
-                <Avatar src={info.avatarUrl} name={info.fullName} size="xs" />
-                <span className="flex-1 truncate">{info.fullName.split(' ')[0]}</span>
-                <span className="text-text-muted text-[10px]">{info.count}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -287,9 +250,8 @@ export default function JobsPage() {
   // Shared props for both sidebar and mobile drawer instances
   const filterPanelProps: FilterPanelProps = {
     hasFilters, filteredCount: filtered.length, facets,
-    selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations, selectedContact,
+    selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations,
     setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes, setSelectedLocations,
-    setSelectedContact, setSelectedContactName,
     toggleRole, toggleCompany, toggleType, toggleWorkMode, toggleLocation,
     clearAll,
     onCloseMobile: () => setShowMobileFilters(false),

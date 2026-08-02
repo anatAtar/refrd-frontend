@@ -12,7 +12,7 @@ import { SendCVSuccessModal } from '@/components/application/SendCVSuccessModal'
 import { useAuth } from '@/lib/context/AuthContext';
 import { useMyApplicationsMap } from '@/lib/hooks/useApplications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
-import { timeAgo, jobCode, jobSlug } from '@/lib/utils';
+import { timeAgo, jobSlug } from '@/lib/utils';
 import type { JobWithReferrer, JobReferrer } from '@/lib/types';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -21,10 +21,9 @@ interface JobCardProps {
   data: JobWithReferrer;
 }
 
-// Status → icon + tooltip text
+// Status → icon + tooltip text (no icon for "viewed" — reviewed status shows via the CTA label only)
 const STATUS_INDICATORS: Record<string, { icon: string; label: string; color: string }> = {
   submitted:  { icon: '📤', label: 'CV sent — awaiting review',          color: 'text-text-muted' },
-  viewed:     { icon: '👀', label: `${''} reviewed your CV`,             color: 'text-warn'       },
   forwarded:  { icon: '🎉', label: 'Forwarded to HR',                    color: 'text-good'       },
   rejected:   { icon: '✕',  label: 'Not a fit — referrer passed on this', color: 'text-crit'      },
 };
@@ -87,7 +86,6 @@ export function JobCard({ data }: JobCardProps) {
             </Link>
             <p className="text-[13px] text-text-muted mt-0.5">
               {job.location ?? 'Remote'}{job.jobType ? ` · ${job.jobType}` : ''} · {timeAgo(job.createdAt)}
-              <span className="ml-2 font-mono">{jobCode(job.companyName, job.id)}</span>
             </p>
           </div>
 
@@ -157,7 +155,7 @@ export function JobCard({ data }: JobCardProps) {
               </Link>
               <Button variant="ghost" size="sm" className="min-h-[44px] text-text-muted shrink-0 gap-1" disabled>
                 {appStatus === 'forwarded' ? '🎉 Forwarded' :
-                 appStatus === 'viewed'    ? '👀 Reviewed' :
+                 appStatus === 'viewed'    ? 'Reviewed' :
                  appStatus === 'rejected'  ? '✕ Not a fit' :
                  '✓ CV sent'}
               </Button>

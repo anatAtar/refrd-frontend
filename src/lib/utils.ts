@@ -16,8 +16,9 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Generate a short human-readable job ID.
- * e.g. company="Wix", id="...3b9f" → #WIX-3B9F
+ * Short human-readable job code, used in the referrer's CV inbox to tell
+ * postings apart at a glance — e.g. company="Wix", id="...3b9f" → #WIX-3B9F.
+ * Intentionally not shown on job cards/detail pages, just here.
  */
 export function jobCode(companyName: string, id: string): string {
   const prefix = companyName
@@ -46,15 +47,18 @@ export function jobSlug(title: string, id: string): string {
 }
 
 /**
- * Best-effort company logo URL, derived from the job's source domain — no
- * logo field/scraping needed. Falls back to null (caller shows a generic
- * icon) if the URL can't be parsed; the image itself may still 404 for
- * domains Clearbit doesn't have indexed, so callers must handle onError too.
+ * Best-effort company icon URL, derived from the job's source domain — no
+ * logo field/scraping needed. Uses Google's favicon service (logo.clearbit.com
+ * no longer resolves at all — the free Clearbit logo API is dead, confirmed
+ * via DNS lookup, not just missing coverage for some domains). Falls back to
+ * null (caller shows a generic icon) if the URL can't be parsed; Google's
+ * service does return a real 404 for domains with no favicon, so callers
+ * must still handle onError too.
  */
 export function companyLogoUrl(sourceUrl: string): string | null {
   try {
     const hostname = new URL(sourceUrl).hostname.replace(/^www\./, '');
-    return `https://logo.clearbit.com/${hostname}`;
+    return `https://www.google.com/s2/favicons?domain=${hostname}&sz=128`;
   } catch {
     return null;
   }
