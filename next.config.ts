@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'lh4.googleusercontent.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'logo.clearbit.com',
+      },
     ],
   },
 };

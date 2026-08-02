@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/Badge';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ApiError } from '@/lib/api/client';
-import { timeAgo } from '@/lib/utils';
+import { timeAgo, jobSlug } from '@/lib/utils';
 import Link from 'next/link';
 
 export default function PostJobPage() {
@@ -202,7 +202,7 @@ export default function PostJobPage() {
               <Card key={job.id} className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <Link href={`/jobs/${job.id}`} className="font-bold text-text-primary text-sm hover:text-gold-300">
+                    <Link href={`/jobs/${jobSlug(job.title, job.id)}`} className="font-bold text-text-primary text-sm hover:text-gold-300">
                       {job.title}
                     </Link>
                     <p className="text-xs text-text-secondary mt-0.5">{job.companyName} · {job.location ?? 'Remote'}</p>

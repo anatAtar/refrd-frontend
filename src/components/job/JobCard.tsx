@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
+import { CompanyIcon } from '@/components/job/CompanyIcon';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -11,7 +12,7 @@ import { SendCVSuccessModal } from '@/components/application/SendCVSuccessModal'
 import { useAuth } from '@/lib/context/AuthContext';
 import { useMyApplicationsMap } from '@/lib/hooks/useApplications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
-import { timeAgo, jobCode } from '@/lib/utils';
+import { timeAgo, jobCode, jobSlug } from '@/lib/utils';
 import type { JobWithReferrer, JobReferrer } from '@/lib/types';
 import Link from 'next/link';
 import useSWR from 'swr';
@@ -36,6 +37,9 @@ export function JobCard({ data }: JobCardProps) {
   const [sendCVOpen, setSendCVOpen] = useState(false);
   const [sentTo, setSentTo] = useState<JobReferrer | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  const href = `/jobs/${jobSlug(job.title, job.id)}`;
+  const isNew = Date.now() - new Date(job.createdAt).getTime() < 48 * 3600 * 1000;
 
   const isOwnPosting   = referrers.some((r) => r.id === user?.id) || user?.id === job.referrerId;
   const appStatus      = referrers.map((r) => appMap.get(r.jobId)).find(Boolean);
@@ -67,21 +71,23 @@ export function JobCard({ data }: JobCardProps) {
 
   return (
     <>
-      <Card hover className="p-4 flex flex-col gap-3" onClick={() => router.push(`/jobs/${job.id}`)}>
+      <Card hover className="p-4 flex flex-col gap-3" onClick={() => router.push(href)}>
         {/* Header */}
         <div className="flex gap-3 items-start">
-          <div className="w-11 h-11 rounded-lg bg-input border border-border flex items-center justify-center text-lg shrink-0">
-            🏢
-          </div>
+          <CompanyIcon sourceUrl={job.sourceUrl} size={44} className="rounded-lg" />
           <div className="flex-1 min-w-0">
-            <Link href={`/jobs/${job.id}`} className="block" onClick={(e) => e.stopPropagation()}>
-              <h3 className="font-bold text-text-primary text-sm leading-snug hover:text-gold-300 transition-colors">
+            <div className="flex items-center gap-2">
+              <span className="text-[15px] font-bold text-text-primary truncate">{job.companyName}</span>
+              {isNew && <Badge variant="violet">New</Badge>}
+            </div>
+            <Link href={href} className="block" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-[16.5px] font-semibold leading-snug text-accent-silver hover:text-gold-300 transition-colors">
                 {job.title}
               </h3>
             </Link>
-            <p className="text-xs text-text-secondary mt-0.5">
-              {job.companyName} · {job.location ?? 'Remote'}
-              <span className="ml-2 text-text-muted font-mono">{jobCode(job.companyName, job.id)}</span>
+            <p className="text-[13px] text-text-muted mt-0.5">
+              {job.location ?? 'Remote'}{job.jobType ? ` · ${job.jobType}` : ''} · {timeAgo(job.createdAt)}
+              <span className="ml-2 font-mono">{jobCode(job.companyName, job.id)}</span>
             </p>
           </div>
 
@@ -120,14 +126,22 @@ export function JobCard({ data }: JobCardProps) {
           {job.workMode   && <Badge variant="teal">{job.workMode}</Badge>}
         </div>
 
-        {/* Contact row */}
+        {/* Contact row — overlapping avatar stack + referrer count, per Jobs Page Dev Spec */}
         <div className="flex items-center gap-2 bg-gold-300/8 border border-gold-300/15 rounded-lg px-3 py-2">
-          <Avatar src={referrer.avatarUrl} name={referrer.fullName} size="xs" />
-          <span className="text-xs text-text-secondary">
-            <span className="text-gold-300 font-semibold">{referrer.fullName}</span>
-            {referrers.length > 1 ? ` + ${referrers.length - 1} more work here` : ' works here'}
+          <div className="flex items-center -space-x-2 shrink-0">
+            {referrers.slice(0, 3).map((r) => (
+              <Avatar key={r.id} src={r.avatarUrl} name={r.fullName} size="xs" className="ring-2 ring-card" />
+            ))}
+          </div>
+          <span className="text-xs text-text-secondary truncate">
+            {referrers.length > 1 ? (
+              <span className="text-gold-300 font-semibold">{referrers.length} referrers at this company</span>
+            ) : (
+              <>
+                <span className="text-gold-300 font-semibold">{referrer.fullName}</span> works here
+              </>
+            )}
           </span>
-          <span className="ml-auto text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
         </div>
 
         {/* CTA */}
@@ -138,7 +152,7 @@ export function JobCard({ data }: JobCardProps) {
             </Link>
           ) : alreadyApplied ? (
             <>
-              <Link href={`/jobs/${job.id}`} className="flex-1" onClick={(e) => e.stopPropagation()}>
+              <Link href={href} className="flex-1" onClick={(e) => e.stopPropagation()}>
                 <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
               </Link>
               <Button variant="ghost" size="sm" className="min-h-[44px] text-text-muted shrink-0 gap-1" disabled>
@@ -150,7 +164,7 @@ export function JobCard({ data }: JobCardProps) {
             </>
           ) : job.isActive ? (
             <>
-              <Link href={`/jobs/${job.id}`} className="flex-1" onClick={(e) => e.stopPropagation()}>
+              <Link href={href} className="flex-1" onClick={(e) => e.stopPropagation()}>
                 <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
               </Link>
               <Button
@@ -165,7 +179,7 @@ export function JobCard({ data }: JobCardProps) {
           ) : (
             <>
               <Button variant="ghost" size="sm" className="flex-1 min-h-[44px]" disabled>Job closed</Button>
-              <Link href={`/jobs/${job.id}`} onClick={(e) => e.stopPropagation()}>
+              <Link href={href} onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" size="sm" className="min-h-[44px]">Details</Button>
               </Link>
             </>

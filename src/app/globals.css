@@ -18,6 +18,8 @@
   --color-text-primary:   #1A1A1A;
   --color-text-secondary: #666666;
   --color-text-muted:     #999999;
+  /* Used for the clickable job-title line on job cards (Jobs Page Dev Spec) */
+  --color-accent-silver:  #808080;
 
   /* ── Brand — Warm Gold ─────────────────────────── */
   --color-gold-100: #FAF0DC;

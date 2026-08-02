@@ -9,7 +9,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import { InboxCard } from '@/components/application/InboxCard';
 import { StatTile } from '@/components/ui/StatTile';
 import { MessageThread } from '@/components/application/MessageThread';
-import { timeAgo, STATUS_LABELS, STATUS_COLORS, cn } from '@/lib/utils';
+import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS, cn } from '@/lib/utils';
 import type { ApplicationWithDetails, SavedJob } from '@/lib/types';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -243,7 +243,7 @@ function SavedTab() {
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
             <Link
-              href={`/jobs/${s.job.id}`}
+              href={`/jobs/${jobSlug(s.job.title, s.job.id)}`}
               style={{ fontSize: 13, fontWeight: 600, color: GOLD, textDecoration: 'none' }}
             >
               View →

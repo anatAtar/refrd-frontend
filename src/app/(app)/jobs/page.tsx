@@ -300,8 +300,8 @@ export default function JobsPage() {
 
       {/* Page header — full width, above the sidebar + list so both start aligned */}
       <div className="px-4 pt-4 pb-3 border-b border-border shrink-0">
-        <h1 className="text-2xl font-bold text-text-primary mb-0.5">Browse Jobs</h1>
-        <p className="text-sm text-text-secondary">
+        <h1 className="text-[26px] font-bold tracking-[-0.02em] text-text-primary mb-0.5">Jobs</h1>
+        <p className="text-[14.5px] text-text-secondary">
           {isLoading ? 'Loading…' : `${allJobs.length} open role${allJobs.length !== 1 ? 's' : ''} from your network`}
         </p>
       </div>

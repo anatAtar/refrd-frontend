@@ -7,7 +7,7 @@ import { applicationsApi } from '@/lib/api/applications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
 import { useAuth } from '@/lib/context/AuthContext';
 import { Avatar } from '@/components/ui/Avatar';
-import { timeAgo, STATUS_LABELS, STATUS_COLORS } from '@/lib/utils';
+import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS } from '@/lib/utils';
 import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
 
@@ -327,7 +327,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                           <span style={{ fontSize: 15, fontWeight: 700 }}>{j.job.companyName}</span>
                         </div>
                         <Link
-                          href={`/jobs/${j.job.id}`}
+                          href={`/jobs/${jobSlug(j.job.title, j.job.id)}`}
                           style={{ background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13.5, fontWeight: 700, padding: '10px 18px', border: 'none', borderRadius: 9, cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none' }}
                         >
                           Role Details

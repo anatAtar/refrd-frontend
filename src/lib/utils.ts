@@ -29,6 +29,37 @@ export function jobCode(companyName: string, id: string): string {
   return `#${prefix}-${suffix}`;
 }
 
+/**
+ * Meaningful job detail URL segment: the role title, slugified, plus an
+ * 8-char id suffix for uniqueness — e.g. "senior-frontend-engineer-117c0d7e"
+ * instead of the raw UUID. The backend resolves this by matching the
+ * suffix against the real job id, so no schema change/slug column needed.
+ */
+export function jobSlug(title: string, id: string): string {
+  const slug = title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  const suffix = id.replace(/-/g, '').slice(-8);
+  return slug ? `${slug}-${suffix}` : suffix;
+}
+
+/**
+ * Best-effort company logo URL, derived from the job's source domain — no
+ * logo field/scraping needed. Falls back to null (caller shows a generic
+ * icon) if the URL can't be parsed; the image itself may still 404 for
+ * domains Clearbit doesn't have indexed, so callers must handle onError too.
+ */
+export function companyLogoUrl(sourceUrl: string): string | null {
+  try {
+    const hostname = new URL(sourceUrl).hostname.replace(/^www\./, '');
+    return `https://logo.clearbit.com/${hostname}`;
+  } catch {
+    return null;
+  }
+}
+
 /** Format bytes to human-readable string */
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;

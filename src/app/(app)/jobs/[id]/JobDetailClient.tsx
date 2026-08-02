@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/Badge';
+import { CompanyIcon } from '@/components/job/CompanyIcon';
 import { Button } from '@/components/ui/Button';
 import { ReferrerContactCard } from '@/components/job/ReferrerContactCard';
 import { SendCVModal } from '@/components/application/SendCVModal';
@@ -13,6 +15,7 @@ import Link from 'next/link';
 
 export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
   const { job, referrers } = data;
+  const router = useRouter();
   const { user } = useAuth();
   const appliedJobIds = useAppliedJobIds();
   const [sendCVOpen, setSendCVOpen] = useState(false);
@@ -24,15 +27,19 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
   return (
     <>
       <div className="max-w-3xl mx-auto px-4 py-6">
-        <Link href="/feed" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary mb-6 transition-colors">
+        <button
+          type="button"
+          onClick={() => (window.history.length > 1 ? router.back() : router.push('/jobs'))}
+          className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary mb-6 transition-colors"
+        >
           ← Back
-        </Link>
+        </button>
 
         <div className="grid md:grid-cols-[1fr_280px] gap-6">
           {/* Main */}
           <div className="space-y-6">
             <div className="flex gap-4 items-start">
-              <div className="w-14 h-14 rounded-xl bg-input border border-border flex items-center justify-center text-2xl shrink-0">🏢</div>
+              <CompanyIcon sourceUrl={job.sourceUrl} size={56} />
               <div>
                 <h1 className="text-[26px] font-bold text-text-primary leading-tight">{job.title}</h1>
                 <p className="text-sm text-text-secondary mt-1.5">
