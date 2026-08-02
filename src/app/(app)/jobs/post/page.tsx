@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Switch } from '@/components/ui/Switch';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { ApiError } from '@/lib/api/client';
@@ -88,13 +89,17 @@ export default function PostJobPage() {
     }
   };
 
-  const handleDeactivate = async (id: string) => {
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const handleToggleActive = async (id: string, isActive: boolean) => {
+    setTogglingId(id);
     try {
-      await jobsApi.delete(id);
-      toast.success('Job deactivated');
+      await jobsApi.update(id, { isActive: !isActive });
+      toast.success(isActive ? 'Job deactivated' : 'Job reactivated');
       mutate();
     } catch {
-      toast.error('Failed to deactivate');
+      toast.error('Failed to update job');
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -213,11 +218,14 @@ export default function PostJobPage() {
                         <span className="text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
                       </div>
                     </div>
-                    {job.isActive && (
-                      <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleDeactivate(job.id); }}>
-                        Deactivate
-                      </Button>
-                    )}
+                    <div onClick={(e) => e.stopPropagation()} className="shrink-0 pt-1">
+                      <Switch
+                        checked={job.isActive}
+                        onChange={() => handleToggleActive(job.id, job.isActive)}
+                        disabled={togglingId === job.id}
+                        label={job.isActive ? 'Deactivate job' : 'Reactivate job'}
+                      />
+                    </div>
                   </div>
                 </Card>
               );
