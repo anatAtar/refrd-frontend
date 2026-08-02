@@ -25,24 +25,20 @@ interface FilterPanelProps {
   facets: {
     roles:     [string, number][];
     companies: [string, number][];
-    types:     [string, number][];
     workModes: [string, number][];
     locations: [string, number][];
     contacts:  [string, { fullName: string; avatarUrl: string | null; count: number }][];
   };
   selectedRoles:     Set<string>;
   selectedCompanies: Set<string>;
-  selectedTypes:     Set<string>;
   selectedWorkModes: Set<string>;
   selectedLocations: Set<string>;
   setSelectedRoles:     (s: Set<string>) => void;
   setSelectedCompanies: (s: Set<string>) => void;
-  setSelectedTypes:     (s: Set<string>) => void;
   setSelectedWorkModes: (s: Set<string>) => void;
   setSelectedLocations: (s: Set<string>) => void;
   toggleRole:    (t: string) => void;
   toggleCompany: (n: string) => void;
-  toggleType:    (t: string) => void;
   toggleWorkMode: (t: string) => void;
   toggleLocation: (t: string) => void;
   clearAll: () => void;
@@ -119,9 +115,9 @@ function FilterGroup({ title, items, selected, onToggle, onClear, searchPlacehol
 
 function FilterPanel({
   hasFilters, filteredCount, facets,
-  selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations,
-  setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes, setSelectedLocations,
-  toggleRole, toggleCompany, toggleType, toggleWorkMode, toggleLocation,
+  selectedRoles, selectedCompanies, selectedWorkModes, selectedLocations,
+  setSelectedRoles, setSelectedCompanies, setSelectedWorkModes, setSelectedLocations,
+  toggleRole, toggleCompany, toggleWorkMode, toggleLocation,
   clearAll, onCloseMobile,
 }: FilterPanelProps) {
   return (
@@ -137,7 +133,6 @@ function FilterPanel({
 
       <FilterGroup title="Roles" items={facets.roles} selected={selectedRoles} onToggle={toggleRole} onClear={() => setSelectedRoles(new Set())} searchPlaceholder="Filter roles…" />
       <FilterGroup title="Companies" items={facets.companies} selected={selectedCompanies} onToggle={toggleCompany} onClear={() => setSelectedCompanies(new Set())} searchPlaceholder="Filter companies…" />
-      <FilterGroup title="Job Type" items={facets.types} selected={selectedTypes} onToggle={toggleType} onClear={() => setSelectedTypes(new Set())} searchPlaceholder="Filter job types…" />
       <FilterGroup title="Work Mode" items={facets.workModes} selected={selectedWorkModes} onToggle={toggleWorkMode} onClear={() => setSelectedWorkModes(new Set())} searchPlaceholder="Filter work modes…" showSearch={false} />
       <FilterGroup title="Location" items={facets.locations} selected={selectedLocations} onToggle={toggleLocation} onClear={() => setSelectedLocations(new Set())} searchPlaceholder="Filter locations…" />
     </div>
@@ -149,7 +144,6 @@ export default function JobsPage() {
   const [search, setSearch]                       = useState('');
   const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
   const [selectedRoles, setSelectedRoles]         = useState<Set<string>>(new Set());
-  const [selectedTypes, setSelectedTypes]         = useState<Set<string>>(new Set());
   const [selectedWorkModes, setSelectedWorkModes] = useState<Set<string>>(new Set());
   const [selectedLocations, setSelectedLocations] = useState<Set<string>>(new Set());
   const [selectedContact, setSelectedContact]     = useState<string | null>(
@@ -180,7 +174,6 @@ export default function JobsPage() {
   const facets = useMemo(() => {
     const companies = new Map<string, number>();
     const roles     = new Map<string, number>();
-    const types     = new Map<string, number>();
     const workModes = new Map<string, number>();
     const locations = new Map<string, number>();
     const contacts  = new Map<string, { fullName: string; avatarUrl: string | null; count: number }>();
@@ -188,7 +181,6 @@ export default function JobsPage() {
     allJobs.forEach((item) => {
       companies.set(item.job.companyName, (companies.get(item.job.companyName) ?? 0) + 1);
       roles.set(item.job.title, (roles.get(item.job.title) ?? 0) + 1);
-      if (item.job.jobType) types.set(item.job.jobType, (types.get(item.job.jobType) ?? 0) + 1);
       if (item.job.workMode) workModes.set(item.job.workMode, (workModes.get(item.job.workMode) ?? 0) + 1);
       if (item.job.location) locations.set(item.job.location, (locations.get(item.job.location) ?? 0) + 1);
       const { id, fullName, avatarUrl } = item.referrer;
@@ -199,7 +191,6 @@ export default function JobsPage() {
     return {
       companies: [...companies.entries()].sort((a, b) => b[1] - a[1]),
       roles:     [...roles.entries()].sort((a, b) => b[1] - a[1]),
-      types:     [...types.entries()].sort((a, b) => b[1] - a[1]),
       workModes: [...workModes.entries()].sort((a, b) => b[1] - a[1]),
       locations: [...locations.entries()].sort((a, b) => b[1] - a[1]),
       contacts:  [...contacts.entries()].sort((a, b) => b[1].count - a[1].count),
@@ -210,7 +201,6 @@ export default function JobsPage() {
     return allJobs.filter((item) => {
       if (selectedCompanies.size > 0 && !selectedCompanies.has(item.job.companyName)) return false;
       if (selectedRoles.size > 0 && !selectedRoles.has(item.job.title)) return false;
-      if (selectedTypes.size > 0 && item.job.jobType && !selectedTypes.has(item.job.jobType)) return false;
       if (selectedWorkModes.size > 0 && item.job.workMode && !selectedWorkModes.has(item.job.workMode)) return false;
       if (selectedLocations.size > 0 && item.job.location && !selectedLocations.has(item.job.location)) return false;
       if (selectedContact && item.referrer.id !== selectedContact) return false;
@@ -226,23 +216,21 @@ export default function JobsPage() {
       }
       return true;
     });
-  }, [allJobs, selectedCompanies, selectedRoles, selectedTypes, selectedWorkModes, selectedLocations, selectedContact, debounced]);
+  }, [allJobs, selectedCompanies, selectedRoles, selectedWorkModes, selectedLocations, selectedContact, debounced]);
 
-  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedTypes.size > 0 || selectedWorkModes.size > 0 || selectedLocations.size > 0 || !!selectedContact || !!debounced;
+  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedWorkModes.size > 0 || selectedLocations.size > 0 || !!selectedContact || !!debounced;
 
   const toggleCompany = (name: string) =>
     setSelectedCompanies((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n; });
   const toggleRole = (title: string) =>
     setSelectedRoles((prev) => { const n = new Set(prev); n.has(title) ? n.delete(title) : n.add(title); return n; });
-  const toggleType = (type: string) =>
-    setSelectedTypes((prev) => { const n = new Set(prev); n.has(type) ? n.delete(type) : n.add(type); return n; });
   const toggleWorkMode = (mode: string) =>
     setSelectedWorkModes((prev) => { const n = new Set(prev); n.has(mode) ? n.delete(mode) : n.add(mode); return n; });
   const toggleLocation = (location: string) =>
     setSelectedLocations((prev) => { const n = new Set(prev); n.has(location) ? n.delete(location) : n.add(location); return n; });
 
   const clearAll = () => {
-    setSelectedCompanies(new Set()); setSelectedRoles(new Set()); setSelectedTypes(new Set());
+    setSelectedCompanies(new Set()); setSelectedRoles(new Set());
     setSelectedWorkModes(new Set()); setSelectedLocations(new Set());
     setSelectedContact(null); setSelectedContactName(''); setSearch('');
   };
@@ -250,9 +238,9 @@ export default function JobsPage() {
   // Shared props for both sidebar and mobile drawer instances
   const filterPanelProps: FilterPanelProps = {
     hasFilters, filteredCount: filtered.length, facets,
-    selectedRoles, selectedCompanies, selectedTypes, selectedWorkModes, selectedLocations,
-    setSelectedRoles, setSelectedCompanies, setSelectedTypes, setSelectedWorkModes, setSelectedLocations,
-    toggleRole, toggleCompany, toggleType, toggleWorkMode, toggleLocation,
+    selectedRoles, selectedCompanies, selectedWorkModes, selectedLocations,
+    setSelectedRoles, setSelectedCompanies, setSelectedWorkModes, setSelectedLocations,
+    toggleRole, toggleCompany, toggleWorkMode, toggleLocation,
     clearAll,
     onCloseMobile: () => setShowMobileFilters(false),
   };
@@ -359,7 +347,6 @@ export default function JobsPage() {
           <div className="hidden md:flex gap-2 flex-wrap px-4 py-2 border-b border-border bg-page/60">
             {[...selectedRoles].map((r) => <ActiveChip key={r} label={r} onRemove={() => toggleRole(r)} />)}
             {[...selectedCompanies].map((c) => <ActiveChip key={c} label={c} onRemove={() => toggleCompany(c)} />)}
-            {[...selectedTypes].map((t) => <ActiveChip key={t} label={t} onRemove={() => toggleType(t)} />)}
             {[...selectedWorkModes].map((m) => <ActiveChip key={m} label={m} onRemove={() => toggleWorkMode(m)} />)}
             {[...selectedLocations].map((l) => <ActiveChip key={l} label={l} onRemove={() => toggleLocation(l)} />)}
             {selectedContact && (
