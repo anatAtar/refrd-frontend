@@ -156,83 +156,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
       {/* ── TWO-COLUMN LAYOUT ── */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
 
-        {/* ── LEFT COLUMN: stats + needs attention ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-          {/* Needs your attention card — only shown if there's something to act on */}
-          {hasAttention && (
-          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, overflow: 'hidden' }}>
-              <div style={{ borderTop: '1px solid oklch(0.93 0.004 70)', padding: 20 }}>
-                <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: '0 0 16px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  Needs your attention
-                  <span
-                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: '100%', border: '1px solid oklch(0.62 0.008 60)', fontSize: 9, fontWeight: 700, cursor: 'default' }}
-                    title="The bar shows time elapsed since the CV was received. More fill = more urgent. Reminders go out at 12h and 24h."
-                  >?</span>
-                </p>
-
-                {/* Group 1 — seeker side */}
-                {seekerPending.length > 0 && (
-                  <>
-                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>Your applications — waiting on a referrer</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: referrerPending.length > 0 ? 20 : 0 }}>
-                      {seekerPending.map(a => (
-                        <div
-                          key={a.application.id}
-                          style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: '3px solid oklch(0.72 0.13 85)', borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
-                        >
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · {a.job.companyName}</p>
-                            <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
-                              Waiting on {a.referrer?.fullName} to respond
-                            </p>
-                            <TimelineBar createdAt={a.application.createdAt} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                {/* Group 2 — referrer side */}
-                {referrerPending.length > 0 && (
-                  <>
-                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>CVs waiting on your review — as the referrer</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {referrerPending.map(a => {
-                        const hours = hoursElapsed(a.application.createdAt);
-                        const urgent = hours >= 24;
-                        const borderCol = urgent ? '#B45309' : 'oklch(0.72 0.13 85)';
-                        return (
-                          <div
-                            key={a.application.id}
-                            style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: `3px solid ${borderCol}`, borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
-                          >
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · your posting</p>
-                              <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
-                                {a.seeker?.fullName}'s CV needs a decision from you
-                              </p>
-                              <TimelineBar createdAt={a.application.createdAt} />
-                            </div>
-                            <Link
-                              href="/applications/inbox"
-                              style={{ border: 'none', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13.5, fontWeight: 700, padding: '8px 16px', borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', flexShrink: 0 }}
-                            >
-                              Review
-                            </Link>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── RIGHT COLUMN: recent applications + matched jobs ── */}
+        {/* ── LEFT COLUMN: recent applications + matched jobs + needs attention ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
           {/* Recent applications */}
@@ -372,6 +296,82 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
               </Link>
             </div>
           )}
+
+          {/* Needs your attention card — only shown if there's something to act on */}
+          {hasAttention && (
+          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, overflow: 'hidden' }}>
+              <div style={{ borderTop: '1px solid oklch(0.93 0.004 70)', padding: 20 }}>
+                <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: '0 0 16px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Needs your attention
+                  <span
+                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: '100%', border: '1px solid oklch(0.62 0.008 60)', fontSize: 9, fontWeight: 700, cursor: 'default' }}
+                    title="The bar shows time elapsed since the CV was received. More fill = more urgent. Reminders go out at 12h and 24h."
+                  >?</span>
+                </p>
+
+                {/* Group 1 — seeker side */}
+                {seekerPending.length > 0 && (
+                  <>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>Your applications — waiting on a referrer</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: referrerPending.length > 0 ? 20 : 0 }}>
+                      {seekerPending.map(a => (
+                        <div
+                          key={a.application.id}
+                          style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: '3px solid oklch(0.72 0.13 85)', borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
+                        >
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · {a.job.companyName}</p>
+                            <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                              Waiting on {a.referrer?.fullName} to respond
+                            </p>
+                            <TimelineBar createdAt={a.application.createdAt} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Group 2 — referrer side */}
+                {referrerPending.length > 0 && (
+                  <>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>CVs waiting on your review — as the referrer</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {referrerPending.map(a => {
+                        const hours = hoursElapsed(a.application.createdAt);
+                        const urgent = hours >= 24;
+                        const borderCol = urgent ? '#B45309' : 'oklch(0.72 0.13 85)';
+                        return (
+                          <div
+                            key={a.application.id}
+                            style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: `3px solid ${borderCol}`, borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · your posting</p>
+                              <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                                {a.seeker?.fullName}'s CV needs a decision from you
+                              </p>
+                              <TimelineBar createdAt={a.application.createdAt} />
+                            </div>
+                            <Link
+                              href="/applications/inbox"
+                              style={{ border: 'none', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13.5, fontWeight: 700, padding: '8px 16px', borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', flexShrink: 0 }}
+                            >
+                              Review
+                            </Link>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── RIGHT COLUMN: empty state ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
           {/* Empty state */}
           {isNewUser && (
