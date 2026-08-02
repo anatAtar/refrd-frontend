@@ -295,11 +295,11 @@ export default function ApplicationsClient({
     { fallbackData: initialReceived },
   );
 
-  const TABS: { id: Tab; label: string }[] = [
-    { id: 'sent',     label: 'Requests you sent' },
-    { id: 'received', label: 'CV Inbox' },
-    { id: 'saved',    label: 'Saved' },
-  ];
+  const titles: Record<Tab, string> = {
+    sent:     'Sent CV',
+    received: 'CV Inbox',
+    saved:    'Saved Jobs',
+  };
 
   const subtitles: Record<Tab, string> = {
     sent:     "CVs you've sent to referrers.",
@@ -310,35 +310,12 @@ export default function ApplicationsClient({
   return (
     <div style={{ padding: '32px 40px 60px' }}>
       {/* Header */}
-      <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 4px' }}>Applications</h1>
+      <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{titles[tab]}</h1>
       <p style={{ fontSize: 14.5, color: 'oklch(0.47 0.008 60)', margin: '0 0 24px' }}>
         {subtitles[tab]}
       </p>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            style={{
-              border: 'none',
-              background: tab === t.id ? GOLD : BG,
-              color: tab === t.id ? DARK : 'oklch(0.47 0.008 60)',
-              fontSize: 14,
-              fontWeight: 600,
-              padding: '9px 18px',
-              borderRadius: 9,
-              cursor: 'pointer',
-              transition: 'background 0.15s',
-            }}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab content */}
+      {/* Content — one view per tab; which view shows is decided by the ?tab= route from the sidebar */}
       {tab === 'sent'     && <SentTab apps={sentApps ?? []} />}
       {tab === 'received' && <ReceivedTab apps={receivedApps ?? []} onUpdate={() => mutateReceived()} />}
       {tab === 'saved'    && <SavedTab />}

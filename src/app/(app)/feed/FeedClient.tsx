@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { jobsApi } from '@/lib/api/jobs';
 import { applicationsApi } from '@/lib/api/applications';
@@ -50,6 +51,19 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
   const { user } = useAuth();
   const firstName = user?.fullName?.split(' ')[0] ?? '';
 
+  // Once the user clicks "Browse a Job" from the empty state, treat them as a seeker
+  // going forward — show the "Looking for a job" summary instead of the empty state
+  // again, even before they've actually sent a CV. Persisted so it survives reloads.
+  const [browseStarted, setBrowseStarted] = useState(false);
+  useEffect(() => {
+    if (!user?.id) return;
+    setBrowseStarted(localStorage.getItem(`feed-browse-started-${user.id}`) === '1');
+  }, [user?.id]);
+  const markBrowseStarted = () => {
+    if (user?.id) localStorage.setItem(`feed-browse-started-${user.id}`, '1');
+    setBrowseStarted(true);
+  };
+
   const { data: myJobs }  = useSWR('feed/my-jobs',  () => jobsApi.mine().then(r => r.data));
   const { data: myInbox } = useSWR('feed/my-inbox', () => applicationsApi.inbox().then(r => r.data));
   const { data: myApps }  = useSWR('feed/my-apps',  () => applicationsApi.mine().then(r => r.data));
@@ -79,11 +93,20 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
 
   const hasAttention = seekerPending.length > 0 || referrerPending.length > 0;
   const recentApps   = (myApps ?? []).slice(0, 3);
-  const isNewUser    = appsSent === 0 && (myInbox ?? []).length === 0;
 
+  const jobsPosted  = (myJobs  ?? []).length;
   const activeJobs  = (myJobs  ?? []).filter(j => j.isActive).length;
+  const recentJobs  = (myJobs  ?? []).slice(0, 3);
   const totalCVs    = (myInbox ?? []).length;
   const pendingCVs  = (myInbox ?? []).filter(a => a.application.status === 'submitted').length;
+
+  // Each top summary card only shows once there's activity in that category —
+  // for the seeker side, that includes saving a job or having clicked "Browse a Job" once
+  const showSeekerSummary   = appsSent > 0 || (savedData ?? []).length > 0 || browseStarted;
+  const showReferrerSummary = jobsPosted > 0;
+
+  // Nothing posted and nothing applied to yet — offer both paths forward instead of empty summaries
+  const isNewUser = !showSeekerSummary && !showReferrerSummary;
 
   return (
     <div style={{ padding: '32px 40px 60px' }}>
@@ -96,147 +119,89 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
         Here's where things stand.
       </p>
 
-      {/* ── ROLE ACTION BLOCKS ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 28 }}>
+      {/* ── ROLE ACTION BLOCKS — each only shows once there's activity in that category ── */}
+      {(showSeekerSummary || showReferrerSummary) && (
+        <div style={{ display: 'grid', gridTemplateColumns: showSeekerSummary && showReferrerSummary ? '1fr 1fr' : '1fr', gap: 16, marginBottom: 28 }}>
 
-        {/* Seeker block */}
-        <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <p style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>Looking for a job</p>
-            <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: 0 }}>Browse roles and track your applications</p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-              <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: 'oklch(0.24 0.008 60)' }}>{appsSent}</p>
-              <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Apps sent</p>
+          {/* Seeker block */}
+          {showSeekerSummary && (
+          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <p style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>Looking for a job</p>
+              <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: 0 }}>Browse roles and track your applications</p>
             </div>
-            <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-              <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: awaitingResp > 0 ? 'oklch(0.72 0.13 85)' : 'oklch(0.24 0.008 60)' }}>{awaitingResp}</p>
-              <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Awaiting response</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: 'oklch(0.24 0.008 60)' }}>{appsSent}</p>
+                <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Apps sent</p>
+              </div>
+              <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: awaitingResp > 0 ? 'oklch(0.72 0.13 85)' : 'oklch(0.24 0.008 60)' }}>{awaitingResp}</p>
+                <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Awaiting response</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Link href="/jobs" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13, fontWeight: 700, borderRadius: 9, textDecoration: 'none' }}>
+                Browse Jobs
+              </Link>
+              <Link href="/applications?tab=sent" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.97 0.003 75)', border: '1px solid oklch(0.93 0.004 70)', color: 'oklch(0.24 0.008 60)', fontSize: 13, fontWeight: 600, borderRadius: 9, textDecoration: 'none' }}>
+                Sent CV
+              </Link>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Link href="/applications?tab=sent" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13, fontWeight: 700, borderRadius: 9, textDecoration: 'none' }}>
-              My Applications
-            </Link>
-            <Link href="/jobs" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.97 0.003 75)', border: '1px solid oklch(0.93 0.004 70)', color: 'oklch(0.24 0.008 60)', fontSize: 13, fontWeight: 600, borderRadius: 9, textDecoration: 'none' }}>
-              Browse Jobs
-            </Link>
+          )}
+
+          {/* Referrer block */}
+          {showReferrerSummary && (
+          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <p style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>Your job postings</p>
+              <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: 0 }}>Review applicants and manage your openings</p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: 'oklch(0.24 0.008 60)' }}>{activeJobs}</p>
+                <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Jobs posted</p>
+              </div>
+              <div style={{ background: pendingCVs > 0 ? 'oklch(0.88 0.09 85)' : 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+                <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: pendingCVs > 0 ? 'oklch(0.3 0.06 85)' : 'oklch(0.24 0.008 60)' }}>{pendingCVs}</p>
+                <p style={{ fontSize: 11.5, color: pendingCVs > 0 ? 'oklch(0.4 0.06 85)' : 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>CVs to review</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Link href="/applications?tab=received" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13, fontWeight: 700, borderRadius: 9, textDecoration: 'none' }}>
+                CV Inbox{pendingCVs > 0 ? ` (${pendingCVs})` : ''}
+              </Link>
+              <Link href="/jobs/post" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.97 0.003 75)', border: '1px solid oklch(0.93 0.004 70)', color: 'oklch(0.24 0.008 60)', fontSize: 13, fontWeight: 600, borderRadius: 9, textDecoration: 'none' }}>
+                Post a Job
+              </Link>
+            </div>
           </div>
+          )}
+
         </div>
+      )}
 
-        {/* Referrer block */}
-        <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <p style={{ fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>Your job postings</p>
-            <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: 0 }}>Review applicants and manage your openings</p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-              <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: 'oklch(0.24 0.008 60)' }}>{activeJobs}</p>
-              <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Jobs posted</p>
-            </div>
-            <div style={{ background: pendingCVs > 0 ? 'oklch(0.88 0.09 85)' : 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-              <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: pendingCVs > 0 ? 'oklch(0.3 0.06 85)' : 'oklch(0.24 0.008 60)' }}>{pendingCVs}</p>
-              <p style={{ fontSize: 11.5, color: pendingCVs > 0 ? 'oklch(0.4 0.06 85)' : 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>CVs to review</p>
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <Link href="/applications?tab=received" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13, fontWeight: 700, borderRadius: 9, textDecoration: 'none' }}>
-              CV Inbox{pendingCVs > 0 ? ` (${pendingCVs})` : ''}
+      {/* Empty state — nothing to show yet, offer both paths forward with two large actions */}
+      {isNewUser && (
+        <div style={{ textAlign: 'center', padding: '56px 0', background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, marginBottom: 24 }}>
+          <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 24px' }}>What would you like to do?</p>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+            <Link href="/jobs" onClick={markBrowseStarted} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, padding: '18px 32px', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 16, fontWeight: 700, borderRadius: 12, textDecoration: 'none' }}>
+              Browse a Job
             </Link>
-            <Link href="/jobs/post" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.97 0.003 75)', border: '1px solid oklch(0.93 0.004 70)', color: 'oklch(0.24 0.008 60)', fontSize: 13, fontWeight: 600, borderRadius: 9, textDecoration: 'none' }}>
+            <Link href="/jobs/post" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, padding: '18px 32px', background: 'oklch(0.97 0.003 75)', border: '1px solid oklch(0.93 0.004 70)', color: 'oklch(0.24 0.008 60)', fontSize: 16, fontWeight: 700, borderRadius: 12, textDecoration: 'none' }}>
               Post a Job
             </Link>
           </div>
         </div>
+      )}
 
-      </div>
+      {/* ── SEEKER COLUMN: recent applications + matched jobs + needs attention ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
-      {/* ── TWO-COLUMN LAYOUT ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, alignItems: 'start' }}>
-
-        {/* ── LEFT COLUMN: stats + needs attention ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-          {/* Needs your attention card — only shown if there's something to act on */}
-          {hasAttention && (
-          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, overflow: 'hidden' }}>
-              <div style={{ borderTop: '1px solid oklch(0.93 0.004 70)', padding: 20 }}>
-                <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: '0 0 16px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', display: 'flex', alignItems: 'center', gap: 6 }}>
-                  Needs your attention
-                  <span
-                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: '100%', border: '1px solid oklch(0.62 0.008 60)', fontSize: 9, fontWeight: 700, cursor: 'default' }}
-                    title="The bar shows time elapsed since the CV was received. More fill = more urgent. Reminders go out at 12h and 24h."
-                  >?</span>
-                </p>
-
-                {/* Group 1 — seeker side */}
-                {seekerPending.length > 0 && (
-                  <>
-                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>Your applications — waiting on a referrer</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: referrerPending.length > 0 ? 20 : 0 }}>
-                      {seekerPending.map(a => (
-                        <div
-                          key={a.application.id}
-                          style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: '3px solid oklch(0.72 0.13 85)', borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
-                        >
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · {a.job.companyName}</p>
-                            <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
-                              Waiting on {a.referrer?.fullName} to respond
-                            </p>
-                            <TimelineBar createdAt={a.application.createdAt} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </>
-                )}
-
-                {/* Group 2 — referrer side */}
-                {referrerPending.length > 0 && (
-                  <>
-                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>CVs waiting on your review — as the referrer</p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                      {referrerPending.map(a => {
-                        const hours = hoursElapsed(a.application.createdAt);
-                        const urgent = hours >= 24;
-                        const borderCol = urgent ? '#B45309' : 'oklch(0.72 0.13 85)';
-                        return (
-                          <div
-                            key={a.application.id}
-                            style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: `3px solid ${borderCol}`, borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
-                          >
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · your posting</p>
-                              <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
-                                {a.seeker?.fullName}'s CV needs a decision from you
-                              </p>
-                              <TimelineBar createdAt={a.application.createdAt} />
-                            </div>
-                            <Link
-                              href="/applications/inbox"
-                              style={{ border: 'none', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13.5, fontWeight: 700, padding: '8px 16px', borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', flexShrink: 0 }}
-                            >
-                              Review
-                            </Link>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── RIGHT COLUMN: recent applications + matched jobs ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-          {/* Recent applications */}
-          {recentApps.length > 0 && (
+        {/* Recent applications */}
+        {recentApps.length > 0 && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                 <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>Your recent applications</h2>
@@ -264,6 +229,41 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
               </div>
             </div>
           )}
+
+        {/* Recent job postings */}
+        {recentJobs.length > 0 && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>Your recent job postings</h2>
+              <Link href="/jobs/post" style={{ fontSize: 13.5, fontWeight: 600, color: 'oklch(0.5 0.02 60)', textDecoration: 'none' }}>View all →</Link>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {recentJobs.map(j => (
+                <Link
+                  key={j.id}
+                  href="/jobs/post"
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 14, padding: '16px 20px', gap: 16, textDecoration: 'none' }}
+                  className="hover:bg-card-hover transition-colors"
+                >
+                  <div>
+                    <p style={{ fontSize: 14.5, fontWeight: 600, margin: '0 0 4px', color: 'oklch(0.24 0.008 60)' }}>{j.title}</p>
+                    <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                      {j.companyName} · Posted {timeAgo(j.createdAt)}
+                    </p>
+                  </div>
+                  <span
+                    className="text-[12px] font-semibold px-3.5 py-1.5 rounded-full border shrink-0"
+                    style={j.isActive
+                      ? { background: 'oklch(0.87 0.1 160)', color: 'oklch(0.25 0.06 160)', borderColor: 'transparent' }
+                      : { background: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)', borderColor: 'transparent' }}
+                  >
+                    {j.isActive ? 'Active' : 'Closed'}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
           {/* Matched to your profile */}
           {hasPrefs && (
@@ -373,20 +373,78 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
             </div>
           )}
 
-          {/* Empty state */}
-          {isNewUser && (
-            <div style={{ textAlign: 'center', padding: '48px 0', background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16 }}>
-              <div style={{ fontSize: 36, marginBottom: 12 }}>🚀</div>
-              <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>You're all set!</p>
-              <p style={{ fontSize: 13, color: 'oklch(0.62 0.008 60)', margin: '0 0 20px' }}>Browse open jobs and send your CV directly to a contact inside the company.</p>
-              <Link href="/jobs" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 20px', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13.5, fontWeight: 700, borderRadius: 9, textDecoration: 'none' }}>
-                🔍 Browse all jobs
-              </Link>
+          {/* Needs your attention card — only shown if there's something to act on */}
+          {hasAttention && (
+          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, overflow: 'hidden' }}>
+              <div style={{ borderTop: '1px solid oklch(0.93 0.004 70)', padding: 20 }}>
+                <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: '0 0 16px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  Needs your attention
+                  <span
+                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: '100%', border: '1px solid oklch(0.62 0.008 60)', fontSize: 9, fontWeight: 700, cursor: 'default' }}
+                    title="The bar shows time elapsed since the CV was received. More fill = more urgent. Reminders go out at 12h and 24h."
+                  >?</span>
+                </p>
+
+                {/* Group 1 — seeker side */}
+                {seekerPending.length > 0 && (
+                  <>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>Your applications — waiting on a referrer</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: referrerPending.length > 0 ? 20 : 0 }}>
+                      {seekerPending.map(a => (
+                        <div
+                          key={a.application.id}
+                          style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: '3px solid oklch(0.72 0.13 85)', borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
+                        >
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · {a.job.companyName}</p>
+                            <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                              Waiting on {a.referrer?.fullName} to respond
+                            </p>
+                            <TimelineBar createdAt={a.application.createdAt} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Group 2 — referrer side */}
+                {referrerPending.length > 0 && (
+                  <>
+                    <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>CVs waiting on your review — as the referrer</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                      {referrerPending.map(a => {
+                        const hours = hoursElapsed(a.application.createdAt);
+                        const urgent = hours >= 24;
+                        const borderCol = urgent ? '#B45309' : 'oklch(0.72 0.13 85)';
+                        return (
+                          <div
+                            key={a.application.id}
+                            style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderLeft: `3px solid ${borderCol}`, borderRadius: 10, padding: '14px 16px', border: '1px solid oklch(0.93 0.004 70)', borderLeftWidth: 3 }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 14, fontWeight: 700, margin: '0 0 2px' }}>{a.job.title} · your posting</p>
+                              <p style={{ fontSize: 13, color: 'oklch(0.47 0.008 60)', margin: 0 }}>
+                                {a.seeker?.fullName}'s CV needs a decision from you
+                              </p>
+                              <TimelineBar createdAt={a.application.createdAt} />
+                            </div>
+                            <Link
+                              href="/applications/inbox"
+                              style={{ border: 'none', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13.5, fontWeight: 700, padding: '8px 16px', borderRadius: 8, cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none', flexShrink: 0 }}
+                            >
+                              Review
+                            </Link>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           )}
-
         </div>
-      </div>
     </div>
   );
 }

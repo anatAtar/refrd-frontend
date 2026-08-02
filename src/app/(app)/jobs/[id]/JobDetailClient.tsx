@@ -72,7 +72,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
               </Link>
             ) : alreadyApplied ? (
               <div className="w-full text-center py-3 bg-good/10 border border-good/25 rounded-xl text-sm font-semibold text-good">
-                ✓ You already sent your CV
+                ✓ CV Sent
               </div>
             ) : job.isActive ? (
               <div className="border border-border rounded-xl p-4 bg-card">

@@ -147,6 +147,7 @@ export function MessageThread({
             onKeyDown={handleKeyDown}
             placeholder="Type a message… (⌘↵ to send)"
             maxLength={2000}
+            charCount
             rows={2}
             className="resize-none"
           />

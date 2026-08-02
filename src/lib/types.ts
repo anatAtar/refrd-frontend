@@ -16,6 +16,7 @@ export interface User {
   invitedById: string | null;
   desiredRole: string | null;
   preferredLocation: string | null;
+  yearsOfExperience: number | null;
   createdAt: string;
   updatedAt: string;
 }
