@@ -8,6 +8,7 @@ import { JobCard } from '@/components/job/JobCard';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { Avatar } from '@/components/ui/Avatar';
 import { useDebounce } from '@/lib/hooks/useDebounce';
+import { useAuth } from '@/lib/context/AuthContext';
 import { cn } from '@/lib/utils';
 import type { JobWithReferrer } from '@/lib/types';
 
@@ -204,7 +205,14 @@ export default function JobsPage() {
     setSelectedContactName(n ?? '');
   }, [searchParams]);
 
-  const { data: allJobs = [], isLoading, error: jobsError } = useAllJobs();
+  const { user } = useAuth();
+  const { data: rawJobs = [], isLoading, error: jobsError } = useAllJobs();
+
+  // Exclude jobs the current user posted themselves — Browse Jobs is for other people's postings
+  const allJobs = useMemo(
+    () => rawJobs.filter((item) => item.referrer.id !== user?.id),
+    [rawJobs, user?.id],
+  );
 
   const facets = useMemo(() => {
     const companies = new Map<string, number>();

@@ -14,6 +14,7 @@ type FormState = {
   companyName: string;
   desiredRole: string;
   preferredLocation: string;
+  yearsOfExperience: string;
 };
 
 function fromUser(user: ReturnType<typeof useAuth>['user']): FormState {
@@ -21,8 +22,10 @@ function fromUser(user: ReturnType<typeof useAuth>['user']): FormState {
     fullName:          user?.fullName          ?? '',
     headline:          user?.headline          ?? '',
     companyName:       user?.companyName       ?? '',
-    desiredRole:       user?.desiredRole       ?? '',
+    // Default to the user's current role until they say they're looking for something else
+    desiredRole:       user?.desiredRole       ?? user?.headline ?? '',
     preferredLocation: user?.preferredLocation ?? '',
+    yearsOfExperience: user?.yearsOfExperience != null ? String(user.yearsOfExperience) : '',
   };
 }
 
@@ -56,6 +59,7 @@ export default function SettingsPage() {
         companyName:       form.companyName       || null,
         desiredRole:       form.desiredRole       || null,
         preferredLocation: form.preferredLocation || null,
+        yearsOfExperience: form.yearsOfExperience !== '' ? Number(form.yearsOfExperience) : null,
       });
       await refresh();
       setSavedForm(form); // mark current form as the new saved baseline
@@ -83,6 +87,24 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSave} className="space-y-4">
 
+        {/* Profile */}
+        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
+          <h2 className="text-sm font-bold text-text-primary">Profile</h2>
+          <Input label="Full name" value={form.fullName} onChange={set('fullName')} required />
+          <Input
+            label="Current Role"
+            value={form.headline}
+            onChange={set('headline')}
+            placeholder="e.g. Senior Engineer"
+          />
+          <Input
+            label="Company"
+            value={form.companyName}
+            onChange={set('companyName')}
+            placeholder="Where do you work?"
+          />
+        </div>
+
         {/* Job matching preferences */}
         <div className="bg-card border border-border rounded-xl p-5 space-y-4">
           <div>
@@ -102,28 +124,19 @@ export default function SettingsPage() {
             placeholder="e.g. Senior Frontend Engineer"
           />
           <Input
+            label="Years of experience"
+            type="number"
+            min={0}
+            max={60}
+            value={form.yearsOfExperience}
+            onChange={set('yearsOfExperience')}
+            placeholder="e.g. 5"
+          />
+          <Input
             label="Preferred location"
             value={form.preferredLocation}
             onChange={set('preferredLocation')}
             placeholder="e.g. Tel Aviv, Remote"
-          />
-        </div>
-
-        {/* Profile */}
-        <div className="bg-card border border-border rounded-xl p-5 space-y-4">
-          <h2 className="text-sm font-bold text-text-primary">Profile</h2>
-          <Input label="Full name" value={form.fullName} onChange={set('fullName')} required />
-          <Input
-            label="Headline"
-            value={form.headline}
-            onChange={set('headline')}
-            placeholder="e.g. Senior Engineer at Google"
-          />
-          <Input
-            label="Company"
-            value={form.companyName}
-            onChange={set('companyName')}
-            placeholder="Where do you work?"
           />
         </div>
 
@@ -132,6 +145,17 @@ export default function SettingsPage() {
           <h2 className="text-sm font-bold text-text-primary mb-2">Account</h2>
           <p className="text-sm text-text-secondary">
             Email: <strong className="text-text-primary">{user?.email}</strong>
+          </p>
+        </div>
+
+        {/* Support */}
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h2 className="text-sm font-bold text-text-primary mb-2">Support</h2>
+          <p className="text-sm text-text-secondary">
+            Need help? Email us at{' '}
+            <a href="mailto:support@direct-ref.com" className="text-gold-500 hover:text-gold-400 font-semibold">
+              support@direct-ref.com
+            </a>
           </p>
         </div>
 
