@@ -88,7 +88,7 @@ export interface Application {
 export interface ApplicationWithDetails {
   application: Omit<Application, 'cvFilename'>;
   job: { id: string; title: string; companyName: string };
-  seeker?: { id: string; fullName: string; avatarUrl: string | null; headline: string | null };
+  seeker?: { id: string; fullName: string; avatarUrl: string | null; headline: string | null; yearsOfExperience?: number | null };
   referrer?: { id: string; fullName: string; avatarUrl: string | null };
 }
 

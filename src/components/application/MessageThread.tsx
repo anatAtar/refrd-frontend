@@ -86,7 +86,7 @@ export function MessageThread({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent
-        title={`💬 Chat with ${otherPartyName}`}
+        title={`Chat with ${otherPartyName}`}
         description="Messages are private between you and this person."
         onClose={onClose}
         className="flex flex-col max-h-[80vh]"
@@ -99,7 +99,6 @@ export function MessageThread({
 
           {!isLoading && messages.length === 0 && (
             <div className="text-center py-10">
-              <p className="text-2xl mb-2">💬</p>
               <p className="text-sm font-semibold text-text-primary">No messages yet</p>
               <p className="text-xs text-text-muted mt-1">Send the first message to start the conversation.</p>
             </div>

@@ -6,10 +6,9 @@ import useSWR from 'swr';
 import { applicationsApi } from '@/lib/api/applications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
 import { useAuth } from '@/lib/context/AuthContext';
-import { InboxCard } from '@/components/application/InboxCard';
-import { StatTile } from '@/components/ui/StatTile';
+import { ReceivedInbox } from '@/components/application/ReceivedInbox';
 import { MessageThread } from '@/components/application/MessageThread';
-import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS, cn } from '@/lib/utils';
+import { timeAgo, jobSlug, STATUS_LABELS } from '@/lib/utils';
 import type { ApplicationWithDetails, SavedJob } from '@/lib/types';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -117,86 +116,6 @@ function SentTab({ apps }: { apps: ApplicationWithDetails[] }) {
           )}
         </div>
       ))}
-    </div>
-  );
-}
-
-// ─── TAB: Requests you received — full InboxClient UI ────────────────────────
-type InboxFilter = 'all' | 'submitted' | 'viewed' | 'rejected';
-
-function ReceivedTab({ apps, onUpdate }: { apps: ApplicationWithDetails[]; onUpdate: () => void }) {
-  const [filter, setFilter] = useState<InboxFilter>('all');
-
-  const counts = {
-    all:       apps.length,
-    submitted: apps.filter(a => a.application.status === 'submitted').length,
-    viewed:    apps.filter(a => a.application.status === 'viewed').length,
-    rejected:  apps.filter(a => a.application.status === 'rejected').length,
-  };
-
-  const filtered = filter === 'all' ? apps : apps.filter(a => a.application.status === filter);
-
-  const TABS: { id: InboxFilter; label: string; icon: string }[] = [
-    { id: 'all',       label: 'All',       icon: '📥' },
-    { id: 'submitted', label: 'Pending',   icon: '⏳' },
-    { id: 'viewed',    label: 'Reviewed',  icon: '👀' },
-    { id: 'rejected',  label: 'Not a fit', icon: '✕'  },
-  ];
-
-  return (
-    <div className="space-y-5">
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatTile label="Total CVs"       value={counts.all}       icon="📥" />
-        <StatTile label="Awaiting Review" value={counts.submitted} icon="⏳" />
-        <StatTile label="Reviewed"        value={counts.viewed}    icon="👀" accent />
-      </div>
-
-      {/* Filter tabs */}
-      <div className="flex gap-1 bg-input border border-border rounded-xl p-1 overflow-x-auto">
-        {TABS.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setFilter(t.id)}
-            className={cn(
-              'flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-1.5 px-2 rounded-lg transition-all whitespace-nowrap',
-              filter === t.id
-                ? 'bg-card text-text-primary shadow-sm'
-                : 'text-text-muted hover:text-text-secondary',
-            )}
-          >
-            <span>{t.icon}</span>
-            {t.label}
-            {counts[t.id] > 0 && (
-              <span className={cn(
-                'text-[10px] font-bold px-1.5 py-0.5 rounded-full',
-                filter === t.id ? 'bg-gold-300/20 text-gold-300' : 'bg-border text-text-muted',
-              )}>
-                {counts[t.id]}
-              </span>
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* List */}
-      {filtered.length === 0 ? (
-        <div className="bg-card border border-border rounded-2xl p-12 text-center">
-          <div className="text-4xl mb-3">📭</div>
-          <p className="text-sm font-semibold text-text-primary mb-1">
-            {filter === 'all' ? 'No CVs yet' : `No ${TABS.find(t => t.id === filter)?.label.toLowerCase()} applications`}
-          </p>
-          <p className="text-xs text-text-muted">
-            {filter === 'all' ? "When someone applies to your job posting, their CV will appear here." : "No applications with this status."}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map(a => (
-            <InboxCard key={a.application.id} data={a} onUpdate={onUpdate} />
-          ))}
-        </div>
-      )}
     </div>
   );
 }
@@ -317,7 +236,7 @@ export default function ApplicationsClient({
 
       {/* Content — one view per tab; which view shows is decided by the ?tab= route from the sidebar */}
       {tab === 'sent'     && <SentTab apps={sentApps ?? []} />}
-      {tab === 'received' && <ReceivedTab apps={receivedApps ?? []} onUpdate={() => mutateReceived()} />}
+      {tab === 'received' && <ReceivedInbox apps={receivedApps ?? []} onUpdate={() => mutateReceived()} />}
       {tab === 'saved'    && <SavedTab />}
     </div>
   );

@@ -111,12 +111,13 @@ export const STATUS_LABELS: Record<string, string> = {
   rejected: 'Not a fit',
 };
 
-/** Map application status to badge color classes */
+/** Map application status to badge color classes.
+ *  "Not a fit" is a valid, neutral outcome — never colored as an error/red state. */
 export const STATUS_COLORS: Record<string, string> = {
   submitted: 'bg-warn/10 text-warn border-warn/20',
   viewed: 'bg-blue/10 text-blue border-blue/20',
   forwarded: 'bg-good/10 text-good border-good/20',
-  rejected: 'bg-crit/10 text-crit border-crit/20',
+  rejected: 'bg-border text-text-secondary border-border-strong',
 };
 
 /** Map connection status to label */
