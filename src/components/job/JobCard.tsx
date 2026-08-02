@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -29,6 +30,7 @@ const STATUS_INDICATORS: Record<string, { icon: string; label: string; color: st
 
 export function JobCard({ data }: JobCardProps) {
   const { job, referrer, referrers } = data;
+  const router = useRouter();
   const { user } = useAuth();
   const { appMap } = useMyApplicationsMap();
   const [sendCVOpen, setSendCVOpen] = useState(false);
@@ -65,14 +67,14 @@ export function JobCard({ data }: JobCardProps) {
 
   return (
     <>
-      <Card hover className="p-4 flex flex-col gap-3">
+      <Card hover className="p-4 flex flex-col gap-3" onClick={() => router.push(`/jobs/${job.id}`)}>
         {/* Header */}
         <div className="flex gap-3 items-start">
           <div className="w-11 h-11 rounded-lg bg-input border border-border flex items-center justify-center text-lg shrink-0">
             🏢
           </div>
           <div className="flex-1 min-w-0">
-            <Link href={`/jobs/${job.id}`} className="block">
+            <Link href={`/jobs/${job.id}`} className="block" onClick={(e) => e.stopPropagation()}>
               <h3 className="font-bold text-text-primary text-sm leading-snug hover:text-gold-300 transition-colors">
                 {job.title}
               </h3>
@@ -131,12 +133,12 @@ export function JobCard({ data }: JobCardProps) {
         {/* CTA */}
         <div className="flex gap-2 pt-1">
           {isOwnPosting ? (
-            <Link href="/jobs/mine" className="flex-1">
+            <Link href="/jobs/mine" className="flex-1" onClick={(e) => e.stopPropagation()}>
               <Button variant="secondary" size="sm" className="w-full">Manage this job</Button>
             </Link>
           ) : alreadyApplied ? (
             <>
-              <Link href={`/jobs/${job.id}`} className="flex-1">
+              <Link href={`/jobs/${job.id}`} className="flex-1" onClick={(e) => e.stopPropagation()}>
                 <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
               </Link>
               <Button variant="ghost" size="sm" className="min-h-[44px] text-text-muted shrink-0 gap-1" disabled>
@@ -148,14 +150,14 @@ export function JobCard({ data }: JobCardProps) {
             </>
           ) : job.isActive ? (
             <>
-              <Link href={`/jobs/${job.id}`} className="flex-1">
+              <Link href={`/jobs/${job.id}`} className="flex-1" onClick={(e) => e.stopPropagation()}>
                 <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
               </Link>
               <Button
                 variant="ghost"
                 size="sm"
                 className="min-h-[44px] text-text-muted hover:text-text-primary shrink-0"
-                onClick={() => setSendCVOpen(true)}
+                onClick={(e) => { e.stopPropagation(); setSendCVOpen(true); }}
               >
                 Send CV
               </Button>
@@ -163,7 +165,7 @@ export function JobCard({ data }: JobCardProps) {
           ) : (
             <>
               <Button variant="ghost" size="sm" className="flex-1 min-h-[44px]" disabled>Job closed</Button>
-              <Link href={`/jobs/${job.id}`}>
+              <Link href={`/jobs/${job.id}`} onClick={(e) => e.stopPropagation()}>
                 <Button variant="ghost" size="sm" className="min-h-[44px]">Details</Button>
               </Link>
             </>
