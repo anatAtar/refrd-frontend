@@ -40,15 +40,31 @@ export interface Job {
   updatedAt: string;
 }
 
+export interface ResponseStats {
+  score: number;
+  band: 'green' | 'orange' | 'red';
+  avgHours: number;
+}
+
+export interface JobReferrer {
+  id: string;
+  fullName: string;
+  avatarUrl: string | null;
+  companyName: string | null;
+  headline: string | null;
+  /** The specific underlying job row this referrer's posting is — submit
+   *  applications against this id, not the grouped card's `job.id`. */
+  jobId: string;
+  responseStats?: ResponseStats;
+}
+
 export interface JobWithReferrer {
   job: Job;
-  referrer: {
-    id: string;
-    fullName: string;
-    avatarUrl: string | null;
-    companyName: string | null;
-    headline: string | null;
-  };
+  /** Back-compat: the top-scoring referrer in the group (or the lone one). */
+  referrer: JobReferrer;
+  /** Every referrer who's independently posted this same listing (same
+   *  sourceUrl) — usually just one, occasionally more. */
+  referrers: JobReferrer[];
 }
 
 export interface Application {

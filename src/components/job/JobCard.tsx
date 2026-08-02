@@ -6,11 +6,12 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { SendCVModal } from '@/components/application/SendCVModal';
+import { SendCVSuccessModal } from '@/components/application/SendCVSuccessModal';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useMyApplicationsMap } from '@/lib/hooks/useApplications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
 import { timeAgo, jobCode } from '@/lib/utils';
-import type { JobWithReferrer } from '@/lib/types';
+import type { JobWithReferrer, JobReferrer } from '@/lib/types';
 import Link from 'next/link';
 import useSWR from 'swr';
 
@@ -27,14 +28,15 @@ const STATUS_INDICATORS: Record<string, { icon: string; label: string; color: st
 };
 
 export function JobCard({ data }: JobCardProps) {
-  const { job, referrer } = data;
+  const { job, referrer, referrers } = data;
   const { user } = useAuth();
   const { appMap } = useMyApplicationsMap();
   const [sendCVOpen, setSendCVOpen] = useState(false);
+  const [sentTo, setSentTo] = useState<JobReferrer | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
-  const isOwnPosting   = user?.id === job.referrerId;
-  const appStatus      = appMap.get(job.id);
+  const isOwnPosting   = referrers.some((r) => r.id === user?.id) || user?.id === job.referrerId;
+  const appStatus      = referrers.map((r) => appMap.get(r.jobId)).find(Boolean);
   const alreadyApplied = !!appStatus;
   const indicator      = appStatus ? STATUS_INDICATORS[appStatus] : null;
 
@@ -120,7 +122,8 @@ export function JobCard({ data }: JobCardProps) {
         <div className="flex items-center gap-2 bg-gold-300/8 border border-gold-300/15 rounded-lg px-3 py-2">
           <Avatar src={referrer.avatarUrl} name={referrer.fullName} size="xs" />
           <span className="text-xs text-text-secondary">
-            <span className="text-gold-300 font-semibold">{referrer.fullName}</span> works here
+            <span className="text-gold-300 font-semibold">{referrer.fullName}</span>
+            {referrers.length > 1 ? ` + ${referrers.length - 1} more work here` : ' works here'}
           </span>
           <span className="ml-auto text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
         </div>
@@ -182,12 +185,21 @@ export function JobCard({ data }: JobCardProps) {
       </Card>
 
       {!isOwnPosting && !alreadyApplied && (
-        <SendCVModal
-          open={sendCVOpen}
-          onClose={() => setSendCVOpen(false)}
-          job={job}
-          referrer={referrer}
-        />
+        <>
+          <SendCVModal
+            open={sendCVOpen}
+            onClose={() => setSendCVOpen(false)}
+            onSuccess={(r) => setSentTo(r)}
+            job={job}
+            referrers={referrers}
+          />
+          <SendCVSuccessModal
+            open={!!sentTo}
+            onClose={() => setSentTo(null)}
+            referrerFirstName={sentTo?.fullName.split(' ')[0] ?? ''}
+            jobTitle={job.title}
+          />
+        </>
       )}
     </>
   );

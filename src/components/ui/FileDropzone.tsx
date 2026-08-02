@@ -5,6 +5,7 @@ import { cn, formatBytes } from '@/lib/utils';
 
 interface FileDropzoneProps {
   onFile: (file: File) => void;
+  onView?: (file: File) => void;
   accept?: string;
   maxBytes?: number;
   file?: File | null;
@@ -13,6 +14,7 @@ interface FileDropzoneProps {
 
 export function FileDropzone({
   onFile,
+  onView,
   accept = 'application/pdf,.doc,.docx',
   maxBytes = 10 * 1024 * 1024,
   file,
@@ -53,7 +55,18 @@ export function FileDropzone({
             <span className="text-3xl">📄</span>
             <p className="text-sm font-semibold text-text-primary">{file.name}</p>
             <p className="text-xs text-text-muted">{formatBytes(file.size)}</p>
-            <p className="text-xs text-gold-300 font-medium">Click to change</p>
+            <div className="flex items-center gap-4 mt-1">
+              {onView && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onView(file); }}
+                  className="text-xs text-gold-300 font-semibold hover:text-gold-400"
+                >
+                  View
+                </button>
+              )}
+              <span className="text-xs text-gold-300 font-medium">Replace</span>
+            </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">

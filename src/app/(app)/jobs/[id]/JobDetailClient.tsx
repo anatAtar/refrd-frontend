@@ -5,20 +5,21 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ReferrerContactCard } from '@/components/job/ReferrerContactCard';
 import { SendCVModal } from '@/components/application/SendCVModal';
+import { SendCVSuccessModal } from '@/components/application/SendCVSuccessModal';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useAppliedJobIds } from '@/lib/hooks/useApplications';
-import { jobCode } from '@/lib/utils';
-import type { JobWithReferrer } from '@/lib/types';
+import type { JobWithReferrer, JobReferrer } from '@/lib/types';
 import Link from 'next/link';
 
 export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
-  const { job, referrer } = data;
+  const { job, referrers } = data;
   const { user } = useAuth();
   const appliedJobIds = useAppliedJobIds();
   const [sendCVOpen, setSendCVOpen] = useState(false);
+  const [sentTo, setSentTo] = useState<JobReferrer | null>(null);
 
-  const isOwnPosting  = user?.id === job.referrerId;
-  const alreadyApplied = appliedJobIds.has(job.id);
+  const isOwnPosting  = referrers.some((r) => r.id === user?.id) || user?.id === job.referrerId;
+  const alreadyApplied = referrers.some((r) => appliedJobIds.has(r.jobId));
 
   return (
     <>
@@ -33,10 +34,12 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
             <div className="flex gap-4 items-start">
               <div className="w-14 h-14 rounded-xl bg-input border border-border flex items-center justify-center text-2xl shrink-0">🏢</div>
               <div>
-                <h1 className="text-xl font-bold text-text-primary leading-tight">{job.title}</h1>
-                <p className="text-text-secondary mt-1">{job.companyName}</p>
-                {job.location && <p className="text-sm text-text-muted mt-0.5">📍 {job.location}</p>}
-                <p className="text-xs text-text-muted font-mono mt-1">{jobCode(job.companyName, job.id)}</p>
+                <h1 className="text-[26px] font-bold text-text-primary leading-tight">{job.title}</h1>
+                <p className="text-sm text-text-secondary mt-1.5">
+                  {job.companyName}
+                  {job.location && <> · {job.location}</>}
+                  {job.jobType && <> · {job.jobType}</>}
+                </p>
               </div>
             </div>
 
@@ -62,9 +65,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-4">
-            <ReferrerContactCard referrer={referrer} job={job} />
-
+          <div className="space-y-4 md:sticky md:top-6 md:self-start">
             {isOwnPosting ? (
               <Link href="/jobs/mine">
                 <Button variant="secondary" size="lg" className="w-full">Manage this job</Button>
@@ -74,23 +75,42 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
                 ✓ You already sent your CV
               </div>
             ) : job.isActive ? (
-              <Button variant="primary" size="lg" className="w-full" onClick={() => setSendCVOpen(true)}>
-                Send CV to {referrer.fullName.split(' ')[0]}
-              </Button>
+              <div className="border border-border rounded-xl p-4 bg-card">
+                <p className="text-sm font-semibold text-text-primary mb-3">Ready to reach out?</p>
+                <Button variant="primary" size="lg" className="w-full" onClick={() => setSendCVOpen(true)}>
+                  Send My C.V.
+                </Button>
+                <p className="text-xs text-text-muted mt-2 text-center">
+                  {referrers.length > 1
+                    ? `${referrers.length} people at ${job.companyName} can refer you`
+                    : `Goes straight to ${referrers[0]?.fullName.split(' ')[0]} at ${job.companyName}`}
+                </p>
+              </div>
             ) : (
               <Button variant="ghost" size="lg" className="w-full" disabled>Job closed</Button>
             )}
+
+            <ReferrerContactCard referrers={referrers} job={job} />
           </div>
         </div>
       </div>
 
       {!isOwnPosting && !alreadyApplied && (
-        <SendCVModal
-          open={sendCVOpen}
-          onClose={() => setSendCVOpen(false)}
-          job={job}
-          referrer={referrer}
-        />
+        <>
+          <SendCVModal
+            open={sendCVOpen}
+            onClose={() => setSendCVOpen(false)}
+            onSuccess={(referrer) => setSentTo(referrer)}
+            job={job}
+            referrers={referrers}
+          />
+          <SendCVSuccessModal
+            open={!!sentTo}
+            onClose={() => setSentTo(null)}
+            referrerFirstName={sentTo?.fullName.split(' ')[0] ?? ''}
+            jobTitle={job.title}
+          />
+        </>
       )}
     </>
   );
