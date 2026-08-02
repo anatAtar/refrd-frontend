@@ -51,16 +51,17 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
   const { user } = useAuth();
   const firstName = user?.fullName?.split(' ')[0] ?? '';
 
-  // Once the user clicks "Browse a Job" from the empty state, treat them as a seeker
-  // going forward — show the "Looking for a job" summary instead of the empty state
-  // again, even before they've actually sent a CV. Persisted so it survives reloads.
+  // Once the user clicks "Browse a Job" from the empty state, treat them as an
+  // active seeker for the rest of this browser session — session-only (not
+  // localStorage) so it doesn't linger across logins if they end up posting
+  // a job instead and never actually send a CV.
   const [browseStarted, setBrowseStarted] = useState(false);
   useEffect(() => {
     if (!user?.id) return;
-    setBrowseStarted(localStorage.getItem(`feed-browse-started-${user.id}`) === '1');
+    setBrowseStarted(sessionStorage.getItem(`feed-browse-started-${user.id}`) === '1');
   }, [user?.id]);
   const markBrowseStarted = () => {
-    if (user?.id) localStorage.setItem(`feed-browse-started-${user.id}`, '1');
+    if (user?.id) sessionStorage.setItem(`feed-browse-started-${user.id}`, '1');
     setBrowseStarted(true);
   };
 
@@ -100,8 +101,10 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
   const totalCVs    = (myInbox ?? []).length;
   const pendingCVs  = (myInbox ?? []).filter(a => a.application.status === 'submitted').length;
 
-  // Each top summary card only shows once there's activity in that category —
-  // for the seeker side, that includes saving a job or having clicked "Browse a Job" once
+  // Each top summary card shows once there's real activity in that category —
+  // for the seeker side, that also includes having clicked "Browse a Job" this
+  // session, so someone actively looking (but not yet applied/saved) sees the
+  // "Looking for a job" card instead of an empty choice screen again
   const showSeekerSummary   = appsSent > 0 || (savedData ?? []).length > 0 || browseStarted;
   const showReferrerSummary = jobsPosted > 0;
 
