@@ -6,14 +6,14 @@ import { FaqAccordion } from '@/components/marketing/FaqAccordion';
 import { mkt } from './tokens';
 
 const description =
-  'Skip the black hole of job boards. DirectRef connects you directly with verified employees at top Israeli tech companies who can refer you internally.';
+  'Skip the black hole of job boards. DirectRef connects you directly with real employees at top tech companies who can refer you internally.';
 
 export const metadata: Metadata = {
-  title: 'DirectRef — Get Referred by Verified Tech Insiders',
+  title: 'DirectRef — Get Referred by Tech Insiders',
   description,
   alternates: { canonical: '/' },
   openGraph: {
-    title: 'DirectRef — Get Referred by Verified Tech Insiders',
+    title: 'DirectRef — Get Referred by Tech Insiders',
     description,
     url: '/',
     siteName: 'DirectRef',
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DirectRef — Get Referred by Verified Tech Insiders',
+    title: 'DirectRef — Get Referred by Tech Insiders',
     description,
   },
 };
@@ -104,7 +104,9 @@ export default function LandingPage() {
           Get referred from the inside.
         </h1>
         <p className="text-[19px] leading-relaxed mx-auto mb-10 max-w-[640px] text-balance" style={{ color: mkt.textSecondary }}>
-          Skip the black hole of job boards and cold applications. Get your resume directly into the hands of hiring managers through verified insiders at top Israeli tech companies and startups.
+          Your CV, hand-delivered<br />
+          Connect with insiders at top tech companies and startups<br />
+          Skip the black hole of job boards
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
           <Link

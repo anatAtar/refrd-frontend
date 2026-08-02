@@ -7,6 +7,7 @@ import { applicationsApi } from '@/lib/api/applications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
 import { useAuth } from '@/lib/context/AuthContext';
 import { Avatar } from '@/components/ui/Avatar';
+import { JobCard } from '@/components/job/JobCard';
 import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS } from '@/lib/utils';
 import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
@@ -55,10 +56,15 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
   // active seeker for the rest of this browser session — session-only (not
   // localStorage) so it doesn't linger across logins if they end up posting
   // a job instead and never actually send a CV.
+  // `browseStartedReady` guards against a flash of the empty state on every
+  // reload: sessionStorage can only be read after mount, so until that read
+  // completes we don't know yet whether this flag is really false.
   const [browseStarted, setBrowseStarted] = useState(false);
+  const [browseStartedReady, setBrowseStartedReady] = useState(false);
   useEffect(() => {
     if (!user?.id) return;
     setBrowseStarted(sessionStorage.getItem(`feed-browse-started-${user.id}`) === '1');
+    setBrowseStartedReady(true);
   }, [user?.id]);
   const markBrowseStarted = () => {
     if (user?.id) sessionStorage.setItem(`feed-browse-started-${user.id}`, '1');
@@ -78,6 +84,12 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
   const { data: matchedJobs } = useSWR(
     hasPrefs ? ['feed/matched', user?.desiredRole, user?.preferredLocation] : null,
     () => jobsApi.search({ q: user?.desiredRole ?? '' }).then(r => r.data),
+  );
+
+  // Most recently posted jobs, platform-wide — shown to every user regardless of role
+  const { data: recentlyPostedJobs } = useSWR(
+    'feed/recently-posted',
+    () => jobsApi.search({ limit: 5 }).then(r => r.data),
   );
 
   // Stats
@@ -108,8 +120,10 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
   const showSeekerSummary   = appsSent > 0 || (savedData ?? []).length > 0 || browseStarted;
   const showReferrerSummary = jobsPosted > 0;
 
-  // Nothing posted and nothing applied to yet — offer both paths forward instead of empty summaries
-  const isNewUser = !showSeekerSummary && !showReferrerSummary;
+  // Nothing posted and nothing applied to yet — offer both paths forward instead of empty summaries.
+  // Held to false until the sessionStorage check above resolves, so we never flash the empty state
+  // (or both the empty state and a summary card) for a returning "Browse a Job" seeker on load.
+  const isNewUser = browseStartedReady && !showSeekerSummary && !showReferrerSummary;
 
   return (
     <div style={{ padding: '32px 40px 60px' }}>
@@ -187,13 +201,16 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
 
       {/* Empty state — nothing to show yet, offer both paths forward with two large actions */}
       {isNewUser && (
-        <div style={{ textAlign: 'center', padding: '56px 0', background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, marginBottom: 24 }}>
-          <p style={{ fontSize: 16, fontWeight: 700, margin: '0 0 24px' }}>What would you like to do?</p>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-            <Link href="/jobs" onClick={markBrowseStarted} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, padding: '18px 32px', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 16, fontWeight: 700, borderRadius: 12, textDecoration: 'none' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <p style={{ fontSize: 15, fontWeight: 600, margin: 0, color: 'oklch(0.24 0.008 60)' }}>Your CV, hand-delivered</p>
+            <Link href="/jobs" onClick={markBrowseStarted} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: 280, padding: '18px 32px', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 16, fontWeight: 700, borderRadius: 12, textDecoration: 'none' }}>
               Browse a Job
             </Link>
-            <Link href="/jobs/post" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 200, padding: '18px 32px', background: 'oklch(0.97 0.003 75)', border: '1px solid oklch(0.93 0.004 70)', color: 'oklch(0.24 0.008 60)', fontSize: 16, fontWeight: 700, borderRadius: 12, textDecoration: 'none' }}>
+          </div>
+          <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: '48px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <p style={{ fontSize: 15, fontWeight: 600, margin: 0, color: 'oklch(0.24 0.008 60)' }}>Your next great hire, one referral away</p>
+            <Link href="/jobs/post" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: 280, padding: '18px 32px', background: 'oklch(0.97 0.003 75)', border: '1px solid oklch(0.93 0.004 70)', color: 'oklch(0.24 0.008 60)', fontSize: 16, fontWeight: 700, borderRadius: 12, textDecoration: 'none' }}>
               Post a Job
             </Link>
           </div>
@@ -448,6 +465,21 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
             </div>
           )}
         </div>
+
+      {/* Recently posted jobs — platform-wide, shown to every user regardless of role */}
+      {recentlyPostedJobs && recentlyPostedJobs.length > 0 && (
+        <div style={{ marginTop: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <h2 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>Recently posted jobs</h2>
+            <Link href="/jobs" style={{ fontSize: 13.5, fontWeight: 600, color: 'oklch(0.5 0.02 60)', textDecoration: 'none' }}>Browse all jobs →</Link>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+            {recentlyPostedJobs.map(j => (
+              <JobCard key={j.job.id} data={j} />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
