@@ -9,8 +9,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { SendCVModal } from '@/components/application/SendCVModal';
 import { SendCVSuccessModal } from '@/components/application/SendCVSuccessModal';
+import { OutOfCreditsModal } from '@/components/credits/OutOfCreditsModal';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useMyApplicationsMap } from '@/lib/hooks/useApplications';
+import { useCreditBalance, refreshCreditBalance } from '@/lib/hooks/useCredits';
 import { savedJobsApi } from '@/lib/api/savedJobs';
 import { timeAgo, jobSlug } from '@/lib/utils';
 import type { JobWithReferrer, JobReferrer } from '@/lib/types';
@@ -33,9 +35,16 @@ export function JobCard({ data }: JobCardProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { appMap } = useMyApplicationsMap();
+  const { balance } = useCreditBalance();
   const [sendCVOpen, setSendCVOpen] = useState(false);
+  const [outOfCreditsOpen, setOutOfCreditsOpen] = useState(false);
   const [sentTo, setSentTo] = useState<JobReferrer | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  const handleSendClick = () => {
+    if (balance && balance.total <= 0) setOutOfCreditsOpen(true);
+    else setSendCVOpen(true);
+  };
 
   const href = `/jobs/${jobSlug(job.title, job.id)}`;
   const isNew = Date.now() - new Date(job.createdAt).getTime() < 48 * 3600 * 1000;
@@ -169,7 +178,7 @@ export function JobCard({ data }: JobCardProps) {
                 variant="ghost"
                 size="sm"
                 className="min-h-[44px] text-text-muted hover:text-text-primary shrink-0"
-                onClick={(e) => { e.stopPropagation(); setSendCVOpen(true); }}
+                onClick={(e) => { e.stopPropagation(); handleSendClick(); }}
               >
                 Send CV
               </Button>
@@ -202,7 +211,7 @@ export function JobCard({ data }: JobCardProps) {
         <SendCVModal
           open={sendCVOpen}
           onClose={() => setSendCVOpen(false)}
-          onSuccess={(r) => setSentTo(r)}
+          onSuccess={(r) => { setSentTo(r); refreshCreditBalance(); }}
           job={job}
           referrers={referrers}
         />
@@ -218,6 +227,7 @@ export function JobCard({ data }: JobCardProps) {
           jobTitle={job.title}
         />
       )}
+      <OutOfCreditsModal open={outOfCreditsOpen} onClose={() => setOutOfCreditsOpen(false)} />
     </>
   );
 }

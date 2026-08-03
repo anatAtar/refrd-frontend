@@ -13,13 +13,17 @@ import { Badge } from '@/components/ui/Badge';
 import { Switch } from '@/components/ui/Switch';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { OutOfCreditsModal } from '@/components/credits/OutOfCreditsModal';
 import { ApiError } from '@/lib/api/client';
-import { timeAgo, jobSlug } from '@/lib/utils';
+import { timeAgo, jobSlug, creditHintText } from '@/lib/utils';
+import { useCreditBalance, refreshCreditBalance } from '@/lib/hooks/useCredits';
 import Link from 'next/link';
 
 export default function PostJobPage() {
   const router = useRouter();
   const { jobs, isLoading: jobsLoading, mutate } = useMyJobs();
+  const { balance } = useCreditBalance();
+  const [outOfCreditsOpen, setOutOfCreditsOpen] = useState(false);
 
   // Post form state
   const [url, setUrl] = useState('');
@@ -65,6 +69,7 @@ export default function PostJobPage() {
     e.preventDefault();
     if (!form.title.trim())       { toast.error('Job title is required'); return; }
     if (!form.companyName.trim()) { toast.error('Company name is required'); return; }
+    if (balance && balance.total <= 0) { setOutOfCreditsOpen(true); return; }
     setIsSubmitting(true);
     try {
       await jobsApi.create({
@@ -79,11 +84,13 @@ export default function PostJobPage() {
       });
       toast.success('Job posted!');
       mutate();
+      refreshCreditBalance();
       // Reset form
       setUrl(''); setScraped(false);
       setForm({ sourceUrl: '', title: '', companyName: '', location: '', description: '', jobType: '', workMode: '' });
     } catch (err) {
-      toast.error(err instanceof ApiError ? err.message : 'Failed to post job');
+      if (err instanceof ApiError && err.code === 'OUT_OF_CREDITS') setOutOfCreditsOpen(true);
+      else toast.error(err instanceof ApiError ? err.message : 'Failed to post job');
     } finally {
       setIsSubmitting(false);
     }
@@ -110,7 +117,9 @@ export default function PostJobPage() {
       <div className="max-w-xl space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-text-primary mb-1">Post a Job</h1>
-          <p className="text-sm text-text-secondary">Share an opening at your company with your network</p>
+          <p className="text-sm text-text-secondary">
+            Roles at your company you&apos;re offering to refer for. Costs 1 credit — same balance as sending a C.V.
+          </p>
         </div>
 
         {!scraped ? (
@@ -180,6 +189,7 @@ export default function PostJobPage() {
               <Button type="button" variant="ghost" onClick={() => setScraped(false)} className="flex-1">← Back</Button>
               <Button type="submit" variant="primary" size="lg" isLoading={isSubmitting} className="flex-1">Post Job</Button>
             </div>
+            <p className="text-xs text-text-muted text-center">{creditHintText(balance)}</p>
           </form>
         )}
       </div>
@@ -234,6 +244,7 @@ export default function PostJobPage() {
         )}
       </div>
 
+      <OutOfCreditsModal open={outOfCreditsOpen} onClose={() => setOutOfCreditsOpen(false)} />
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import { useUnreadCount } from '@/lib/hooks/useNotifications';
 import { applicationsApi } from '@/lib/api/applications';
 import { LogoMark } from '@/components/ui/Logo';
+import { CreditsCard } from '@/components/credits/CreditsCard';
 
 type Mode = 'seeker' | 'referrer';
 
@@ -202,8 +203,9 @@ export function Sidebar() {
         </div>
       </nav>
 
-      {/* Bottom: user + logout */}
+      {/* Bottom: credits + user + logout */}
       <div className="p-3" style={{ borderTop: '1px solid rgba(212,175,122,0.08)' }}>
+        <CreditsCard />
         {user && (
           <Link
             href="/settings"

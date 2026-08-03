@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { useAuth } from '@/lib/context/AuthContext';
 import { usersApi } from '@/lib/api/users';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { ApiError } from '@/lib/api/client';
+import { useCreditBalance } from '@/lib/hooks/useCredits';
 
 type FormState = {
   fullName: string;
@@ -35,6 +37,7 @@ function isDirty(a: FormState, b: FormState) {
 
 export default function SettingsPage() {
   const { user, refresh } = useAuth();
+  const { balance } = useCreditBalance();
 
   const [savedForm, setSavedForm] = useState<FormState>(() => fromUser(user));
   const [form, setForm]           = useState<FormState>(() => fromUser(user));
@@ -83,6 +86,28 @@ export default function SettingsPage() {
       <div>
         <h1 className="text-2xl font-bold text-text-primary mb-1">Settings</h1>
         <p className="text-sm text-text-secondary">Manage your profile and job preferences</p>
+      </div>
+
+      {/* Billing & credits — surfaced above the form, not buried in it */}
+      <div className="bg-card border border-border rounded-2xl p-5 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-text-muted mb-1.5">Application credits</p>
+          {balance ? (
+            <>
+              <p className="text-2xl font-bold text-text-primary leading-none">
+                {balance.total} available
+              </p>
+              <p className="text-sm text-text-muted mt-1.5">
+                {balance.freeAvailable} of {balance.freeTotal} free · {balance.purchased} purchased
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-text-secondary">Loading balance…</p>
+          )}
+        </div>
+        <Link href="/credits" className="shrink-0">
+          <Button type="button" variant="primary" size="lg" className="rounded-full">Buy credits</Button>
+        </Link>
       </div>
 
       <form onSubmit={handleSave} className="space-y-4">

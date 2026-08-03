@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { applicationsApi } from '@/lib/api/applications';
 import { optimisticAddApplication } from '@/lib/hooks/useApplications';
-import { formatBytes, cn } from '@/lib/utils';
+import { useCreditBalance } from '@/lib/hooks/useCredits';
+import { formatBytes, cn, creditHintText } from '@/lib/utils';
 import { ApiError } from '@/lib/api/client';
 import type { Job, JobReferrer } from '@/lib/types';
 
@@ -28,6 +29,7 @@ const BAND_COLOR: Record<string, string> = {
 };
 
 export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCVModalProps) {
+  const { balance } = useCreditBalance();
   const [selectedId, setSelectedId] = useState(referrers[0]?.id);
   const [file, setFile] = useState<File | null>(null);
   const [coverNote, setCoverNote] = useState('');
@@ -155,11 +157,14 @@ export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCV
           />
         </div>
 
-        <div className="px-6 pb-5 flex justify-end gap-2 border-t border-border pt-4">
-          <Button variant="ghost" onClick={handleClose}>Cancel</Button>
-          <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit}>
-            Send to {referrerFirst}
-          </Button>
+        <div className="px-6 pb-5 border-t border-border pt-4">
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={handleClose}>Cancel</Button>
+            <Button variant="primary" isLoading={isSubmitting} onClick={handleSubmit}>
+              Send to {referrerFirst}
+            </Button>
+          </div>
+          <p className="text-xs text-text-muted text-right mt-2">{creditHintText(balance)}</p>
         </div>
       </DialogContent>
     </Dialog>

@@ -151,3 +151,19 @@ export interface ApplicationMessage {
   isRead: boolean;
   createdAt: string;
 }
+
+export interface CreditBalance {
+  freeAvailable: number;
+  freeTotal: number;
+  purchased: number;
+  total: number;
+}
+
+export interface CreditPackage {
+  id: string;
+  name: string;
+  credits: number;
+  price: number;
+  currency: string;
+  featured?: boolean;
+}

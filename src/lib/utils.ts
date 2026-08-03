@@ -1,5 +1,19 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import type { CreditBalance } from './types';
+
+/** Copy for the credits-hint line shown under "Send My C.V." / "Post Job" —
+ *  same shared-balance rule in both places, per the credits guidelines. */
+export function creditHintText(balance: CreditBalance | null | undefined): string {
+  if (!balance) return '';
+  if (balance.freeAvailable > 0) {
+    return `Uses 1 of your ${balance.freeTotal} free credit${balance.freeTotal === 1 ? '' : 's'}. You have ${balance.total} credit${balance.total === 1 ? '' : 's'} total.`;
+  }
+  if (balance.purchased > 0) {
+    return `Uses 1 purchased credit. You have ${balance.total} credit${balance.total === 1 ? '' : 's'} left.`;
+  }
+  return "You're out of credits. Buy more credits.";
+}
 
 /** Validate a `next=` post-login redirect target: same-origin path only.
  *  Rejects protocol-relative ("//host") and absolute URLs to prevent an
