@@ -261,7 +261,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
               {recentJobs.map(j => (
                 <Link
                   key={j.id}
-                  href="/jobs/post"
+                  href={`/jobs/${jobSlug(j.title, j.id)}`}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 14, padding: '16px 20px', gap: 16, textDecoration: 'none' }}
                   className="hover:bg-card-hover transition-colors"
                 >
@@ -272,10 +272,10 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                     </p>
                   </div>
                   <span
-                    className="text-[12px] font-semibold px-3.5 py-1.5 rounded-full border shrink-0"
-                    style={j.isActive
-                      ? { background: 'oklch(0.87 0.1 160)', color: 'oklch(0.25 0.06 160)', borderColor: 'transparent' }
-                      : { background: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)', borderColor: 'transparent' }}
+                    className={j.isActive
+                      ? 'text-[12px] font-semibold px-3.5 py-1.5 rounded-full border shrink-0 bg-good/15 text-good border-good/25'
+                      : 'text-[12px] font-semibold px-3.5 py-1.5 rounded-full border shrink-0'}
+                    style={j.isActive ? undefined : { background: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)', borderColor: 'transparent' }}
                   >
                     {j.isActive ? 'Active' : 'Closed'}
                   </span>

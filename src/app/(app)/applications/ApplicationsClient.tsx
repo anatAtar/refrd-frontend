@@ -40,10 +40,16 @@ function BuildingIcon() {
 // ─── Status badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
   const label = STATUS_LABELS[status] ?? status;
+  if (status === 'forwarded') {
+    return (
+      <span className="bg-good/15 text-good border border-good/25 rounded-full whitespace-nowrap" style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 14px' }}>
+        {label}
+      </span>
+    );
+  }
   const colors: Record<string, { bg: string; color: string }> = {
     submitted: { bg: 'oklch(0.88 0.09 85)',  color: 'oklch(0.3 0.06 85)' },
     viewed:    { bg: 'oklch(0.88 0.05 240)', color: 'oklch(0.3 0.05 240)' },
-    forwarded: { bg: 'oklch(0.87 0.1 160)',  color: 'oklch(0.25 0.06 160)' },
     rejected:  { bg: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)' },
   };
   const c = colors[status] ?? { bg: 'oklch(0.93 0.004 70)', color: MUTED };
