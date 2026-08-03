@@ -89,7 +89,7 @@ export function Sidebar() {
             <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
           </span>
           <span className="text-[9px] font-medium text-text-muted leading-none">
-            Find your next job
+            Refer. Get hired.
           </span>
         </div>
       </div>
