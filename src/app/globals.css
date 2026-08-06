@@ -5,6 +5,8 @@
   --color-sidebar:       #120E09;
   --color-sidebar-card:  #1A1410;
   --color-sidebar-border: rgba(212, 175, 122, 0.08);
+  --color-sidebar-foreground: #F0E8D8;
+  --color-sidebar-muted:      #A89070;
 
   /* ── Main content surfaces (light grey) ────────── */
   --color-page:          #F2F2F2;
