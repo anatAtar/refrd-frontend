@@ -1,28 +1,39 @@
 import Link from 'next/link';
 import { mkt } from '@/app/(marketing)/tokens';
 
+function FooterLogo() {
+  return (
+    <span className="flex items-center gap-2 font-semibold tracking-tight" style={{ color: mkt.textPrimary }}>
+      <svg viewBox="0 0 28 28" className="w-6 h-6" style={{ color: mkt.accentSeeker }} aria-hidden="true">
+        <circle cx="14" cy="9" r="4" fill="currentColor" />
+        <path d="M5 25c0-4.6 4-8 9-8s9 3.4 9 8" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+        <path d="M21.5 3.5c1.9 1.7 1.9 5.3 0 7M24.5 1c3.2 2.9 3.2 9.1 0 12" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" opacity="0.55" />
+      </svg>
+      <span className="text-[17px]">DirectRef</span>
+    </span>
+  );
+}
+
+const footerLinkStyle = { color: mkt.textSecondary };
+
 export function MarketingFooter() {
   return (
     <footer style={{ borderTop: `1px solid ${mkt.border}` }}>
-      <div className="max-w-[1120px] mx-auto px-8 py-12 flex justify-between items-center flex-wrap gap-6">
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-[26px] h-[26px] rounded-[7px]"
-            style={{ background: `linear-gradient(135deg, ${mkt.accentSeeker}, ${mkt.accentReferral})` }}
-          />
-          <span className="text-base font-bold" style={{ color: mkt.textPrimary }}>DirectRef</span>
-          <span className="text-sm ml-2" style={{ color: mkt.textMuted }}>Connecting people to their next role.</span>
+      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-10 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <FooterLogo />
+          <p className="mt-2 text-[13px]" style={{ color: mkt.textMuted }}>Built for Israeli tech · Connecting people to their next role.</p>
         </div>
-        <div className="flex gap-7 items-center flex-wrap">
-          <Link href="/our-story" className="text-[14.5px]" style={{ color: mkt.textSecondary }}>Our Story</Link>
-          <Link href="/login" className="text-[14.5px]" style={{ color: mkt.textSecondary }}>Log in</Link>
-          <Link href="/login" className="text-[14.5px]" style={{ color: mkt.textSecondary }}>Sign up as seeker</Link>
-          <Link href="/login" className="text-[14.5px]" style={{ color: mkt.textSecondary }}>Sign up as referrer</Link>
-        </div>
+        <nav className="flex flex-wrap gap-5 text-[13.5px]">
+          <Link href="/our-story" style={footerLinkStyle}>Our story</Link>
+          <Link href="/login" style={footerLinkStyle}>Log in</Link>
+          <Link href="/login" style={footerLinkStyle}>Sign up as seeker</Link>
+          <Link href="/login" style={footerLinkStyle}>Sign up as referrer</Link>
+        </nav>
       </div>
       <div className="flex justify-center gap-5 flex-wrap pb-3.5">
-        <Link href="/privacy" className="text-[13px]" style={{ color: mkt.textMuted }}>Privacy Policy</Link>
-        <Link href="/terms" className="text-[13px]" style={{ color: mkt.textMuted }}>Terms of Service</Link>
+        <Link href="/terms" className="text-[13px]" style={{ color: mkt.textMuted }}>Terms</Link>
+        <Link href="/privacy" className="text-[13px]" style={{ color: mkt.textMuted }}>Privacy</Link>
         <a href="mailto:support@directref.com" className="text-[13px]" style={{ color: mkt.textMuted }}>Contact</a>
       </div>
       <p className="text-center text-[13px] pb-7" style={{ color: mkt.textMuted }}>© 2026 DirectRef.</p>

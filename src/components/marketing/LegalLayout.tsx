@@ -15,31 +15,30 @@ interface LegalLayoutProps {
 
 export function LegalLayout({ title, effectiveDate, toc, children }: LegalLayoutProps) {
   return (
-    <div className="max-w-[1180px] mx-auto px-8 pt-6 pb-24 grid grid-cols-1 md:grid-cols-[240px_minmax(0,1fr)] gap-14 items-start">
-      <nav className="md:sticky md:top-6">
-        <p
-          className="text-xs uppercase tracking-[0.08em] font-semibold mb-3.5 pb-2.5"
-          style={{ color: mkt.textMuted, borderBottom: `1px solid ${mkt.border}` }}
-        >
-          Contents
-        </p>
-        <div className="flex flex-col gap-0.5 max-h-[calc(100vh-100px)] overflow-y-auto">
-          {toc.map((item) => (
-            <Link
-              key={item.id}
-              href={`#${item.id}`}
-              className="py-1.5 pl-3 text-[13.5px] leading-tight"
-              style={{ borderLeft: `2px solid ${mkt.border}`, color: mkt.textSecondary }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
-      </nav>
+    <div className="max-w-6xl mx-auto px-5 py-14 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-12 items-start">
+      <aside className="hidden lg:block">
+        <nav className="sticky top-24">
+          <p className="text-xs font-semibold uppercase tracking-[0.09em] mb-3" style={{ color: mkt.textMuted }}>
+            On this page
+          </p>
+          <div className="flex flex-col gap-2 max-h-[calc(100vh-140px)] overflow-y-auto pr-2">
+            {toc.map((item) => (
+              <Link
+                key={item.id}
+                href={`#${item.id}`}
+                className="block text-[13px] leading-tight"
+                style={{ color: mkt.textSecondary }}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      </aside>
 
       <article className="min-w-0">
-        <h1 className="text-[38px] leading-[1.15] font-extrabold tracking-tight mb-2">{title}</h1>
-        <p className="text-sm mb-8" style={{ color: mkt.textMuted }}>{effectiveDate}</p>
+        <h1 className="text-[32px] leading-tight font-bold tracking-tight">{title}</h1>
+        <p className="mt-2 mb-8 text-[13px]" style={{ color: mkt.textMuted }}>{effectiveDate}</p>
         {children}
       </article>
     </div>
@@ -50,7 +49,7 @@ export function LegalH2({ id, children }: { id: string; children: React.ReactNod
   return (
     <h2
       id={id}
-      className="text-[22px] font-bold mt-10 mb-3.5 pt-6"
+      className="text-[19px] font-semibold mt-9 mb-3 pt-6 scroll-mt-24"
       style={{ borderTop: `1px solid ${mkt.border}` }}
     >
       {children}
