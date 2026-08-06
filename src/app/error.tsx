@@ -1,10 +1,12 @@
 'use client';
 
+import { AlertTriangle } from 'lucide-react';
+
 export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="text-center">
-        <div className="text-5xl mb-4">⚠️</div>
+        <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-crit" strokeWidth={1.5} />
         <h2 className="text-xl font-bold text-text-primary mb-2">Something went wrong</h2>
         <p className="text-sm text-text-secondary mb-6">An unexpected error occurred.</p>
         <button

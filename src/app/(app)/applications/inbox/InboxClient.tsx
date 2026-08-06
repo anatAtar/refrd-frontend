@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Inbox as InboxIcon, Hourglass, Eye, XCircle, type LucideIcon } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useInbox } from '@/lib/hooks/useApplications';
 import { InboxCard } from '@/components/application/InboxCard';
@@ -28,11 +29,11 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
     ? applications
     : applications.filter(a => a.application.status === tab);
 
-  const TABS: { id: Tab; label: string; icon: string }[] = [
-    { id: 'all',       label: 'All',        icon: '📥' },
-    { id: 'submitted', label: 'Pending',    icon: '⏳' },
-    { id: 'viewed',    label: 'Reviewed',   icon: '👀' },
-    { id: 'rejected',  label: 'Not a fit',  icon: '✕'  },
+  const TABS: { id: Tab; label: string; icon: LucideIcon }[] = [
+    { id: 'all',       label: 'All',        icon: InboxIcon },
+    { id: 'submitted', label: 'Pending',    icon: Hourglass },
+    { id: 'viewed',    label: 'Reviewed',   icon: Eye       },
+    { id: 'rejected',  label: 'Not a fit',  icon: XCircle   },
   ];
 
   return (
@@ -46,9 +47,9 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
-        <StatTile label="Total CVs"      value={counts.all}       icon="📥" />
-        <StatTile label="Awaiting Review" value={counts.submitted} icon="⏳" />
-        <StatTile label="Reviewed"        value={counts.viewed}    icon="👀" accent />
+        <StatTile label="Total CVs"      value={counts.all}       icon={<InboxIcon className="w-4 h-4" strokeWidth={1.8} />} />
+        <StatTile label="Awaiting Review" value={counts.submitted} icon={<Hourglass className="w-4 h-4" strokeWidth={1.8} />} />
+        <StatTile label="Reviewed"        value={counts.viewed}    icon={<Eye className="w-4 h-4" strokeWidth={1.8} />} accent />
       </div>
 
       {/* Tabs */}
@@ -64,7 +65,7 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
                 : 'text-text-muted hover:text-text-secondary',
             )}
           >
-            <span>{t.icon}</span>
+            <t.icon className="w-3.5 h-3.5" strokeWidth={1.8} />
             {t.label}
             {counts[t.id] > 0 && (
               <span className={cn(
@@ -85,7 +86,7 @@ export default function InboxClient({ initialData }: { initialData: ApplicationW
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon={tab === 'rejected' ? '✕' : '📭'}
+          icon={tab === 'rejected' ? <XCircle className="w-9 h-9" strokeWidth={1.5} /> : <InboxIcon className="w-9 h-9" strokeWidth={1.5} />}
           title={
             tab === 'all'      ? 'No CVs yet' :
             tab === 'rejected' ? 'No declined applications' :

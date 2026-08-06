@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { MailCheck } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -28,7 +29,7 @@ export function ForgotPasswordForm() {
   if (sent) {
     return (
       <div className="text-center py-4">
-        <div className="text-4xl mb-4">📧</div>
+        <MailCheck className="w-9 h-9 mx-auto mb-4 text-gold-300" strokeWidth={1.5} />
         <h2 className="text-lg font-bold text-text-primary mb-2">Check your inbox</h2>
         <p className="text-sm text-text-secondary mb-6">
           If <strong>{email}</strong> has a DirectRef account, we sent a reset link.

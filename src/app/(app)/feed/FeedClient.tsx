@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
+import { Star } from 'lucide-react';
 import { jobsApi } from '@/lib/api/jobs';
 import { applicationsApi } from '@/lib/api/applications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
@@ -25,8 +26,8 @@ function TimelineBar({ createdAt }: { createdAt: string }) {
   const label   = overdue ? 'Overdue' : `${Math.floor(hours)}h / 48h`;
 
   const milestones: string[] = [];
-  if (hours >= 12) milestones.push('12h reminder sent ✓');
-  if (hours >= 24) milestones.push('24h reminder sent ✓');
+  if (hours >= 12) milestones.push('12h reminder sent');
+  if (hours >= 24) milestones.push('24h reminder sent');
 
   return (
     <div className="mt-2.5" style={{ maxWidth: 300 }}>
@@ -369,7 +370,8 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                       onClick={toggleSave}
                       style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid oklch(0.93 0.004 70)', background: isSaved ? 'oklch(0.88 0.09 85)' : 'transparent', color: isSaved ? 'oklch(0.3 0.06 85)' : '#000000', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer' }}
                     >
-                      {isSaved ? '★ Saved' : '☆ Save'}
+                      <Star size={14} strokeWidth={1.8} fill={isSaved ? 'currentColor' : 'none'} />
+                      {isSaved ? 'Saved' : 'Save'}
                     </button>
                   </div>
                 </div>

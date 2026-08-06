@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Hand, Users, Search, FileText } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 
 export default function OnboardingWelcomePage() {
@@ -28,7 +29,7 @@ export default function OnboardingWelcomePage() {
 
         {/* Wave + greeting */}
         <div className="space-y-4">
-          <div className="text-6xl">👋</div>
+          <Hand className="w-12 h-12 mx-auto text-gold-300" strokeWidth={1.5} />
           <h1 className="text-3xl font-bold text-text-primary">
             Welcome, {firstName}!
           </h1>
@@ -41,12 +42,12 @@ export default function OnboardingWelcomePage() {
         {/* How it works */}
         <div className="grid grid-cols-3 gap-4 text-center">
           {[
-            { icon: '👥', label: 'Connect with colleagues' },
-            { icon: '🔍', label: 'Find their open roles' },
-            { icon: '📄', label: 'Send CV directly' },
+            { icon: Users, label: 'Connect with colleagues' },
+            { icon: Search, label: 'Find their open roles' },
+            { icon: FileText, label: 'Send CV directly' },
           ].map((s) => (
             <div key={s.label} className="bg-card border border-border rounded-xl p-3 space-y-2">
-              <div className="text-2xl">{s.icon}</div>
+              <s.icon className="w-6 h-6 mx-auto text-gold-300" strokeWidth={1.6} />
               <div className="text-xs text-text-secondary leading-snug">{s.label}</div>
             </div>
           ))}

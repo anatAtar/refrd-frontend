@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Check } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { CompanyIcon } from '@/components/job/CompanyIcon';
 import { JobDescription } from '@/components/job/JobDescription';
@@ -66,7 +67,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
               {job.workMode   && <Badge variant="teal">{job.workMode}</Badge>}
               {!job.isActive  && <Badge variant="rose">Closed</Badge>}
               {isOwnPosting   && <Badge variant="violet">Your posting</Badge>}
-              {alreadyApplied && <Badge variant="good">CV Sent ✓</Badge>}
+              {alreadyApplied && <Badge variant="good"><Check className="w-3 h-3" strokeWidth={2.5} /> CV Sent</Badge>}
             </div>
 
             {job.description && (
@@ -89,8 +90,8 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
                 <Button variant="secondary" size="lg" className="w-full">Manage this job</Button>
               </Link>
             ) : alreadyApplied ? (
-              <div className="w-full text-center py-3 bg-good/10 border border-good/25 rounded-xl text-sm font-semibold text-good">
-                ✓ CV Sent
+              <div className="w-full flex items-center justify-center gap-1.5 py-3 bg-good/10 border border-good/25 rounded-xl text-sm font-semibold text-good">
+                <Check className="w-4 h-4" strokeWidth={2.5} /> CV Sent
               </div>
             ) : job.isActive ? (
               <div className="border border-border rounded-xl p-4 bg-card">

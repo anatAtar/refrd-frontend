@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { Building2 } from 'lucide-react';
 import { cn, companyLogoUrl } from '@/lib/utils';
 
 interface CompanyIconProps {
@@ -35,7 +36,7 @@ export function CompanyIcon({ sourceUrl, size = 44, className }: CompanyIconProp
           onError={() => setFailed(true)}
         />
       ) : (
-        <span className="text-lg" style={{ fontSize: size * 0.45 }} role="img" aria-label="Company">🏢</span>
+        <Building2 style={{ width: size * 0.45, height: size * 0.45 }} className="text-text-muted" strokeWidth={1.6} aria-label="Company" />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const Dialog = DialogPrimitive.Root;
@@ -50,7 +51,7 @@ export function DialogContent({
                 onClick={onClose}
                 className="w-7 h-7 rounded-full bg-border flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-border-strong transition-colors"
               >
-                ✕
+                <X className="w-4 h-4" strokeWidth={2} />
               </DialogPrimitive.Close>
             )}
           </div>

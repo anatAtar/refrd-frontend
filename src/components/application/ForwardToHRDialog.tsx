@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { Lightbulb, Send } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
@@ -63,7 +64,7 @@ export function ForwardToHRDialog({ open, onClose, applicationId, seekerName, jo
             rows={3}
           />
           <div className="flex items-start gap-2 bg-gold-300/8 border border-gold-300/15 rounded-lg px-3 py-2">
-            <span>💡</span>
+            <Lightbulb className="w-4 h-4 shrink-0 text-gold-300" strokeWidth={1.8} />
             <p className="text-xs text-text-secondary">
               An email with {seekerName}&apos;s CV will be sent to the HR team, including your referral note.
             </p>
@@ -71,8 +72,8 @@ export function ForwardToHRDialog({ open, onClose, applicationId, seekerName, jo
         </div>
         <div className="px-6 pb-5 flex justify-end gap-2 border-t border-border pt-4">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button variant="primary" isLoading={isLoading} onClick={handleForward}>
-            Send to HR ✦
+          <Button variant="primary" isLoading={isLoading} onClick={handleForward} className="gap-1.5">
+            <Send className="w-3.5 h-3.5" strokeWidth={1.8} /> Send to HR
           </Button>
         </div>
       </DialogContent>

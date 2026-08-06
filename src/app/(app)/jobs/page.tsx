@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import useSWR from 'swr';
 import { useSearchParams } from 'next/navigation';
+import { Search, SlidersHorizontal, AlertTriangle, Inbox, Frown, Check, ChevronRight } from 'lucide-react';
 import { jobsApi } from '@/lib/api/jobs';
 import { JobCard } from '@/components/job/JobCard';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
@@ -76,7 +77,7 @@ function FilterGroup({ title, items, selected, onToggle, onClear, searchPlacehol
           onClick={() => setExpanded((v) => !v)}
           className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted"
         >
-          <span className={cn('transition-transform text-[8px]', expanded ? 'rotate-90' : '')}>▶</span>
+          <ChevronRight className={cn('w-3 h-3 transition-transform', expanded ? 'rotate-90' : '')} strokeWidth={2.5} />
           {title} <span className="font-normal normal-case tracking-normal">({items.length})</span>
         </button>
         {selected.size > 0 && (
@@ -87,7 +88,7 @@ function FilterGroup({ title, items, selected, onToggle, onClear, searchPlacehol
         <>
           {showSearch && (
             <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
-              <span className="text-text-muted text-[11px]">🔍</span>
+              <Search className="w-3 h-3 text-text-muted" strokeWidth={2} />
               <input
                 className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
                 placeholder={searchPlaceholder}
@@ -292,7 +293,7 @@ export default function JobsPage() {
 
           {/* Desktop search */}
           <div className="hidden md:flex flex-1 items-center gap-2 bg-input border border-border-strong rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
-            <span className="text-text-muted shrink-0">🔍</span>
+            <Search className="w-4 h-4 text-text-muted shrink-0" strokeWidth={1.8} />
             <input
               className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
               placeholder="Search by role, company, location, referrer…"
@@ -307,7 +308,7 @@ export default function JobsPage() {
           {/* Mobile: search + filter button */}
           <div className="flex md:hidden items-center gap-2 flex-1 min-w-0">
             <div className="flex-1 flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40">
-              <span className="text-text-muted shrink-0">🔍</span>
+              <Search className="w-4 h-4 text-text-muted shrink-0" strokeWidth={1.8} />
               <input
                 className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
                 placeholder="Search roles, companies…"
@@ -325,7 +326,7 @@ export default function JobsPage() {
                   : 'bg-input text-text-secondary border-border-strong',
               )}
             >
-              ⚙️ {hasFilters ? filtered.length : 'Filter'}
+              <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={1.8} /> {hasFilters ? filtered.length : 'Filter'}
             </button>
           </div>
 
@@ -364,19 +365,19 @@ export default function JobsPage() {
             <div className="space-y-3">{[...Array(5)].map((_, i) => <JobCardSkeleton key={i} />)}</div>
           ) : jobsError ? (
             <div className="text-center py-16">
-              <div className="text-4xl mb-3">⚠️</div>
+              <AlertTriangle className="w-9 h-9 mx-auto mb-3 text-crit" strokeWidth={1.5} />
               <p className="text-sm font-semibold text-text-primary mb-1">Couldn&apos;t load jobs</p>
               <p className="text-xs text-text-muted">Check your connection and try refreshing</p>
             </div>
           ) : filtered.length === 0 && allJobs.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-4xl mb-3">📭</div>
+              <Inbox className="w-9 h-9 mx-auto mb-3 text-text-muted" strokeWidth={1.5} />
               <p className="text-sm font-semibold text-text-primary mb-1">No open roles yet</p>
               <p className="text-xs text-text-muted">Check back soon — new roles are added all the time</p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
-              <div className="text-4xl mb-3">😔</div>
+              <Frown className="w-9 h-9 mx-auto mb-3 text-text-muted" strokeWidth={1.5} />
               <p className="text-sm font-semibold text-text-primary mb-1">No jobs match</p>
               <button onClick={clearAll} className="text-sm text-gold-300 hover:text-gold-400 font-medium py-2 px-4">Clear filters</button>
             </div>
@@ -408,7 +409,7 @@ function FilterRow({ label, count, active, onToggle }: {
         'w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-colors',
         active ? 'bg-gold-300 border-gold-300' : 'border-border-strong',
       )}>
-        {active && <span className="text-white text-[8px] font-bold">✓</span>}
+        {active && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
       </span>
       <span className="flex-1 truncate" title={label}>{label}</span>
       <span className="text-text-muted text-[10px]">{count}</span>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { CheckCircle2, XCircle } from 'lucide-react';
 import { authApi } from '@/lib/api/auth';
 
 function VerifyContent() {
@@ -21,7 +22,7 @@ function VerifyContent() {
 
   if (status === 'success') return (
     <div className="text-center py-4">
-      <div className="text-4xl mb-4">✅</div>
+      <CheckCircle2 className="w-10 h-10 mx-auto mb-4 text-good" strokeWidth={1.5} />
       <h2 className="text-lg font-bold text-text-primary mb-2">Email verified!</h2>
       <p className="text-sm text-text-secondary mb-6">You can now log in to your account.</p>
       <Link href="/login" className="text-gold-300 font-medium hover:text-gold-400">Go to login →</Link>
@@ -30,7 +31,7 @@ function VerifyContent() {
 
   return (
     <div className="text-center py-4">
-      <div className="text-4xl mb-4">❌</div>
+      <XCircle className="w-10 h-10 mx-auto mb-4 text-crit" strokeWidth={1.5} />
       <h2 className="text-lg font-bold text-text-primary mb-2">Invalid link</h2>
       <p className="text-sm text-text-secondary mb-6">This verification link is invalid or has expired.</p>
       <Link href="/login" className="text-gold-300 font-medium hover:text-gold-400">Go to login →</Link>

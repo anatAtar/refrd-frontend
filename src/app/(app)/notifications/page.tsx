@@ -1,19 +1,20 @@
 'use client';
 
 import { mutate } from 'swr';
+import { Eye, Send, Inbox, XCircle, Handshake, CheckCircle2, Bell, type LucideIcon } from 'lucide-react';
 import { useNotifications } from '@/lib/hooks/useNotifications';
 import { notificationsApi } from '@/lib/api/notifications';
 import { Button } from '@/components/ui/Button';
 import { timeAgo, cn } from '@/lib/utils';
 import Link from 'next/link';
 
-const TYPE_ICON: Record<string, string> = {
-  cv_viewed:            '👀',
-  cv_forwarded:         '🎉',
-  cv_received:          '📥',
-  cv_rejected:          '😔',
-  connection_request:   '🤝',
-  connection_accepted:  '✅',
+const TYPE_ICON: Record<string, LucideIcon> = {
+  cv_viewed:            Eye,
+  cv_forwarded:         Send,
+  cv_received:          Inbox,
+  cv_rejected:          XCircle,
+  connection_request:   Handshake,
+  connection_accepted:  CheckCircle2,
 };
 
 export default function NotificationsPage() {
@@ -40,7 +41,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary mb-0.5">Notifications</h1>
           <p className="text-sm text-text-secondary">
-            {unread.length > 0 ? `${unread.length} unread` : 'All caught up ✓'}
+            {unread.length > 0 ? `${unread.length} unread` : 'All caught up'}
           </p>
         </div>
         {unread.length > 0 && (
@@ -59,7 +60,7 @@ export default function NotificationsPage() {
         </div>
       ) : notifications.length === 0 ? (
         <div className="text-center py-20">
-          <div className="text-5xl mb-4">🔔</div>
+          <Bell className="w-10 h-10 mx-auto mb-4 text-text-muted" strokeWidth={1.5} />
           <h3 className="text-base font-bold text-text-primary mb-2">No notifications yet</h3>
           <p className="text-sm text-text-secondary">
             When someone views or forwards your CV you&apos;ll see it here.
@@ -80,10 +81,13 @@ export default function NotificationsPage() {
             >
               {/* Icon */}
               <div className={cn(
-                'w-9 h-9 rounded-full flex items-center justify-center text-lg shrink-0',
+                'w-9 h-9 rounded-full flex items-center justify-center shrink-0',
                 n.isRead ? 'bg-input' : 'bg-gold-300/15',
               )}>
-                {TYPE_ICON[n.type] ?? '🔔'}
+                {(() => {
+                  const Icon = TYPE_ICON[n.type] ?? Bell;
+                  return <Icon className="w-[18px] h-[18px] text-text-secondary" strokeWidth={1.8} />;
+                })()}
               </div>
 
               {/* Content */}

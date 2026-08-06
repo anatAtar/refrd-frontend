@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useSearchParams } from 'next/navigation';
+import { Sparkles, Search, Building2, MailQuestion, Send, Handshake, Hourglass } from 'lucide-react';
 import { useConnections } from '@/lib/hooks/useConnections';
 import { connectionsApi } from '@/lib/api/connections';
 import { usersApi } from '@/lib/api/users';
@@ -109,7 +110,7 @@ export default function NetworkPage() {
 
   const handleAccept = async (id: string) => {
     await connectionsApi.update(id, 'accepted');
-    toast.success('Connected! 🎉');
+    toast.success('Connected!');
     mutate();
   };
 
@@ -161,13 +162,15 @@ export default function NetworkPage() {
       {/* ── PEOPLE YOU MAY KNOW ─────────────────────────────────── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-text-primary">✨ People on DirectRef</h2>
+          <h2 className="flex items-center gap-1.5 text-sm font-bold text-text-primary">
+            <Sparkles className="w-4 h-4 text-gold-300" strokeWidth={1.8} /> People on DirectRef
+          </h2>
           <span className="text-xs text-text-muted">{suggestions.length} people</span>
         </div>
 
         {/* Search */}
         <div className="flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
-          <span className="text-text-muted text-sm">🔍</span>
+          <Search className="w-4 h-4 text-text-muted" strokeWidth={1.8} />
           <input
             className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none"
             placeholder="Search by name or company…"
@@ -189,8 +192,8 @@ export default function NetworkPage() {
             {suggestionsByCompany.map(([company, people]) => (
               <div key={company}>
                 {company !== '—' && (
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-text-muted mb-2 px-1">
-                    🏢 {company}
+                  <p className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-widest text-text-muted mb-2 px-1">
+                    <Building2 className="w-3 h-3" strokeWidth={2} /> {company}
                   </p>
                 )}
                 <div className="space-y-2">
@@ -216,7 +219,7 @@ export default function NetworkPage() {
                         {isPendingSent ? (
                           /* Show pending badge — row stays visible */
                           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-warn/10 text-warn border border-warn/20 shrink-0">
-                            ⏳ Pending
+                            <Hourglass className="w-3 h-3" strokeWidth={2} /> Pending
                           </span>
                         ) : (
                           <Button
@@ -274,12 +277,12 @@ export default function NetworkPage() {
         {/* Connection list */}
         {filtered.length === 0 ? (
           tab === 'pending' ? (
-            <EmptyState icon="✉️" title="No pending requests" description="When someone sends you a connection request, it will appear here." />
+            <EmptyState icon={<MailQuestion className="w-9 h-9" strokeWidth={1.5} />} title="No pending requests" description="When someone sends you a connection request, it will appear here." />
           ) : tab === 'sent' ? (
-            <EmptyState icon="📤" title="No sent requests" description="Requests you've sent that haven't been accepted yet." />
+            <EmptyState icon={<Send className="w-9 h-9" strokeWidth={1.5} />} title="No sent requests" description="Requests you've sent that haven't been accepted yet." />
           ) : (
             <EmptyState
-              icon="🤝"
+              icon={<Handshake className="w-9 h-9" strokeWidth={1.5} />}
               title="No connections yet"
               description="Connect with people above to start building your network."
             />
@@ -338,7 +341,7 @@ function ConnectionRow({ connection, viewerId, tab, isRemoving, onAccept, onDecl
           </>
         ) : tab === 'sent' ? (
           <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-2 rounded-full bg-warn/10 text-warn border border-warn/20">
-            ⏳ Pending
+            <Hourglass className="w-3 h-3" strokeWidth={2} /> Pending
           </span>
         ) : (
           <>
