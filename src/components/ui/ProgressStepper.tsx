@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ProgressStepperProps {
@@ -19,7 +20,7 @@ export function ProgressStepper({ steps, current }: ProgressStepperProps) {
                 i > current && 'bg-border text-text-muted',
               )}
             >
-              {i < current ? '✓' : i + 1}
+              {i < current ? <Check className="w-3.5 h-3.5" strokeWidth={2.5} /> : i + 1}
             </div>
             <span
               className={cn(

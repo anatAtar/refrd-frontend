@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import { toast } from 'sonner';
+import { FileText, Eye, Download, MessageCircle, XCircle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -87,8 +88,8 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
 
           {/* CV file info */}
           <div className="flex items-center gap-2 mt-3">
-            <span className="text-xs text-text-muted">
-              📄 {application.cvOriginalName} · {formatBytes(application.cvSizeBytes)}
+            <span className="inline-flex items-center gap-1 text-xs text-text-muted">
+              <FileText className="w-3.5 h-3.5" strokeWidth={1.8} /> {application.cvOriginalName} · {formatBytes(application.cvSizeBytes)}
             </span>
             <span className="text-xs text-text-muted ml-auto">{timeAgo(application.createdAt)}</span>
           </div>
@@ -98,14 +99,14 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
             <div className="mt-3 space-y-2">
               <div className="flex gap-2 flex-wrap">
                 {/* View — always available */}
-                <Button variant="secondary" size="sm" onClick={handleView} className="shrink-0">
-                  👁️ View
+                <Button variant="secondary" size="sm" onClick={handleView} className="shrink-0 gap-1.5">
+                  <Eye className="w-3.5 h-3.5" strokeWidth={1.8} /> View
                 </Button>
 
                 {/* Download — always available */}
                 <a href={cvUrl} download={application.cvOriginalName} className="flex-1">
-                  <Button variant="primary" size="sm" className="w-full">
-                    📥 Download CV
+                  <Button variant="primary" size="sm" className="w-full gap-1.5">
+                    <Download className="w-3.5 h-3.5" strokeWidth={1.8} /> Download CV
                   </Button>
                 </a>
 
@@ -113,10 +114,10 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="relative shrink-0"
+                  className="relative shrink-0 gap-1.5"
                   onClick={() => setMsgOpen(true)}
                 >
-                  💬 Message
+                  <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.8} /> Message
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-crit text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
                       {unreadCount}
@@ -155,14 +156,16 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
           {/* Done state — still allow messaging */}
           {isDone && (
             <div className="mt-3 flex items-center gap-2">
-              <Badge variant="muted">✕ Not a fit</Badge>
+              <Badge variant="muted">
+                <XCircle className="w-3 h-3" strokeWidth={2} /> Not a fit
+              </Badge>
               <Button
                 variant="ghost"
                 size="sm"
-                className="relative ml-auto shrink-0"
+                className="relative ml-auto shrink-0 gap-1.5"
                 onClick={() => setMsgOpen(true)}
               >
-                💬 Message
+                <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.8} /> Message
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-crit text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
                     {unreadCount}

@@ -1,6 +1,9 @@
 'use client';
 
+import { Laptop, Building2, FileEdit, Clock } from 'lucide-react';
 import { Chip } from '@/components/ui/Chip';
+
+const chipIcon = (Icon: typeof Laptop) => <Icon className="w-3.5 h-3.5" strokeWidth={1.8} />;
 
 interface Filters {
   jobType?: string;
@@ -21,25 +24,25 @@ export function JobFilters({ filters, onChange }: JobFiltersProps) {
     <div className="flex flex-wrap gap-2">
       <Chip
         label="Remote"
-        icon="💻"
+        icon={chipIcon(Laptop)}
         active={!!filters.remote}
         onToggle={() => toggle('remote', true)}
       />
       <Chip
         label="Full-time"
-        icon="🏢"
+        icon={chipIcon(Building2)}
         active={filters.jobType === 'full-time'}
         onToggle={() => toggle('jobType', 'full-time')}
       />
       <Chip
         label="Contract"
-        icon="📝"
+        icon={chipIcon(FileEdit)}
         active={filters.jobType === 'contract'}
         onToggle={() => toggle('jobType', 'contract')}
       />
       <Chip
         label="Part-time"
-        icon="⏰"
+        icon={chipIcon(Clock)}
         active={filters.jobType === 'part-time'}
         onToggle={() => toggle('jobType', 'part-time')}
       />

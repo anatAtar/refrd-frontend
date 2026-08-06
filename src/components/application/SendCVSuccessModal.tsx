@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { Check } from 'lucide-react';
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { Button } from '@/components/ui/Button';
 
@@ -46,8 +47,8 @@ export function SendCVSuccessModal({ open, onClose, referrerFirstName, jobTitle 
                 }}
               />
             ))}
-            <div className="cv-success-badge absolute inset-0 rounded-full bg-good/15 border border-good/25 flex items-center justify-center text-3xl">
-              ✅
+            <div className="cv-success-badge absolute inset-0 rounded-full bg-good/15 border border-good/25 flex items-center justify-center">
+              <Check className="w-7 h-7 text-good" strokeWidth={2.2} />
             </div>
           </div>
 

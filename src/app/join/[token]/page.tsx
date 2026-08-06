@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
+import { Link2Off } from 'lucide-react';
 import { invitesApi, type InviteInfo } from '@/lib/api/invites';
 import { Avatar } from '@/components/ui/Avatar';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
@@ -31,7 +32,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center space-y-4 max-w-sm">
-          <div className="text-5xl">😔</div>
+          <Link2Off className="w-12 h-12 mx-auto text-text-muted" strokeWidth={1.5} />
           <h1 className="text-xl font-bold text-text-primary">Invalid invite link</h1>
           <p className="text-sm text-text-secondary">{error}</p>
           <Link href="/register"

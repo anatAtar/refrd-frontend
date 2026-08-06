@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
+import { FileText, MessageCircle } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
@@ -42,7 +43,9 @@ export function ApplicationCard({ data }: { data: ApplicationWithDetails }) {
             </span>
           </div>
           <div className="flex items-center justify-between mt-2">
-            <span className="text-xs text-text-muted">📄 {application.cvOriginalName}</span>
+            <span className="inline-flex items-center gap-1 text-xs text-text-muted">
+              <FileText className="w-3.5 h-3.5" strokeWidth={1.8} /> {application.cvOriginalName}
+            </span>
             <span className="text-xs text-text-muted">{timeAgo(application.createdAt)}</span>
           </div>
 
@@ -51,10 +54,10 @@ export function ApplicationCard({ data }: { data: ApplicationWithDetails }) {
             <Button
               variant="ghost"
               size="sm"
-              className="relative"
+              className="relative gap-1.5"
               onClick={() => setMsgOpen(true)}
             >
-              💬 Message
+              <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.8} /> Message
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 bg-crit text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
                   {unreadCount}

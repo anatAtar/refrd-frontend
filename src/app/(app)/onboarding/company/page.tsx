@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Building2, Check } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 import { invitesApi, type Colleague } from '@/lib/api/invites';
 import { connectionsApi } from '@/lib/api/connections';
@@ -79,7 +80,7 @@ export default function OnboardingCompanyPage() {
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="text-4xl mb-2">🏢</div>
+          <Building2 className="w-9 h-9 mx-auto mb-2 text-gold-300" strokeWidth={1.5} />
           <h1 className="text-2xl font-bold text-text-primary">Where do you work?</h1>
           <p className="text-sm text-text-secondary">
             We'll show you colleagues already on DirectRef
@@ -112,7 +113,7 @@ export default function OnboardingCompanyPage() {
         {!loading && colleagues.length > 0 && (
           <div className="space-y-3">
             <p className="text-sm font-semibold text-text-primary">
-              🎉 {colleagues.length} {colleagues.length === 1 ? 'person' : 'people'} at {company} already on DirectRef
+              {colleagues.length} {colleagues.length === 1 ? 'person' : 'people'} at {company} already on DirectRef
             </p>
             <div className="space-y-2">
               {colleagues.map((c) => (
@@ -123,7 +124,9 @@ export default function OnboardingCompanyPage() {
                     <p className="text-xs text-text-secondary truncate">{c.headline ?? c.companyName ?? ''}</p>
                   </div>
                   {connected.has(c.id) ? (
-                    <span className="text-xs text-good font-semibold">✓ Sent</span>
+                    <span className="inline-flex items-center gap-1 text-xs text-good font-semibold">
+                      <Check className="w-3.5 h-3.5" strokeWidth={2} /> Sent
+                    </span>
                   ) : (
                     <Button
                       variant="primary"

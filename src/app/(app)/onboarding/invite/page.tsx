@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { Share2, Check, Copy, MessageCircle, Link2, Lightbulb } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 import { invitesApi } from '@/lib/api/invites';
 import { usersApi } from '@/lib/api/users';
@@ -62,7 +63,7 @@ export default function OnboardingInvitePage() {
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="text-4xl mb-2">📲</div>
+          <Share2 className="w-9 h-9 mx-auto mb-2 text-gold-300" strokeWidth={1.5} />
           <h1 className="text-2xl font-bold text-text-primary">Invite your colleagues</h1>
           <p className="text-sm text-text-secondary">
             When they sign up via your link, you're automatically connected
@@ -83,8 +84,8 @@ export default function OnboardingInvitePage() {
             <div className="flex-1 bg-input border border-border-strong rounded-lg px-3 py-2.5 text-sm text-text-secondary font-mono truncate">
               {loading ? '...' : inviteUrl}
             </div>
-            <Button variant="secondary" size="sm" onClick={handleCopy} disabled={loading}>
-              {copied ? '✓ Copied' : '📋 Copy'}
+            <Button variant="secondary" size="sm" onClick={handleCopy} disabled={loading} className="gap-1.5">
+              {copied ? <><Check className="w-3.5 h-3.5" strokeWidth={2} /> Copied</> : <><Copy className="w-3.5 h-3.5" strokeWidth={1.8} /> Copy</>}
             </Button>
           </div>
         </div>
@@ -97,7 +98,7 @@ export default function OnboardingInvitePage() {
             disabled={loading}
             className="w-full flex items-center gap-3 px-4 py-3.5 bg-[#25D366]/10 border border-[#25D366]/30 hover:bg-[#25D366]/20 rounded-xl transition-colors text-left"
           >
-            <span className="text-2xl">📱</span>
+            <MessageCircle className="w-6 h-6 shrink-0 text-[#25D366]" strokeWidth={1.6} />
             <div>
               <p className="text-sm font-semibold text-text-primary">Share on WhatsApp</p>
               <p className="text-xs text-text-muted">Opens WhatsApp with a pre-written message</p>
@@ -110,7 +111,7 @@ export default function OnboardingInvitePage() {
             disabled={loading}
             className="w-full flex items-center gap-3 px-4 py-3.5 bg-card border border-border hover:bg-card-hover rounded-xl transition-colors text-left"
           >
-            <span className="text-2xl">🔗</span>
+            <Link2 className="w-6 h-6 shrink-0 text-text-secondary" strokeWidth={1.6} />
             <div>
               <p className="text-sm font-semibold text-text-primary">Copy link</p>
               <p className="text-xs text-text-muted">Share anywhere — Slack, email, LinkedIn</p>
@@ -119,13 +120,14 @@ export default function OnboardingInvitePage() {
         </div>
 
         {/* Info */}
-        <div className="bg-gold-300/10 border border-gold-300/20 rounded-xl px-4 py-3 text-sm text-text-secondary">
-          💡 Every time someone signs up via your link, you'll be <strong className="text-gold-300">auto-connected</strong> — no need to search for them.
+        <div className="flex items-start gap-2 bg-gold-300/10 border border-gold-300/20 rounded-xl px-4 py-3 text-sm text-text-secondary">
+          <Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-gold-300" strokeWidth={1.8} />
+          <span>Every time someone signs up via your link, you'll be <strong className="text-gold-300">auto-connected</strong> — no need to search for them.</span>
         </div>
 
         {/* Done */}
         <Button variant="primary" size="lg" className="w-full" onClick={handleDone}>
-          Go to my feed 🚀
+          Go to my feed
         </Button>
 
         <div className="text-center">

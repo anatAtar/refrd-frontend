@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
+import { FileText, Paperclip } from 'lucide-react';
 import { cn, formatBytes } from '@/lib/utils';
 
 interface FileDropzoneProps {
@@ -52,7 +53,7 @@ export function FileDropzone({
       >
         {file ? (
           <div className="flex flex-col items-center gap-2">
-            <span className="text-3xl">📄</span>
+            <FileText className="w-7 h-7 text-gold-300" strokeWidth={1.6} />
             <p className="text-sm font-semibold text-text-primary">{file.name}</p>
             <p className="text-xs text-text-muted">{formatBytes(file.size)}</p>
             <div className="flex items-center gap-4 mt-1">
@@ -70,7 +71,7 @@ export function FileDropzone({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-2">
-            <span className="text-3xl opacity-50">📎</span>
+            <Paperclip className="w-7 h-7 text-text-muted opacity-50" strokeWidth={1.6} />
             <p className="text-sm text-text-secondary">
               Drop your CV here, or <span className="text-gold-300 font-semibold">browse</span>
             </p>

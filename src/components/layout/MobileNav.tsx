@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Home, Search, Users, ClipboardList, Inbox } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const MOBILE_ITEMS = [
-  { href: '/feed',               icon: '🏠', label: 'Home'     },
-  { href: '/jobs',               icon: '🔍', label: 'Browse'   },
-  { href: '/network',            icon: '👥', label: 'Network'  },
-  { href: '/applications',       icon: '📋', label: 'Applied'  },
-  { href: '/applications/inbox', icon: '📥', label: 'Inbox'    },
+  { href: '/feed',               icon: Home,          label: 'Home'    },
+  { href: '/jobs',               icon: Search,        label: 'Browse'  },
+  { href: '/network',            icon: Users,         label: 'Network' },
+  { href: '/applications',       icon: ClipboardList, label: 'Applied' },
+  { href: '/applications/inbox', icon: Inbox,         label: 'Inbox'   },
 ];
 
 export function MobileNav() {
@@ -29,7 +30,7 @@ export function MobileNav() {
                 active ? 'text-gold-300' : 'text-text-muted',
               )}
             >
-              <span className="text-lg">{item.icon}</span>
+              <item.icon className="w-5 h-5" strokeWidth={1.8} />
               {item.label}
             </Link>
           );

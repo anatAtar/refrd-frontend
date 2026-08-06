@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { Check } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 import { usersApi } from '@/lib/api/users';
 import { Input } from '@/components/ui/Input';
@@ -79,7 +80,7 @@ export default function SettingsPage() {
 
   let buttonLabel = 'Save Changes';
   if (isLoading)  buttonLabel = 'Saving…';
-  else if (justSaved && !hasChanges) buttonLabel = '✓ Saved!';
+  else if (justSaved && !hasChanges) buttonLabel = 'Saved!';
 
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-6">
@@ -138,7 +139,9 @@ export default function SettingsPage() {
               Used to show matched jobs on your{' '}
               <a href="/feed" className="text-gold-500 hover:text-gold-400 font-semibold">Home</a> page.
               {hasPreferences && (
-                <span className="ml-1 text-green-600 font-semibold">✓ Active</span>
+                <span className="ml-1 inline-flex items-center gap-0.5 text-green-600 font-semibold">
+                  <Check className="w-3 h-3" strokeWidth={2.5} /> Active
+                </span>
               )}
             </p>
           </div>

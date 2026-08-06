@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { CheckCircle2, ClipboardList } from 'lucide-react';
 import { jobsApi } from '@/lib/api/jobs';
 import { useMyJobs } from '@/lib/hooks/useJobs';
 import { Input } from '@/components/ui/Input';
@@ -158,7 +159,7 @@ export default function PostJobPage() {
           <form onSubmit={handlePublish} className="space-y-4">
             {form.title && (
               <div className="flex items-center gap-2 bg-good/10 border border-good/20 rounded-lg px-3 py-2">
-                <span>✅</span>
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-good" strokeWidth={1.8} />
                 <span className="text-xs text-good font-medium">Details filled in — review and edit if needed</span>
               </div>
             )}
@@ -207,7 +208,7 @@ export default function PostJobPage() {
           <div className="space-y-3">{[...Array(3)].map((_, i) => <JobCardSkeleton key={i} />)}</div>
         ) : jobs.length === 0 ? (
           <div className="bg-card border border-border rounded-2xl p-10 text-center">
-            <div className="text-4xl mb-3">📋</div>
+            <ClipboardList className="w-9 h-9 mx-auto mb-3 text-text-muted" strokeWidth={1.5} />
             <p className="text-sm font-semibold text-text-primary mb-1">No jobs posted yet</p>
             <p className="text-xs text-text-muted">Post a job above to let people apply through you.</p>
           </div>

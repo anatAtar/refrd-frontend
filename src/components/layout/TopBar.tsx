@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { Bell } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useUnreadCount } from '@/lib/hooks/useNotifications';
 import { Avatar } from '@/components/ui/Avatar';
@@ -21,7 +22,7 @@ export function TopBar() {
         href="/notifications"
         className="relative flex items-center justify-center w-11 h-11 rounded-xl text-text-muted hover:text-text-primary hover:bg-card-hover transition-colors"
       >
-        <span className="text-lg">🔔</span>
+        <Bell className="w-5 h-5" strokeWidth={1.8} />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-gold-300 text-[#0A0A0A] text-[9px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}

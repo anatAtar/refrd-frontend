@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Send, CheckCircle2, XCircle, Star, type LucideIcon } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { CompanyIcon } from '@/components/job/CompanyIcon';
 import { Avatar } from '@/components/ui/Avatar';
@@ -24,10 +25,10 @@ interface JobCardProps {
 }
 
 // Status → icon + tooltip text (no icon for "viewed" — reviewed status shows via the CTA label only)
-const STATUS_INDICATORS: Record<string, { icon: string; label: string; color: string }> = {
-  submitted:  { icon: '📤', label: 'CV sent — awaiting review',          color: 'text-text-muted' },
-  forwarded:  { icon: '🎉', label: 'Forwarded to HR',                    color: 'text-good'       },
-  rejected:   { icon: '✕',  label: 'Not a fit — referrer passed on this', color: 'text-crit'      },
+const STATUS_INDICATORS: Record<string, { icon: LucideIcon; label: string; color: string }> = {
+  submitted:  { icon: Send,        label: 'CV sent — awaiting review',          color: 'text-text-muted' },
+  forwarded:  { icon: CheckCircle2, label: 'Forwarded to HR',                    color: 'text-good'       },
+  rejected:   { icon: XCircle,     label: 'Not a fit — referrer passed on this', color: 'text-crit'      },
 };
 
 export function JobCard({ data }: JobCardProps) {
@@ -108,10 +109,10 @@ export function JobCard({ data }: JobCardProps) {
                   onMouseLeave={() => setTooltipVisible(false)}
                   onFocus={() => setTooltipVisible(true)}
                   onBlur={() => setTooltipVisible(false)}
-                  className={`text-base leading-none ${indicator.color} cursor-default`}
+                  className={`flex items-center leading-none ${indicator.color} cursor-default`}
                   aria-label={indicator.label}
                 >
-                  {indicator.icon}
+                  <indicator.icon className="w-[18px] h-[18px]" strokeWidth={1.8} />
                 </button>
                 {tooltipVisible && (
                   <div className="absolute right-0 top-7 z-50 whitespace-nowrap bg-card-hover border border-border-strong text-xs text-text-primary px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none">
@@ -163,10 +164,10 @@ export function JobCard({ data }: JobCardProps) {
                 <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
               </Link>
               <Button variant="ghost" size="sm" className="min-h-[44px] text-text-muted shrink-0 gap-1" disabled>
-                {appStatus === 'forwarded' ? '🎉 Forwarded' :
+                {appStatus === 'forwarded' ? 'Forwarded' :
                  appStatus === 'viewed'    ? 'Reviewed' :
-                 appStatus === 'rejected'  ? '✕ Not a fit' :
-                 '✓ CV sent'}
+                 appStatus === 'rejected'  ? 'Not a fit' :
+                 'CV sent'}
               </Button>
             </>
           ) : job.isActive ? (
@@ -201,7 +202,7 @@ export function JobCard({ data }: JobCardProps) {
               onClick={toggleSave}
               title={isSaved ? 'Remove from saved' : 'Save job'}
             >
-              {isSaved ? '★' : '☆'}
+              <Star className="w-4 h-4" strokeWidth={1.8} fill={isSaved ? 'currentColor' : 'none'} />
             </Button>
           )}
         </div>

@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
+
 interface StatTileProps {
   label: string;
   value: string | number;
-  icon?: string;
+  icon?: ReactNode;
   delta?: string;
   accent?: boolean;
 }
