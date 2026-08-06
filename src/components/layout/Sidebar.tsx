@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useSearchParams, useRouter } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
+import { Home, Search, Send, Bookmark, PlusSquare, Inbox, Bell, LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useUnreadCount } from '@/lib/hooks/useNotifications';
@@ -11,219 +11,162 @@ import { applicationsApi } from '@/lib/api/applications';
 import { LogoMark } from '@/components/ui/Logo';
 import { CreditsCard } from '@/components/credits/CreditsCard';
 
-type Mode = 'seeker' | 'referrer';
+type Item = {
+  href: string;
+  icon: typeof Home;
+  label: string;
+  badge?: number;
+};
 
-const SEEKER_ITEMS = [
-  { href: '/jobs',                    icon: '⌕', label: 'Browse Jobs' },
-  { href: '/applications?tab=sent',   icon: '↗', label: 'Sent CV'     },
-  { href: '/applications?tab=saved',  icon: '★', label: 'Saved Jobs'  },
+const SEEKER_ITEMS: Item[] = [
+  { href: '/jobs',                   icon: Search,   label: 'Browse jobs' },
+  { href: '/applications?tab=sent',  icon: Send,     label: 'Sent CVs'    },
+  { href: '/applications?tab=saved', icon: Bookmark, label: 'Saved jobs'  },
 ];
 
-const REFERRER_ITEMS = [
-  { href: '/jobs/post',           icon: '＋', label: 'Post a Job' },
-  { href: '/applications/inbox',  icon: '▤', label: 'CV Inbox'   },
+const REFERRER_ITEMS: Item[] = [
+  { href: '/jobs/post',          icon: PlusSquare, label: 'Post a job' },
+  { href: '/applications/inbox', icon: Inbox,      label: 'CV inbox'   },
 ];
 
-const GENERAL_ITEMS = [
-  { href: '/network',       icon: '⊞', label: 'My Network'    },
-  { href: '/notifications', icon: '✉', label: 'Notifications' },
+const GENERAL_ITEMS: Item[] = [
+  { href: '/notifications', icon: Bell, label: 'Notifications' },
 ];
 
 const EXACT_ROUTES = ['/applications', '/jobs'];
+const REFERRER_ROUTES = ['/jobs/post', '/applications/inbox'];
 
 function isActive(pathname: string, search: string, href: string) {
   const [path, query] = href.split('?');
   if (!EXACT_ROUTES.includes(path) && pathname.startsWith(path + '/')) return true;
   if (pathname !== path) return false;
   if (!query) return true;
-  // Distinguish links that share a pathname but differ by ?tab=, e.g. Sent CV vs Saved Jobs
+  // Distinguish links that share a pathname but differ by ?tab=, e.g. Sent CVs vs Saved jobs
   const wantedTab = new URLSearchParams(query).get('tab');
   const currentTab = new URLSearchParams(search).get('tab');
   return wantedTab === null || wantedTab === currentTab;
 }
 
-const REFERRER_ROUTES = ['/jobs/post', '/applications/inbox'];
-
-const DEFAULT_ROUTE: Record<Mode, string> = {
-  seeker:   '/jobs',
-  referrer: '/jobs/post',
-};
+function NavLink({ item, dim, active }: { item: Item; dim?: boolean; active: boolean }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        'flex items-center gap-2.5 rounded-[10px] px-2.5 py-2.5 text-[14.5px] font-medium transition-colors duration-150',
+        active ? 'bg-gold-glow text-gold-300' : dim ? 'text-sidebar-muted/60 hover:bg-white/5' : 'text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground',
+      )}
+    >
+      <Icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.7} />
+      <span className="min-w-0 flex-1 truncate">{item.label}</span>
+      {item.badge ? (
+        <span className="shrink-0 rounded-full bg-gold-300 px-1.5 py-0.5 text-[10px] font-bold text-[#0A0A0A] min-w-[18px] text-center">
+          {item.badge > 9 ? '9+' : item.badge}
+        </span>
+      ) : null}
+    </Link>
+  );
+}
 
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = searchParams.toString();
-  const router = useRouter();
   const { user, logout } = useAuth();
   const { count: unreadCount } = useUnreadCount();
   const { data: inbox } = useSWR('sidebar/inbox', () => applicationsApi.inbox().then(r => r.data));
   const pendingCVs = (inbox ?? []).filter(a => a.application.status === 'submitted').length;
 
-  const [mode, setMode] = useState<Mode>(
-    REFERRER_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/')) ? 'referrer' : 'seeker',
-  );
-  const items = mode === 'seeker' ? SEEKER_ITEMS : REFERRER_ITEMS;
+  const inReferrerSection = REFERRER_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'));
 
-  const switchMode = (next: Mode) => {
-    if (next === mode) return;
-    setMode(next);
-    router.push(DEFAULT_ROUTE[next]);
+  const handleLogout = () => {
+    if (window.confirm('Log out of DirectRef?')) logout();
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0" style={{ background: '#120E09', borderRight: '1px solid rgba(212,175,122,0.08)' }}>
-      {/* Logo */}
-      <div className="px-4 h-16 flex items-center gap-3" style={{ borderBottom: '1px solid rgba(212,175,122,0.08)' }}>
-        {/* Logo mark */}
-        <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-          style={{
-            background: 'rgba(212,175,122,0.12)',
-            border: '1px solid rgba(212,175,122,0.28)',
-          }}
-        >
+    <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0 bg-sidebar border-r border-sidebar-border">
+      {/* Logo — links home */}
+      <Link href="/feed" className="px-4 h-16 flex items-center gap-3 border-b border-sidebar-border">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gold-glow border border-gold-300/30">
           <LogoMark size={20} />
-        </div>        {/* Name + tagline */}
-        <div className="flex flex-col gap-0.5">
+        </div>
+        <span className="flex flex-col gap-0.5 leading-none">
           <span className="text-lg font-black tracking-tight leading-none">
             <span style={{ background: 'linear-gradient(160deg,#FAFAFA,#E8E8E8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Direct</span>
             <span style={{ background: 'linear-gradient(160deg,#F0D9A8,#D4AF7A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Ref</span>
           </span>
-          <span className="text-[9px] font-medium text-text-muted leading-none">
-            Refer. Get hired.
-          </span>
-        </div>
-      </div>
+          <span className="text-[9px] font-medium text-sidebar-muted leading-none">Refer. Get hired.</span>
+        </span>
+      </Link>
 
-      {/* Nav */}
-      <nav className="flex-1 py-3 px-2 overflow-y-auto">
-        {/* Home — always visible, outside the mode switch */}
-        <div className="mb-3.5">
-          <Link
-            href="/feed"
-            className={cn(
-              'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150',
-              isActive(pathname, search, '/feed') ? '' : 'hover:bg-white/5',
-            )}
-            style={{
-              color: isActive(pathname, search, '/feed') ? '#D4AF7A' : '#A89070',
-              background: isActive(pathname, search, '/feed') ? 'rgba(212,175,122,0.12)' : undefined,
-            }}
-          >
-            <span className="text-base w-[18px] text-center shrink-0">⌂</span>
-            <span className="flex-1">Home</span>
-          </Link>
+      <nav className="flex-1 py-4 px-2.5 overflow-y-auto">
+        {/* Home */}
+        <div className="mb-4">
+          <NavLink item={{ href: '/feed', icon: Home, label: 'Home' }} active={isActive(pathname, search, '/feed')} />
         </div>
 
-        {/* Mode switcher */}
-        <div className="flex gap-0.5 p-[3px] rounded-[10px] mb-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(212,175,122,0.08)' }}>
-          <button
-            onClick={() => switchMode('seeker')}
-            className="flex-1 py-2 px-1.5 rounded-lg text-[12.5px] font-bold transition-colors"
-            style={{
-              background: mode === 'seeker' ? '#D4AF7A' : 'transparent',
-              color: mode === 'seeker' ? '#0A0A0A' : '#A89070',
-            }}
-          >
-            Job Seeker
-          </button>
-          <button
-            onClick={() => switchMode('referrer')}
-            className="flex-1 py-2 px-1.5 rounded-lg text-[12.5px] font-bold transition-colors"
-            style={{
-              background: mode === 'referrer' ? '#D4AF7A' : 'transparent',
-              color: mode === 'referrer' ? '#0A0A0A' : '#A89070',
-            }}
-          >
-            Referrer
-          </button>
+        {/* Finding work */}
+        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-2">
+          Finding work
+        </p>
+        <div className="space-y-0.5 mb-4">
+          {SEEKER_ITEMS.map((item) => (
+            <NavLink key={item.href} item={item} active={isActive(pathname, search, item.href)} dim={inReferrerSection} />
+          ))}
         </div>
 
-        {/* Mode-specific items */}
-        <div className="mb-3.5 mt-2.5">
-          {items.map((item) => {
-            const active = isActive(pathname, search, item.href);
-            const showBadge = item.href === '/applications/inbox' && pendingCVs > 0;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150',
-                  active ? '' : 'hover:bg-white/5',
-                )}
-                style={{
-                  color: active ? '#D4AF7A' : '#A89070',
-                  background: active ? 'rgba(212,175,122,0.12)' : undefined,
-                }}
-              >
-                <span className="text-base w-[18px] text-center shrink-0">{item.icon}</span>
-                <span className="flex-1">{item.label}</span>
-                {showBadge && (
-                  <span className="text-[10px] font-bold bg-gold-300 text-[#0A0A0A] px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                    {pendingCVs > 9 ? '9+' : pendingCVs}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        {/* Referring */}
+        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-2">
+          Referring
+        </p>
+        <div className="space-y-0.5 mb-4">
+          {REFERRER_ITEMS.map((item) => (
+            <NavLink
+              key={item.href}
+              item={item.href === '/applications/inbox' && pendingCVs > 0 ? { ...item, badge: pendingCVs } : item}
+              active={isActive(pathname, search, item.href)}
+              dim={!inReferrerSection}
+            />
+          ))}
         </div>
 
-        {/* General — shared by both */}
-        <div>
-          <p className="text-[10.5px] font-extrabold uppercase tracking-widest px-2.5 pb-2" style={{ color: 'rgba(168,144,112,0.55)' }}>
-            General
-          </p>
-          {GENERAL_ITEMS.map((item) => {
-            const active = isActive(pathname, search, item.href);
-            const showBadge = item.href === '/notifications' && unreadCount > 0;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  'flex items-center gap-2.5 px-2 py-2.5 rounded-lg text-[14.5px] font-medium transition-all duration-150',
-                  active ? '' : 'hover:bg-white/5',
-                )}
-                style={{
-                  color: active ? '#D4AF7A' : '#A89070',
-                  background: active ? 'rgba(212,175,122,0.12)' : undefined,
-                }}
-              >
-                <span className="text-base w-[18px] text-center shrink-0">{item.icon}</span>
-                <span className="flex-1">{item.label}</span>
-                {showBadge && (
-                  <span className="text-[10px] font-bold bg-gold-300 text-[#0A0A0A] px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        {/* General */}
+        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-2">
+          General
+        </p>
+        <div className="space-y-0.5">
+          {GENERAL_ITEMS.map((item) => (
+            <NavLink
+              key={item.href}
+              item={item.href === '/notifications' && unreadCount > 0 ? { ...item, badge: unreadCount } : item}
+              active={isActive(pathname, search, item.href)}
+            />
+          ))}
         </div>
       </nav>
 
-      {/* Bottom: credits + user + logout */}
-      <div className="p-3" style={{ borderTop: '1px solid rgba(212,175,122,0.08)' }}>
+      {/* Credits + profile + logout */}
+      <div className="p-3 space-y-1 border-t border-sidebar-border">
         <CreditsCard />
         {user && (
           <Link
             href="/settings"
-            className="px-2 py-2.5 mb-1 rounded-lg hover:bg-white/5 transition-colors block"
+            className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[10px] hover:bg-white/5 transition-colors"
           >
-            <p className="text-[13px] font-semibold truncate" style={{ color: '#F0E8D8' }}>{user.fullName}</p>
-            <p className="text-[13px] truncate" style={{ color: '#A89070' }}>Profile & preferences</p>
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sidebar-card text-[11px] font-semibold text-sidebar-foreground">
+              {user.fullName.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase()}
+            </span>
+            <span className="min-w-0 text-[13px] leading-tight">
+              <span className="block truncate font-semibold text-sidebar-foreground">{user.fullName}</span>
+              <span className="block text-sidebar-muted">Profile &amp; preferences</span>
+            </span>
           </Link>
         )}
         <button
-          onClick={logout}
-          className="w-full flex items-center gap-2.5 px-2 py-[9px] rounded-lg text-[13px] font-semibold transition-colors hover:bg-white/5"
-          style={{ color: '#A89070' }}
+          onClick={handleLogout}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2v10" />
-            <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
-          </svg>
+          <LogOut className="h-[17px] w-[17px]" strokeWidth={1.7} />
           Log out
         </button>
       </div>
