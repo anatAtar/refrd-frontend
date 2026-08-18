@@ -3,14 +3,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import useSWR from 'swr';
 import { useSearchParams } from 'next/navigation';
-import { Search, SlidersHorizontal, AlertTriangle, Inbox, Frown, Check, ChevronRight } from 'lucide-react';
+import { Search, ChevronDown, AlertTriangle, Star, Check } from 'lucide-react';
 import { jobsApi } from '@/lib/api/jobs';
 import { JobCard } from '@/components/job/JobCard';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { useDebounce } from '@/lib/hooks/useDebounce';
 import { useAuth } from '@/lib/context/AuthContext';
 import { cn } from '@/lib/utils';
-import type { JobWithReferrer } from '@/lib/types';
 
 function useAllJobs() {
   return useSWR('jobs/browse/v2', () =>
@@ -19,94 +18,89 @@ function useAllJobs() {
   );
 }
 
-// ── Filter panel — lifted outside JobsPage so it's a stable component type ──
-interface FilterPanelProps {
-  hasFilters: boolean;
-  filteredCount: number;
-  facets: {
-    roles:     [string, number][];
-    companies: [string, number][];
-    workModes: [string, number][];
-    locations: [string, number][];
-    contacts:  [string, { fullName: string; avatarUrl: string | null; count: number }][];
-  };
-  selectedRoles:     Set<string>;
-  selectedCompanies: Set<string>;
-  selectedWorkModes: Set<string>;
-  selectedLocations: Set<string>;
-  setSelectedRoles:     (s: Set<string>) => void;
-  setSelectedCompanies: (s: Set<string>) => void;
-  setSelectedWorkModes: (s: Set<string>) => void;
-  setSelectedLocations: (s: Set<string>) => void;
-  toggleRole:    (t: string) => void;
-  toggleCompany: (n: string) => void;
-  toggleWorkMode: (t: string) => void;
-  toggleLocation: (t: string) => void;
-  clearAll: () => void;
-  onCloseMobile: () => void;
-}
-
-// ── Reusable filter group: collapsible header + optional search + checkbox list ──
-function FilterGroup({ title, items, selected, onToggle, onClear, searchPlaceholder, showSearch = true }: {
+// ── Reusable filter group: collapsible header + optional mini-search + checkbox list ──
+function FilterGroup({ title, items, selected, onToggle, searchPlaceholder, showSearch = false }: {
   title: string;
   items: [string, number][];
   selected: Set<string>;
   onToggle: (value: string) => void;
-  onClear: () => void;
   searchPlaceholder: string;
   showSearch?: boolean;
 }) {
   const [search, setSearch] = useState('');
-  const [showAll, setShowAll] = useState(false);
   const [expanded, setExpanded] = useState(true);
 
   const visible = useMemo(() => {
-    const f = search
-      ? items.filter(([label]) => label.toLowerCase().includes(search.toLowerCase()))
-      : items;
-    return showAll ? f : f.slice(0, 7);
-  }, [items, search, showAll]);
+    if (!search) return items;
+    return items.filter(([label]) => label.toLowerCase().includes(search.toLowerCase()));
+  }, [items, search]);
 
   if (items.length === 0) return null;
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-text-muted"
-        >
-          <ChevronRight className={cn('w-3 h-3 transition-transform', expanded ? 'rotate-90' : '')} strokeWidth={2.5} />
-          {title} <span className="font-normal normal-case tracking-normal">({items.length})</span>
-        </button>
-        {selected.size > 0 && (
-          <button onClick={onClear} className="text-[10px] text-gold-300 hover:text-gold-400 font-medium">Clear</button>
-        )}
-      </div>
+    <div className="border-b border-jobs-border pb-4 last:border-0 last:pb-0">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="flex w-full items-center justify-between gap-2 mb-2"
+      >
+        <span className="flex items-center gap-1.5">
+          <span className="text-xs font-semibold uppercase tracking-[0.09em] text-jobs-ink-muted">{title}</span>
+          {selected.size > 0 && (
+            <span className="rounded-full bg-jobs-gold-soft text-gold-500 text-[10.5px] font-semibold px-1.5 py-0.5 normal-case">
+              {selected.size}
+            </span>
+          )}
+        </span>
+        <ChevronDown
+          className={cn('w-4 h-4 text-jobs-ink-muted transition-transform', !expanded && '-rotate-90')}
+          strokeWidth={1.8}
+        />
+      </button>
+
       {expanded && (
         <>
           {showSearch && (
-            <div className="mb-2 flex items-center gap-1.5 bg-input border border-border rounded-lg px-2 py-1.5 focus-within:ring-1 focus-within:ring-gold-300/40">
-              <Search className="w-3 h-3 text-text-muted" strokeWidth={2} />
+            <div className="relative mb-2">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-jobs-ink-muted" strokeWidth={1.8} />
               <input
-                className="flex-1 bg-transparent text-xs text-text-primary placeholder:text-text-muted outline-none min-w-0"
+                className="w-full rounded-[8px] border border-jobs-border bg-jobs-surface py-1.5 pl-8 pr-2.5 text-[12.5px] text-jobs-ink placeholder:text-jobs-ink-muted focus:outline-none focus:border-gold-300 transition-colors"
                 placeholder={searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              {search && <button onClick={() => setSearch('')} className="text-text-muted hover:text-text-primary text-xs font-bold">×</button>}
             </div>
           )}
-          <div className="space-y-0.5">
-            {visible.map(([label, count]) => (
-              <FilterRow key={label} label={label} count={count} active={selected.has(label)} onToggle={() => onToggle(label)} />
-            ))}
-          </div>
-          {!search && items.length > 7 && (
-            <button onClick={() => setShowAll((v) => !v)} className="text-xs text-gold-300 hover:text-gold-400 px-1 py-0.5 mt-1">
-              {showAll ? '↑ Show less' : `+ ${items.length - 7} more`}
-            </button>
+          {visible.length === 0 ? (
+            <p className="text-[12px] text-jobs-ink-muted">No matches</p>
+          ) : (
+            <div className="max-h-56 overflow-y-auto pr-1 space-y-1">
+              {visible.map(([label, count]) => {
+                const active = selected.has(label);
+                return (
+                  <label key={label} className="flex items-center gap-2 cursor-pointer group">
+                    <span
+                      onClick={() => onToggle(label)}
+                      className={cn(
+                        'w-3.5 h-3.5 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors',
+                        active ? 'bg-gold-300 border-gold-300' : 'border-jobs-border-strong group-hover:border-gold-300/50',
+                      )}
+                    >
+                      {active && <Check className="w-2.5 h-2.5 text-gold-500" strokeWidth={3} />}
+                    </span>
+                    <span
+                      onClick={() => onToggle(label)}
+                      className="flex-1 min-w-0 truncate text-[13px] text-jobs-ink-secondary"
+                      title={label}
+                    >
+                      {label}
+                    </span>
+                    <span className="text-[11px] text-jobs-ink-muted shrink-0">{count}</span>
+                  </label>
+                );
+              })}
+            </div>
           )}
         </>
       )}
@@ -114,53 +108,20 @@ function FilterGroup({ title, items, selected, onToggle, onClear, searchPlacehol
   );
 }
 
-function FilterPanel({
-  hasFilters, filteredCount, facets,
-  selectedRoles, selectedCompanies, selectedWorkModes, selectedLocations,
-  setSelectedRoles, setSelectedCompanies, setSelectedWorkModes, setSelectedLocations,
-  toggleRole, toggleCompany, toggleWorkMode, toggleLocation,
-  clearAll, onCloseMobile,
-}: FilterPanelProps) {
-  return (
-    <div className="p-4 space-y-6">
-
-      {/* Mobile-only clear row */}
-      {hasFilters && (
-        <div className="flex md:hidden items-center justify-between">
-          <span className="text-xs text-text-secondary font-medium">{filteredCount} result{filteredCount !== 1 ? 's' : ''}</span>
-          <button onClick={() => { clearAll(); onCloseMobile(); }} className="text-xs text-gold-300 hover:text-gold-400 font-medium">Clear all</button>
-        </div>
-      )}
-
-      <FilterGroup title="Roles" items={facets.roles} selected={selectedRoles} onToggle={toggleRole} onClear={() => setSelectedRoles(new Set())} searchPlaceholder="Filter roles…" />
-      <FilterGroup title="Companies" items={facets.companies} selected={selectedCompanies} onToggle={toggleCompany} onClear={() => setSelectedCompanies(new Set())} searchPlaceholder="Filter companies…" />
-      <FilterGroup title="Work Mode" items={facets.workModes} selected={selectedWorkModes} onToggle={toggleWorkMode} onClear={() => setSelectedWorkModes(new Set())} searchPlaceholder="Filter work modes…" showSearch={false} />
-      <FilterGroup title="Location" items={facets.locations} selected={selectedLocations} onToggle={toggleLocation} onClear={() => setSelectedLocations(new Set())} searchPlaceholder="Filter locations…" />
-    </div>
-  );
-}
-
 export default function JobsPage() {
   const searchParams = useSearchParams();
-  const [search, setSearch]                       = useState('');
-  const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
-  const [selectedRoles, setSelectedRoles]         = useState<Set<string>>(new Set());
-  const [selectedWorkModes, setSelectedWorkModes] = useState<Set<string>>(new Set());
-  const [selectedLocations, setSelectedLocations] = useState<Set<string>>(new Set());
-  const [selectedContact, setSelectedContact]     = useState<string | null>(
-    searchParams.get('contact') ?? null,
-  );
-  const [selectedContactName, setSelectedContactName] = useState<string>(
-    searchParams.get('name') ?? '',
-  );
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [search, setSearch]                             = useState('');
+  const [selectedCompanies, setSelectedCompanies]         = useState<Set<string>>(new Set());
+  const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<Set<string>>(new Set());
+  const [selectedWorkModes, setSelectedWorkModes]         = useState<Set<string>>(new Set());
+  const [selectedLocations, setSelectedLocations]         = useState<Set<string>>(new Set());
+  const [selectedContact, setSelectedContact]             = useState<string | null>(searchParams.get('contact') ?? null);
+  const [selectedContactName, setSelectedContactName]     = useState<string>(searchParams.get('name') ?? '');
   const debounced = useDebounce(search, 300);
 
   useEffect(() => {
-    const c = searchParams.get('contact');
-    const n = searchParams.get('name');
-    setSelectedContact(c ?? null);
-    setSelectedContactName(n ?? '');
+    setSelectedContact(searchParams.get('contact') ?? null);
+    setSelectedContactName(searchParams.get('name') ?? '');
   }, [searchParams]);
 
   const { user } = useAuth();
@@ -173,37 +134,32 @@ export default function JobsPage() {
   );
 
   const facets = useMemo(() => {
-    const companies = new Map<string, number>();
-    const roles     = new Map<string, number>();
-    const workModes = new Map<string, number>();
-    const locations = new Map<string, number>();
-    const contacts  = new Map<string, { fullName: string; avatarUrl: string | null; count: number }>();
+    const companies       = new Map<string, number>();
+    const employmentTypes = new Map<string, number>();
+    const workModes       = new Map<string, number>();
+    const locations        = new Map<string, number>();
 
     allJobs.forEach((item) => {
       companies.set(item.job.companyName, (companies.get(item.job.companyName) ?? 0) + 1);
-      roles.set(item.job.title, (roles.get(item.job.title) ?? 0) + 1);
+      if (item.job.jobType) employmentTypes.set(item.job.jobType, (employmentTypes.get(item.job.jobType) ?? 0) + 1);
       if (item.job.workMode) workModes.set(item.job.workMode, (workModes.get(item.job.workMode) ?? 0) + 1);
       if (item.job.location) locations.set(item.job.location, (locations.get(item.job.location) ?? 0) + 1);
-      const { id, fullName, avatarUrl } = item.referrer;
-      if (!contacts.has(id)) contacts.set(id, { fullName, avatarUrl, count: 0 });
-      contacts.get(id)!.count += 1;
     });
 
     return {
-      companies: [...companies.entries()].sort((a, b) => b[1] - a[1]),
-      roles:     [...roles.entries()].sort((a, b) => b[1] - a[1]),
-      workModes: [...workModes.entries()].sort((a, b) => b[1] - a[1]),
-      locations: [...locations.entries()].sort((a, b) => b[1] - a[1]),
-      contacts:  [...contacts.entries()].sort((a, b) => b[1].count - a[1].count),
+      companies:       [...companies.entries()].sort((a, b) => b[1] - a[1]),
+      employmentTypes: [...employmentTypes.entries()].sort((a, b) => b[1] - a[1]),
+      workModes:       [...workModes.entries()].sort((a, b) => b[1] - a[1]),
+      locations:       [...locations.entries()].sort((a, b) => b[1] - a[1]),
     };
   }, [allJobs]);
 
   const filtered = useMemo(() => {
     return allJobs.filter((item) => {
       if (selectedCompanies.size > 0 && !selectedCompanies.has(item.job.companyName)) return false;
-      if (selectedRoles.size > 0 && !selectedRoles.has(item.job.title)) return false;
-      if (selectedWorkModes.size > 0 && item.job.workMode && !selectedWorkModes.has(item.job.workMode)) return false;
-      if (selectedLocations.size > 0 && item.job.location && !selectedLocations.has(item.job.location)) return false;
+      if (selectedEmploymentTypes.size > 0 && (!item.job.jobType || !selectedEmploymentTypes.has(item.job.jobType))) return false;
+      if (selectedWorkModes.size > 0 && (!item.job.workMode || !selectedWorkModes.has(item.job.workMode))) return false;
+      if (selectedLocations.size > 0 && (!item.job.location || !selectedLocations.has(item.job.location))) return false;
       if (selectedContact && item.referrer.id !== selectedContact) return false;
       if (debounced) {
         const q = debounced.toLowerCase();
@@ -217,218 +173,103 @@ export default function JobsPage() {
       }
       return true;
     });
-  }, [allJobs, selectedCompanies, selectedRoles, selectedWorkModes, selectedLocations, selectedContact, debounced]);
+  }, [allJobs, selectedCompanies, selectedEmploymentTypes, selectedWorkModes, selectedLocations, selectedContact, debounced]);
 
-  const hasFilters = selectedCompanies.size > 0 || selectedRoles.size > 0 || selectedWorkModes.size > 0 || selectedLocations.size > 0 || !!selectedContact || !!debounced;
+  const hasFilters = selectedCompanies.size > 0 || selectedEmploymentTypes.size > 0 || selectedWorkModes.size > 0 || selectedLocations.size > 0 || !!selectedContact || !!debounced;
 
   const toggleCompany = (name: string) =>
     setSelectedCompanies((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n; });
-  const toggleRole = (title: string) =>
-    setSelectedRoles((prev) => { const n = new Set(prev); n.has(title) ? n.delete(title) : n.add(title); return n; });
+  const toggleEmploymentType = (type: string) =>
+    setSelectedEmploymentTypes((prev) => { const n = new Set(prev); n.has(type) ? n.delete(type) : n.add(type); return n; });
   const toggleWorkMode = (mode: string) =>
     setSelectedWorkModes((prev) => { const n = new Set(prev); n.has(mode) ? n.delete(mode) : n.add(mode); return n; });
   const toggleLocation = (location: string) =>
     setSelectedLocations((prev) => { const n = new Set(prev); n.has(location) ? n.delete(location) : n.add(location); return n; });
 
   const clearAll = () => {
-    setSelectedCompanies(new Set()); setSelectedRoles(new Set());
+    setSelectedCompanies(new Set()); setSelectedEmploymentTypes(new Set());
     setSelectedWorkModes(new Set()); setSelectedLocations(new Set());
     setSelectedContact(null); setSelectedContactName(''); setSearch('');
   };
 
-  // Shared props for both sidebar and mobile drawer instances
-  const filterPanelProps: FilterPanelProps = {
-    hasFilters, filteredCount: filtered.length, facets,
-    selectedRoles, selectedCompanies, selectedWorkModes, selectedLocations,
-    setSelectedRoles, setSelectedCompanies, setSelectedWorkModes, setSelectedLocations,
-    toggleRole, toggleCompany, toggleWorkMode, toggleLocation,
-    clearAll,
-    onCloseMobile: () => setShowMobileFilters(false),
-  };
-
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)] overflow-hidden">
-
-      {/* Page header — full width, above the sidebar + list so both start aligned */}
-      <div className="px-4 pt-4 pb-3 border-b border-border shrink-0">
-        <h1 className="text-[26px] font-bold tracking-[-0.02em] text-text-primary mb-0.5">Jobs</h1>
-        <p className="text-[14.5px] text-text-secondary">
-          {isLoading ? 'Loading…' : `${allJobs.length} open role${allJobs.length !== 1 ? 's' : ''} from your network`}
-        </p>
+    <div className="max-w-5xl mx-auto px-4 py-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
+        <div>
+          <h1 className="text-[26px] font-bold text-jobs-ink">Jobs</h1>
+          <p className="mt-0.5 text-[14px] text-jobs-ink-secondary">
+            {isLoading ? 'Loading…' : `${filtered.length} open role${filtered.length !== 1 ? 's' : ''}${hasFilters ? '' : ' from your network'}`}
+            {selectedContact && (
+              <>
+                {' · '}Filtering by {selectedContactName || 'contact'}{' '}
+                <button onClick={() => { setSelectedContact(null); setSelectedContactName(''); }} className="text-gold-500 hover:text-gold-400 font-medium">
+                  Clear
+                </button>
+              </>
+            )}
+          </p>
+        </div>
+        <div className="relative sm:w-[300px] shrink-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-jobs-ink-muted" strokeWidth={1.8} />
+          <input
+            className="w-full rounded-[10px] border border-jobs-border bg-jobs-surface py-2.5 pl-9 pr-3 text-[13.5px] text-jobs-ink placeholder:text-jobs-ink-muted focus:outline-none focus:border-gold-300 transition-colors"
+            placeholder="Search jobs…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-
-        {/* ── MOBILE FILTER DRAWER ── */}
-        {showMobileFilters && (
-          <div className="md:hidden fixed inset-0 z-50 flex flex-col">
-            <div className="absolute inset-0 bg-black/60" onClick={() => setShowMobileFilters(false)} />
-            <div className="relative mt-auto bg-card border-t border-border rounded-t-2xl max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                <span className="text-sm font-bold text-text-primary">Filter Jobs</span>
-                <button onClick={() => setShowMobileFilters(false)} className="text-text-muted hover:text-text-primary p-2 -mr-2 text-lg">×</button>
-              </div>
-              <FilterPanel {...filterPanelProps} />
-              <div className="px-4 pb-6">
-                <button
-                  onClick={() => setShowMobileFilters(false)}
-                  className="w-full py-3 bg-gold-300 text-[#0A0A0A] font-semibold rounded-xl text-sm"
-                >
-                  Show {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── DESKTOP FILTER SIDEBAR ── */}
-        <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-border overflow-y-auto">
-          <FilterPanel {...filterPanelProps} />
-        </aside>
-
-        {/* ── JOB LIST ── */}
-        <main className="flex-1 overflow-y-auto">
-          {/* Sticky top bar */}
-        <div className="sticky top-0 z-10 bg-page/90 backdrop-blur border-b border-border px-4 py-3 flex items-center gap-3">
-
-          {/* Desktop search */}
-          <div className="hidden md:flex flex-1 items-center gap-2 bg-input border border-border-strong rounded-xl px-4 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40 transition-all">
-            <Search className="w-4 h-4 text-text-muted shrink-0" strokeWidth={1.8} />
-            <input
-              className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
-              placeholder="Search by role, company, location, referrer…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            {search && (
-              <button onClick={() => setSearch('')} className="flex items-center justify-center w-6 h-6 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors text-sm font-bold shrink-0">×</button>
-            )}
-          </div>
-
-          {/* Mobile: search + filter button */}
-          <div className="flex md:hidden items-center gap-2 flex-1 min-w-0">
-            <div className="flex-1 flex items-center gap-2 bg-input border border-border-strong rounded-xl px-3 py-2.5 focus-within:ring-2 focus-within:ring-gold-300/40">
-              <Search className="w-4 h-4 text-text-muted shrink-0" strokeWidth={1.8} />
-              <input
-                className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-muted outline-none min-w-0"
-                placeholder="Search roles, companies…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-              {search && <button onClick={() => setSearch('')} className="flex items-center justify-center w-7 h-7 rounded-full bg-border hover:bg-border-strong text-text-muted hover:text-text-primary transition-colors font-bold shrink-0">×</button>}
-            </div>
-            <button
-              onClick={() => setShowMobileFilters(true)}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-semibold border transition-colors shrink-0',
-                hasFilters
-                  ? 'bg-gold-300/15 text-gold-300 border-gold-300/30'
-                  : 'bg-input text-text-secondary border-border-strong',
-              )}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" strokeWidth={1.8} /> {hasFilters ? filtered.length : 'Filter'}
-            </button>
-          </div>
-
-          {/* Desktop: count + clear all */}
-          <div className="hidden md:flex items-center gap-2 shrink-0">
-            <span className="text-sm font-bold text-text-primary whitespace-nowrap">
-              {hasFilters ? `${filtered.length} jobs` : `${allJobs.length} open roles`}
-            </span>
+      <div className="grid gap-6 lg:grid-cols-[240px_1fr]">
+        {/* Filter rail */}
+        <aside className="lg:sticky lg:top-6 lg:self-start">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[13.5px] font-semibold text-jobs-ink">Filters</span>
             {hasFilters && (
-              <button onClick={clearAll} className="text-xs text-gold-300 hover:text-gold-400 font-medium whitespace-nowrap">
+              <button onClick={clearAll} className="text-[12.5px] text-jobs-silver hover:text-jobs-ink underline underline-offset-4">
                 Clear all
               </button>
             )}
           </div>
-        </div>
-
-        {/* Active filter chips (desktop) */}
-        {hasFilters && (
-          <div className="hidden md:flex gap-2 flex-wrap px-4 py-2 border-b border-border bg-page/60">
-            {[...selectedRoles].map((r) => <ActiveChip key={r} label={r} onRemove={() => toggleRole(r)} />)}
-            {[...selectedCompanies].map((c) => <ActiveChip key={c} label={c} onRemove={() => toggleCompany(c)} />)}
-            {[...selectedWorkModes].map((m) => <ActiveChip key={m} label={m} onRemove={() => toggleWorkMode(m)} />)}
-            {[...selectedLocations].map((l) => <ActiveChip key={l} label={l} onRemove={() => toggleLocation(l)} />)}
-            {selectedContact && (
-              <ActiveChip
-                label={facets.contacts.find(([id]) => id === selectedContact)?.[1].fullName.split(' ')[0] ?? selectedContactName}
-                onRemove={() => { setSelectedContact(null); setSelectedContactName(''); }}
-              />
-            )}
+          <div className="space-y-4">
+            <FilterGroup title="Company" items={facets.companies} selected={selectedCompanies} onToggle={toggleCompany} searchPlaceholder="Search companies…" showSearch />
+            <FilterGroup title="Employment type" items={facets.employmentTypes} selected={selectedEmploymentTypes} onToggle={toggleEmploymentType} searchPlaceholder="" />
+            <FilterGroup title="Work mode" items={facets.workModes} selected={selectedWorkModes} onToggle={toggleWorkMode} searchPlaceholder="" />
+            <FilterGroup title="Location" items={facets.locations} selected={selectedLocations} onToggle={toggleLocation} searchPlaceholder="Search locations…" showSearch />
           </div>
-        )}
+        </aside>
 
-        {/* Job results */}
-        <div className="p-4">
+        {/* Results */}
+        <div className="space-y-4 min-w-0">
           {isLoading ? (
-            <div className="space-y-3">{[...Array(5)].map((_, i) => <JobCardSkeleton key={i} />)}</div>
+            [...Array(5)].map((_, i) => <JobCardSkeleton key={i} />)
           ) : jobsError ? (
-            <div className="text-center py-16">
-              <AlertTriangle className="w-9 h-9 mx-auto mb-3 text-crit" strokeWidth={1.5} />
-              <p className="text-sm font-semibold text-text-primary mb-1">Couldn&apos;t load jobs</p>
-              <p className="text-xs text-text-muted">Check your connection and try refreshing</p>
-            </div>
-          ) : filtered.length === 0 && allJobs.length === 0 ? (
-            <div className="text-center py-16">
-              <Inbox className="w-9 h-9 mx-auto mb-3 text-text-muted" strokeWidth={1.5} />
-              <p className="text-sm font-semibold text-text-primary mb-1">No open roles yet</p>
-              <p className="text-xs text-text-muted">Check back soon — new roles are added all the time</p>
+            <div className="bg-jobs-surface border border-jobs-border rounded-lg px-6 py-14 text-center">
+              <AlertTriangle className="w-6 h-6 mx-auto mb-3 text-jobs-ink-muted" strokeWidth={1.5} />
+              <p className="text-[16.5px] font-semibold text-jobs-ink mb-1">Couldn&apos;t load jobs</p>
+              <p className="text-[13.5px] text-jobs-ink-secondary">Check your connection and try refreshing</p>
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-16">
-              <Frown className="w-9 h-9 mx-auto mb-3 text-text-muted" strokeWidth={1.5} />
-              <p className="text-sm font-semibold text-text-primary mb-1">No jobs match</p>
-              <button onClick={clearAll} className="text-sm text-gold-300 hover:text-gold-400 font-medium py-2 px-4">Clear filters</button>
+            <div className="bg-jobs-surface border border-jobs-border rounded-lg px-6 py-14 text-center">
+              <Star className="w-6 h-6 mx-auto mb-3 text-jobs-ink-muted" strokeWidth={1.5} />
+              <p className="text-[16.5px] font-semibold text-jobs-ink mb-1">
+                {allJobs.length === 0 ? 'No open roles yet' : 'No jobs match'}
+              </p>
+              <p className="text-[13.5px] text-jobs-ink-secondary mb-4">
+                {allJobs.length === 0 ? 'Check back soon — new roles are added all the time' : 'Try adjusting or clearing your filters'}
+              </p>
+              {hasFilters && (
+                <button onClick={clearAll} className="rounded-[10px] bg-gold-300 hover:opacity-90 text-gold-500 text-[13.5px] font-semibold px-4 py-2 transition-opacity">
+                  Reset filters
+                </button>
+              )}
             </div>
           ) : (
-            <div className="space-y-3">{filtered.map((j) => <JobCard key={j.job.id} data={j} />)}</div>
+            filtered.map((j) => <JobCard key={j.job.id} data={j} />)
           )}
         </div>
-      </main>
       </div>
     </div>
-  );
-}
-
-// ── Filter row checkbox ──────────────────────────────────────────────────────
-function FilterRow({ label, count, active, onToggle }: {
-  label: string; count: number; active: boolean; onToggle: () => void;
-}) {
-  return (
-    <button
-      onClick={onToggle}
-      className={cn(
-        'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-xs transition-colors text-left',
-        active
-          ? 'bg-gold-300/15 text-gold-300'
-          : 'text-text-secondary hover:text-text-primary hover:bg-card-hover',
-      )}
-    >
-      <span className={cn(
-        'w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 transition-colors',
-        active ? 'bg-gold-300 border-gold-300' : 'border-border-strong',
-      )}>
-        {active && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
-      </span>
-      <span className="flex-1 truncate" title={label}>{label}</span>
-      <span className="text-text-muted text-[10px]">{count}</span>
-    </button>
-  );
-}
-
-// ── Active filter chip ───────────────────────────────────────────────────────
-function ActiveChip({ label, onRemove }: { label: string; onRemove: () => void }) {
-  return (
-    <span className="inline-flex items-center gap-2 text-xs font-semibold bg-gold-300/15 text-gold-300 border border-gold-300/25 pl-3 pr-1.5 py-1.5 rounded-full">
-      {label}
-      <button
-        onClick={onRemove}
-        className="flex items-center justify-center w-5 h-5 rounded-full bg-gold-300/25 hover:bg-gold-300/50 text-gold-300 transition-colors font-bold text-sm leading-none"
-        aria-label={`Remove ${label} filter`}
-      >
-        ×
-      </button>
-    </span>
   );
 }

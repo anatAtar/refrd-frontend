@@ -8,6 +8,25 @@
   --color-sidebar-foreground: #F0E8D8;
   --color-sidebar-muted:      #A89070;
 
+  /* ── Jobs pages (Browse / Detail / Send CV) — per Jobs Design spec ──
+     Separate warm-light palette, scoped to this feature so it doesn't
+     shift the shared text-primary (kept pure black elsewhere). */
+  --color-jobs-bg:              oklch(0.985 0.003 75);
+  --color-jobs-surface:         oklch(1 0 0);
+  --color-jobs-ink:             oklch(0.24 0.008 60);
+  --color-jobs-ink-secondary:   oklch(0.47 0.008 60);
+  --color-jobs-ink-muted:       oklch(0.62 0.008 60);
+  --color-jobs-border:          oklch(0.93 0.004 70);
+  --color-jobs-border-strong:   oklch(0.88 0.006 65);
+  --color-jobs-gold-soft:       oklch(0.94 0.05 85);
+  --color-jobs-silver:          oklch(0.5 0.02 60);
+  --color-jobs-chip-bg:         oklch(0.94 0.004 70);
+  --color-jobs-chip-text:       oklch(0.4 0.008 60);
+  --color-jobs-highlight-wash:  oklch(0.97 0.02 85);
+  --color-jobs-status-fwd-bg:   oklch(0.87 0.1 160);
+  --color-jobs-status-fwd-text: oklch(0.25 0.06 160);
+  --color-jobs-success:         oklch(0.5 0.11 160);
+
   /* ── Main content surfaces (light grey) ────────── */
   --color-page:          #F2F2F2;
   --color-card:          #FFFFFF;

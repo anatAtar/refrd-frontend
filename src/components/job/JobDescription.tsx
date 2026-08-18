@@ -8,17 +8,17 @@ export function JobDescription({ description }: { description: string }) {
       {blocks.map((block, i) => {
         if (block.type === 'heading') {
           return (
-            <h3 key={i} className="text-[15px] font-bold text-text-primary pt-1">
+            <h2 key={i} className="text-[17px] font-semibold text-jobs-ink mt-8 first:mt-0">
               {block.text}
-            </h3>
+            </h2>
           );
         }
         if (block.type === 'list') {
           return (
-            <ul key={i} className="space-y-2.5">
+            <ul key={i} className="space-y-2">
               {block.items.map((item, j) => (
-                <li key={j} className="flex gap-2.5 text-sm text-text-secondary leading-relaxed">
-                  <span className="text-text-muted shrink-0">•</span>
+                <li key={j} className="flex gap-2.5 text-[14px] text-jobs-ink-secondary leading-relaxed">
+                  <span className="mt-2 h-1.5 w-1.5 rounded-full bg-gold-300 shrink-0" />
                   <span>{item}</span>
                 </li>
               ))}
@@ -26,7 +26,7 @@ export function JobDescription({ description }: { description: string }) {
           );
         }
         return (
-          <p key={i} className="text-sm text-text-secondary leading-relaxed">
+          <p key={i} className="text-[14px] text-jobs-ink-secondary leading-relaxed">
             {block.text}
           </p>
         );

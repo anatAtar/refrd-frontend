@@ -1,22 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Send, CheckCircle2, XCircle, Star, type LucideIcon } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
+import { Send, CheckCircle2, XCircle, Bookmark, type LucideIcon } from 'lucide-react';
 import { CompanyIcon } from '@/components/job/CompanyIcon';
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { SendCVModal } from '@/components/application/SendCVModal';
-import { SendCVSuccessModal } from '@/components/application/SendCVSuccessModal';
 import { OutOfCreditsModal } from '@/components/credits/OutOfCreditsModal';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useMyApplicationsMap } from '@/lib/hooks/useApplications';
 import { useCreditBalance, refreshCreditBalance } from '@/lib/hooks/useCredits';
 import { savedJobsApi } from '@/lib/api/savedJobs';
-import { timeAgo, jobSlug } from '@/lib/utils';
-import type { JobWithReferrer, JobReferrer } from '@/lib/types';
+import { timeAgo, jobSlug, cn } from '@/lib/utils';
+import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
 import useSWR from 'swr';
 
@@ -26,20 +22,18 @@ interface JobCardProps {
 
 // Status → icon + tooltip text (no icon for "viewed" — reviewed status shows via the CTA label only)
 const STATUS_INDICATORS: Record<string, { icon: LucideIcon; label: string; color: string }> = {
-  submitted:  { icon: Send,        label: 'CV sent — awaiting review',          color: 'text-text-muted' },
-  forwarded:  { icon: CheckCircle2, label: 'Forwarded to HR',                    color: 'text-good'       },
-  rejected:   { icon: XCircle,     label: 'Not a fit — referrer passed on this', color: 'text-crit'      },
+  submitted:  { icon: Send,         label: 'CV sent — awaiting review',          color: 'text-jobs-ink-muted' },
+  forwarded:  { icon: CheckCircle2, label: 'Forwarded to HR',                    color: 'text-jobs-success'   },
+  rejected:   { icon: XCircle,      label: 'Not a fit — referrer passed on this', color: 'text-crit'          },
 };
 
 export function JobCard({ data }: JobCardProps) {
   const { job, referrer, referrers } = data;
-  const router = useRouter();
   const { user } = useAuth();
   const { appMap } = useMyApplicationsMap();
   const { balance } = useCreditBalance();
   const [sendCVOpen, setSendCVOpen] = useState(false);
   const [outOfCreditsOpen, setOutOfCreditsOpen] = useState(false);
-  const [sentTo, setSentTo] = useState<JobReferrer | null>(null);
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
   const handleSendClick = () => {
@@ -62,170 +56,135 @@ export function JobCard({ data }: JobCardProps) {
     { revalidateOnFocus: false },
   );
   const isSaved = (savedData ?? []).some(s => s.job.id === job.id);
-  const toggleSave = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const toggleSave = async () => {
     try {
       if (isSaved) {
         await savedJobsApi.unsave(job.id);
         mutateSaved((savedData ?? []).filter(s => s.job.id !== job.id), false);
       } else {
         await savedJobsApi.save(job.id);
-        mutateSaved(); // revalidate to get full job data back
+        mutateSaved();
       }
     } catch {
-      mutateSaved(); // revert on error
+      mutateSaved();
     }
   };
 
   return (
     <>
-      <Card hover className="p-4 flex flex-col gap-3" onClick={() => router.push(href)}>
-        {/* Header */}
-        <div className="flex gap-3 items-start">
-          <CompanyIcon sourceUrl={job.sourceUrl} size={44} className="rounded-lg" />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[15px] font-bold text-text-primary truncate">{job.companyName}</span>
-              {isNew && <Badge variant="violet">New</Badge>}
-            </div>
-            <Link href={href} className="block" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-[16.5px] font-semibold leading-snug text-accent-silver hover:text-gold-300 transition-colors">
-                {job.title}
-              </h3>
-            </Link>
-            <p className="text-[13px] text-text-muted mt-0.5">
-              {job.location ?? 'Remote'}{job.jobType ? ` · ${job.jobType}` : ''} · {timeAgo(job.createdAt)}
-            </p>
-          </div>
+      <div className="relative bg-jobs-surface border border-jobs-border rounded-lg p-4 flex flex-col gap-3 transition-colors hover:border-jobs-border-strong">
+        {/* Full-bleed card link — whole card navigates; interactive bits opt back in below */}
+        <Link href={href} aria-label={`${job.title} at ${job.companyName}`} className="absolute inset-0 z-0 rounded-lg" />
 
-          {/* Status badges + icon */}
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Eye / status icon with tooltip */}
-            {indicator && (
-              <div className="relative">
-                <button
-                  onMouseEnter={() => setTooltipVisible(true)}
-                  onMouseLeave={() => setTooltipVisible(false)}
-                  onFocus={() => setTooltipVisible(true)}
-                  onBlur={() => setTooltipVisible(false)}
-                  className={`flex items-center leading-none ${indicator.color} cursor-default`}
-                  aria-label={indicator.label}
-                >
-                  <indicator.icon className="w-[18px] h-[18px]" strokeWidth={1.8} />
-                </button>
-                {tooltipVisible && (
-                  <div className="absolute right-0 top-7 z-50 whitespace-nowrap bg-card-hover border border-border-strong text-xs text-text-primary px-2.5 py-1.5 rounded-lg shadow-lg pointer-events-none">
-                    {indicator.label}
-                    {/* Arrow */}
-                    <div className="absolute -top-1 right-2 w-2 h-2 bg-card-hover border-l border-t border-border-strong rotate-45" />
-                  </div>
+        <div className="relative pointer-events-none flex flex-col gap-3">
+          {/* Header */}
+          <div className="flex gap-3 items-start">
+            <CompanyIcon sourceUrl={job.sourceUrl} size={38} className="rounded-md bg-jobs-chip-bg border-jobs-border" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[15px] font-bold text-jobs-ink truncate">{job.companyName}</span>
+                {isNew && (
+                  <span className="shrink-0 rounded-full border border-gold-300 text-gold-500 px-2 py-0.5 text-[11px] font-semibold">
+                    New
+                  </span>
                 )}
               </div>
-            )}
-            {!job.isActive && <Badge variant="muted">Closed</Badge>}
-            {isOwnPosting && <Badge variant="violet">Your post</Badge>}
+              <h3 className="text-[16.5px] font-semibold leading-snug text-jobs-ink truncate">
+                {job.title}
+              </h3>
+              <p className="text-[13px] text-jobs-ink-muted mt-0.5">
+                {job.location ?? 'Remote'}{job.jobType ? ` · ${job.jobType}` : ''} · {timeAgo(job.createdAt)}
+              </p>
+            </div>
+
+            {/* Top-right CTA slot */}
+            <div className="pointer-events-auto shrink-0">
+              {isOwnPosting ? (
+                <Link href="/jobs/mine">
+                  <Button variant="secondary" size="sm">Manage</Button>
+                </Link>
+              ) : alreadyApplied ? (
+                <div className="relative">
+                  {indicator && (
+                    <button
+                      type="button"
+                      onMouseEnter={() => setTooltipVisible(true)}
+                      onMouseLeave={() => setTooltipVisible(false)}
+                      onFocus={() => setTooltipVisible(true)}
+                      onBlur={() => setTooltipVisible(false)}
+                      className={cn('flex items-center gap-1.5 rounded-md bg-jobs-chip-bg px-2.5 py-1.5 text-[12px] font-semibold cursor-default', indicator.color)}
+                      aria-label={indicator.label}
+                    >
+                      <indicator.icon className="w-[15px] h-[15px]" strokeWidth={1.8} />
+                      {appStatus === 'forwarded' ? 'Forwarded' : appStatus === 'rejected' ? 'Not a fit' : 'CV sent'}
+                    </button>
+                  )}
+                  {tooltipVisible && (
+                    <div className="absolute right-0 top-9 z-50 whitespace-nowrap bg-jobs-ink text-jobs-bg text-xs px-2.5 py-1.5 rounded-md shadow-lg pointer-events-none">
+                      {indicator?.label}
+                    </div>
+                  )}
+                </div>
+              ) : job.isActive ? (
+                <button
+                  type="button"
+                  onClick={handleSendClick}
+                  className="rounded-md bg-gold-300 hover:opacity-90 text-[13px] font-semibold text-gold-500 px-3.5 py-2 transition-opacity"
+                >
+                  Send my C.V.
+                </button>
+              ) : (
+                <span className="rounded-md bg-jobs-chip-bg text-jobs-ink-muted text-[12.5px] font-semibold px-3 py-2 cursor-not-allowed">
+                  Closed
+                </span>
+              )}
+            </div>
           </div>
-        </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1.5">
-          {job.jobType    && <Badge variant="muted">{job.jobType}</Badge>}
-          {job.workMode   && <Badge variant="teal">{job.workMode}</Badge>}
-        </div>
-
-        {/* Contact row — overlapping avatar stack + referrer count, per Jobs Page Dev Spec */}
-        <div className="flex items-center gap-2 bg-gold-300/8 border border-gold-300/15 rounded-lg px-3 py-2">
-          <div className="flex items-center -space-x-2 shrink-0">
-            {referrers.slice(0, 3).map((r) => (
-              <Avatar key={r.id} src={r.avatarUrl} name={r.fullName} size="xs" className="ring-2 ring-card" />
-            ))}
-          </div>
-          <span className="text-xs text-text-secondary truncate">
-            {referrers.length > 1 ? (
-              <span className="text-gold-300 font-semibold">{referrers.length} referrers at this company</span>
-            ) : (
-              <>
-                <span className="text-gold-300 font-semibold">{referrer.fullName}</span> works here
-              </>
+          {/* Chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {job.jobType && (
+              <span className="rounded-full bg-jobs-chip-bg text-jobs-chip-text px-2.5 py-1 text-[12px]">{job.jobType}</span>
             )}
-          </span>
-        </div>
+            {job.workMode && (
+              <span className="rounded-full bg-jobs-chip-bg text-jobs-chip-text px-2.5 py-1 text-[12px]">{job.workMode}</span>
+            )}
+          </div>
 
-        {/* CTA */}
-        <div className="flex gap-2 pt-1">
-          {isOwnPosting ? (
-            <Link href="/jobs/mine" className="flex-1" onClick={(e) => e.stopPropagation()}>
-              <Button variant="secondary" size="sm" className="w-full">Manage this job</Button>
-            </Link>
-          ) : alreadyApplied ? (
-            <>
-              <Link href={href} className="flex-1" onClick={(e) => e.stopPropagation()}>
-                <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
-              </Link>
-              <Button variant="ghost" size="sm" className="min-h-[44px] text-text-muted shrink-0 gap-1" disabled>
-                {appStatus === 'forwarded' ? 'Forwarded' :
-                 appStatus === 'viewed'    ? 'Reviewed' :
-                 appStatus === 'rejected'  ? 'Not a fit' :
-                 'CV sent'}
-              </Button>
-            </>
-          ) : job.isActive ? (
-            <>
-              <Link href={href} className="flex-1" onClick={(e) => e.stopPropagation()}>
-                <Button variant="primary" size="sm" className="w-full min-h-[44px]">View Details</Button>
-              </Link>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="min-h-[44px] text-text-muted hover:text-text-primary shrink-0"
-                onClick={(e) => { e.stopPropagation(); handleSendClick(); }}
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-3 border-t border-jobs-border">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center -space-x-2 shrink-0">
+                {referrers.slice(0, 3).map((r) => (
+                  <Avatar key={r.id} src={r.avatarUrl} name={r.fullName} size="xs" className="ring-2 ring-jobs-surface" />
+                ))}
+              </div>
+              <span className="text-[12.5px] text-gold-500 font-semibold truncate">
+                {referrers.length > 1 ? `${referrers.length} referrers at this company` : `${referrer.fullName} works here`}
+              </span>
+            </div>
+            {!isOwnPosting && (
+              <button
+                type="button"
+                onClick={toggleSave}
+                className="pointer-events-auto shrink-0 rounded-full p-1.5 hover:bg-jobs-chip-bg transition-colors"
+                title={isSaved ? 'Remove from saved' : 'Save job'}
+                aria-label={isSaved ? 'Remove from saved' : 'Save job'}
               >
-                Send CV
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" size="sm" className="flex-1 min-h-[44px]" disabled>Job closed</Button>
-              <Link href={href} onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="sm" className="min-h-[44px]">Details</Button>
-              </Link>
-            </>
-          )}
-          {/* Save button — always visible unless own posting */}
-          {!isOwnPosting && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="min-h-[44px] shrink-0 transition-colors"
-              style={{ color: isSaved ? '#D4AF7A' : undefined }}
-              onClick={toggleSave}
-              title={isSaved ? 'Remove from saved' : 'Save job'}
-            >
-              <Star className="w-4 h-4" strokeWidth={1.8} fill={isSaved ? 'currentColor' : 'none'} />
-            </Button>
-          )}
+                <Bookmark className={cn('w-[18px] h-[18px]', isSaved ? 'text-gold-300 fill-gold-300' : 'text-jobs-ink-muted fill-none')} strokeWidth={1.8} />
+              </button>
+            )}
+          </div>
         </div>
-      </Card>
+      </div>
 
-      {!isOwnPosting && !alreadyApplied && (
+      {!isOwnPosting && (
         <SendCVModal
           open={sendCVOpen}
           onClose={() => setSendCVOpen(false)}
-          onSuccess={(r) => { setSentTo(r); refreshCreditBalance(); }}
+          onSuccess={() => refreshCreditBalance()}
           job={job}
           referrers={referrers}
-        />
-      )}
-      {/* Not gated on alreadyApplied — submitting flips that to true
-          immediately (optimisticAddApplication), which would otherwise
-          unmount this in the same render it's meant to open in. */}
-      {!isOwnPosting && (
-        <SendCVSuccessModal
-          open={!!sentTo}
-          onClose={() => setSentTo(null)}
-          referrerFirstName={sentTo?.fullName.split(' ')[0] ?? ''}
-          jobTitle={job.title}
         />
       )}
       <OutOfCreditsModal open={outOfCreditsOpen} onClose={() => setOutOfCreditsOpen(false)} />

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
-import { FileText, MessageCircle, Star } from 'lucide-react';
+import { FileText, MessageCircle, Bookmark } from 'lucide-react';
 import { applicationsApi } from '@/lib/api/applications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
 import { useAuth } from '@/lib/context/AuthContext';
@@ -146,7 +146,7 @@ function SavedTab() {
   if (saved.length === 0) {
     return (
       <div style={{ background: BG, border: `1px solid ${BORDER}`, borderRadius: 16, padding: '48px 22px', textAlign: 'center' }}>
-        <Star size={36} strokeWidth={1.4} style={{ margin: '0 auto 12px', color: MUTED }} />
+        <Bookmark size={36} strokeWidth={1.4} style={{ margin: '0 auto 12px', color: MUTED }} />
         <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>No saved jobs</p>
         <p style={{ fontSize: 13, color: MUTED, margin: '0 0 16px' }}>Tap "Save" on any job to bookmark it here.</p>
         <Link href="/jobs" style={{ fontSize: 13, fontWeight: 600, color: GOLD, textDecoration: 'none' }}>Browse jobs →</Link>

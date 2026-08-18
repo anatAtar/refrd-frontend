@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef } from 'react';
-import { FileText, Paperclip } from 'lucide-react';
+import { FileText, Upload } from 'lucide-react';
 import { cn, formatBytes } from '@/lib/utils';
 
 interface FileDropzoneProps {
@@ -16,7 +16,7 @@ interface FileDropzoneProps {
 export function FileDropzone({
   onFile,
   onView,
-  accept = 'application/pdf,.doc,.docx',
+  accept = '.pdf,.doc,.docx',
   maxBytes = 10 * 1024 * 1024,
   file,
   error,
@@ -40,43 +40,48 @@ export function FileDropzone({
   return (
     <div>
       <div
-        onClick={() => inputRef.current?.click()}
+        onClick={() => !file && inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
         className={cn(
-          'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all',
-          file
-            ? 'border-gold-300/50 bg-gold-300/5'
-            : 'border-border-strong hover:border-gold-300/40 hover:bg-gold-300/5',
+          'rounded-[10px] border border-dashed p-3 flex items-center gap-3',
+          file ? 'border-jobs-border-strong' : 'border-jobs-border-strong cursor-pointer hover:border-gold-300/50',
           error && 'border-crit/50',
         )}
       >
         {file ? (
-          <div className="flex flex-col items-center gap-2">
-            <FileText className="w-7 h-7 text-gold-300" strokeWidth={1.6} />
-            <p className="text-sm font-semibold text-text-primary">{file.name}</p>
-            <p className="text-xs text-text-muted">{formatBytes(file.size)}</p>
-            <div className="flex items-center gap-4 mt-1">
-              {onView && (
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); onView(file); }}
-                  className="text-xs text-gold-300 font-semibold hover:text-gold-400"
-                >
-                  View
-                </button>
-              )}
-              <span className="text-xs text-gold-300 font-medium">Replace</span>
+          <>
+            <FileText className="w-4 h-4 shrink-0 text-gold-500" strokeWidth={1.8} />
+            <div className="flex-1 min-w-0">
+              <p className="text-[13.5px] font-medium text-jobs-ink truncate">{file.name}</p>
+              <p className="text-[11.5px] text-jobs-ink-muted">{formatBytes(file.size)}</p>
             </div>
-          </div>
+            {onView && (
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); onView(file); }}
+                className="shrink-0 text-[12.5px] font-medium text-gold-500 hover:text-gold-400"
+              >
+                View
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+              className="shrink-0 inline-flex items-center gap-1 rounded-[8px] border border-jobs-border px-2.5 py-1.5 text-[12.5px] font-medium text-jobs-ink-secondary hover:border-jobs-border-strong transition-colors"
+            >
+              <Upload className="w-3.5 h-3.5" strokeWidth={1.8} />
+              Replace
+            </button>
+          </>
         ) : (
-          <div className="flex flex-col items-center gap-2">
-            <Paperclip className="w-7 h-7 text-text-muted opacity-50" strokeWidth={1.6} />
-            <p className="text-sm text-text-secondary">
-              Drop your CV here, or <span className="text-gold-300 font-semibold">browse</span>
+          <>
+            <FileText className="w-4 h-4 shrink-0 text-jobs-ink-muted" strokeWidth={1.8} />
+            <p className="flex-1 text-[13.5px] text-jobs-ink-secondary">
+              Drop your CV here, or <span className="text-gold-500 font-semibold">browse</span>
+              <span className="block text-[11.5px] text-jobs-ink-muted">PDF or Word · Max {formatBytes(maxBytes)}</span>
             </p>
-            <p className="text-xs text-text-muted">PDF or Word · Max {formatBytes(maxBytes)}</p>
-          </div>
+          </>
         )}
       </div>
       {error && <p className="mt-1 text-xs text-crit">{error}</p>}
