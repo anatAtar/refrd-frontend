@@ -210,7 +210,7 @@ export default function JobsPage() {
             )}
           </p>
         </div>
-        <div className="relative sm:w-[300px] shrink-0">
+        <div data-tour="jobs-search" className="relative sm:w-[300px] shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-jobs-ink-muted" strokeWidth={1.8} />
           <input
             className="w-full rounded-[10px] border border-jobs-border bg-jobs-surface py-2.5 pl-9 pr-3 text-[13.5px] text-jobs-ink placeholder:text-jobs-ink-muted focus:outline-none focus:border-gold-300 transition-colors"

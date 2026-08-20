@@ -236,7 +236,7 @@ export default function ApplicationsClient({
   return (
     <div style={{ padding: '32px 40px 60px' }}>
       {/* Header */}
-      <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{titles[tab]}</h1>
+      <h1 data-tour="sent-header" style={{ fontSize: 26, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 4px' }}>{titles[tab]}</h1>
       <p style={{ fontSize: 14.5, color: '#000000', margin: '0 0 24px' }}>
         {subtitles[tab]}
       </p>

@@ -113,7 +113,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
 
           {/* Sticky action card */}
           <aside className="lg:sticky lg:top-6 lg:self-start">
-            <div className="bg-jobs-surface border border-jobs-border rounded-lg p-5">
+            <div data-tour="send-cv" className="bg-jobs-surface border border-jobs-border rounded-lg p-5">
               <p className="text-xs font-semibold uppercase tracking-[0.09em] text-jobs-ink-muted mb-3">Apply</p>
 
               {isOwnPosting ? (

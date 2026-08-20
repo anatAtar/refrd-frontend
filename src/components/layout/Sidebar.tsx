@@ -16,10 +16,11 @@ type Item = {
   icon: typeof Home;
   label: string;
   badge?: number;
+  tourAnchor?: string;
 };
 
 const SEEKER_ITEMS: Item[] = [
-  { href: '/jobs',                   icon: Search,   label: 'Browse jobs' },
+  { href: '/jobs',                   icon: Search,   label: 'Browse jobs', tourAnchor: 'nav-jobs' },
   { href: '/applications?tab=sent',  icon: Send,     label: 'Sent CVs'    },
   { href: '/applications?tab=saved', icon: Bookmark, label: 'Saved jobs'  },
 ];
@@ -52,6 +53,7 @@ function NavLink({ item, dim, active }: { item: Item; dim?: boolean; active: boo
   return (
     <Link
       href={item.href}
+      data-tour={item.tourAnchor}
       className={cn(
         'flex items-center gap-2.5 rounded-[10px] px-2.5 py-2.5 text-[14.5px] font-medium transition-colors duration-150',
         active ? 'bg-gold-glow text-gold-300' : dim ? 'text-sidebar-muted/60 hover:bg-white/5' : 'text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground',
@@ -102,7 +104,7 @@ export function Sidebar() {
       <nav className="flex-1 py-4 px-2.5 overflow-y-auto">
         {/* Home */}
         <div className="mb-4">
-          <NavLink item={{ href: '/feed', icon: Home, label: 'Home' }} active={isActive(pathname, search, '/feed')} />
+          <NavLink item={{ href: '/feed', icon: Home, label: 'Home', tourAnchor: 'nav-home' }} active={isActive(pathname, search, '/feed')} />
         </div>
 
         {/* Finding work */}
@@ -147,10 +149,13 @@ export function Sidebar() {
 
       {/* Credits + profile + logout */}
       <div className="p-3 space-y-1 border-t border-sidebar-border">
-        <CreditsCard />
+        <div data-tour="credits">
+          <CreditsCard />
+        </div>
         {user && (
           <Link
             href="/settings"
+            data-tour="profile"
             className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[10px] hover:bg-white/5 transition-colors"
           >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sidebar-card text-[11px] font-semibold text-sidebar-foreground">

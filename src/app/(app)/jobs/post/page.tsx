@@ -124,7 +124,7 @@ export default function PostJobPage() {
         </div>
 
         {!scraped ? (
-          <div className="space-y-4">
+          <div data-tour="post-form" className="space-y-4">
             <div className="space-y-2">
               <label className="text-xs font-semibold text-text-secondary block">
                 Paste the job listing URL
