@@ -1,5 +1,8 @@
 // ── Core data types matching backend API responses ──────────────────────────
 
+export type EmploymentType = 'full-time' | 'part-time';
+export type Seniority = 'junior' | 'mid' | 'senior' | 'lead' | 'manager';
+
 export interface User {
   id: string;
   email: string;
@@ -7,6 +10,7 @@ export interface User {
   headline: string | null;
   avatarUrl: string | null;
   googleId: string | null;
+  linkedinId: string | null;
   companyName: string | null;
   isReferrer: boolean;
   isSeeker: boolean;
@@ -17,6 +21,8 @@ export interface User {
   desiredRole: string | null;
   preferredLocation: string | null;
   yearsOfExperience: number | null;
+  employmentType: EmploymentType | null;
+  seniority: Seniority | null;
   createdAt: string;
   updatedAt: string;
 }
