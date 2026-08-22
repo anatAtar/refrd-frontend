@@ -18,8 +18,8 @@ export function CreditsCard() {
   const freePct       = freeTotal > 0 ? (freeAvailable / freeTotal) * 100 : 0;
 
   return (
-    <div className="rounded-[14px] p-4 mb-1" style={{ background: '#1A1410', border: '1px solid rgba(212,175,122,0.08)' }}>
-      <div className="flex items-center gap-1.5 mb-2">
+    <div className="rounded-[14px] p-2.5" style={{ background: '#1A1410', border: '1px solid rgba(212,175,122,0.08)' }}>
+      <div className="flex items-center gap-1.5 mb-1">
         <span className="text-[12.5px] font-semibold uppercase tracking-[0.03em]" style={{ color: '#A89070' }}>
           Credits
         </span>
@@ -48,16 +48,16 @@ export function CreditsCard() {
       </div>
 
       {isLoading ? (
-        <p className="text-[13px] mb-3" style={{ color: '#A89070' }}>Loading…</p>
+        <p className="text-[13px] mb-2" style={{ color: '#A89070' }}>Loading…</p>
       ) : (
         <>
           <p className="text-[15px] font-bold mb-1" style={{ color: '#F0E8D8' }}>
             {total} credit{total === 1 ? '' : 's'} available
           </p>
-          <p className="text-[12px] mb-2.5" style={{ color: '#A89070' }}>
+          <p className="text-[12px] mb-1.5" style={{ color: '#A89070' }}>
             {freeAvailable} of {freeTotal} free · {purchased} purchased
           </p>
-          <div className="h-1.5 rounded-full overflow-hidden mb-3" style={{ background: 'rgba(255,255,255,0.08)' }}>
+          <div className="h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
             <div className="h-full rounded-full transition-all" style={{ width: `${freePct}%`, background: '#D4AF7A' }} />
           </div>
         </>
@@ -65,7 +65,7 @@ export function CreditsCard() {
 
       <Link
         href="/credits"
-        className="w-full flex items-center justify-center py-2 rounded-lg text-[13px] font-semibold transition-colors hover:bg-white/5"
+        className="w-full flex items-center justify-center py-1.5 rounded-lg text-[13px] font-semibold transition-colors hover:bg-white/5"
         style={{ border: '1px solid rgba(168,144,112,0.4)', color: '#D9C9A8' }}
       >
         Buy credits

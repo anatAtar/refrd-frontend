@@ -55,7 +55,7 @@ function NavLink({ item, dim, active }: { item: Item; dim?: boolean; active: boo
       href={item.href}
       data-tour={item.tourAnchor}
       className={cn(
-        'flex items-center gap-2.5 rounded-[10px] px-2.5 py-2.5 text-[14.5px] font-medium transition-colors duration-150',
+        'flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-[14.5px] font-medium transition-colors duration-150',
         active ? 'bg-gold-glow text-gold-300' : dim ? 'text-sidebar-muted/60 hover:bg-white/5' : 'text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground',
       )}
     >
@@ -88,7 +88,7 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0 bg-sidebar border-r border-sidebar-border">
       {/* Logo — links home */}
-      <Link href="/feed" className="px-4 h-16 flex items-center gap-3 border-b border-sidebar-border">
+      <Link href="/feed" className="px-4 h-14 flex items-center gap-3 border-b border-sidebar-border">
         <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-gold-glow border border-gold-300/30">
           <LogoMark size={20} />
         </div>
@@ -101,27 +101,27 @@ export function Sidebar() {
         </span>
       </Link>
 
-      <nav className="flex-1 py-4 px-2.5 overflow-y-auto">
+      <nav className="flex-1 py-2.5 px-2.5 overflow-y-auto">
         {/* Home */}
-        <div className="mb-4">
+        <div className="mb-2.5">
           <NavLink item={{ href: '/feed', icon: Home, label: 'Home', tourAnchor: 'nav-home' }} active={isActive(pathname, search, '/feed')} />
         </div>
 
         {/* Finding work */}
-        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-2">
+        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-1">
           Finding work
         </p>
-        <div className="space-y-0.5 mb-4">
+        <div className="space-y-0.5 mb-2.5">
           {SEEKER_ITEMS.map((item) => (
             <NavLink key={item.href} item={item} active={isActive(pathname, search, item.href)} dim={inReferrerSection} />
           ))}
         </div>
 
         {/* Referring */}
-        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-2">
+        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-1">
           Referring
         </p>
-        <div className="space-y-0.5 mb-4">
+        <div className="space-y-0.5 mb-2.5">
           {REFERRER_ITEMS.map((item) => (
             <NavLink
               key={item.href}
@@ -133,7 +133,7 @@ export function Sidebar() {
         </div>
 
         {/* General */}
-        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-2">
+        <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-sidebar-muted/60 px-2.5 pb-1">
           General
         </p>
         <div className="space-y-0.5">
@@ -148,15 +148,15 @@ export function Sidebar() {
       </nav>
 
       {/* Credits + profile + logout */}
-      <div className="p-3 space-y-1 border-t border-sidebar-border">
-        <div data-tour="credits">
+      <div className="p-2 space-y-0.5 border-t border-sidebar-border">
+        <div data-tour="credits" className="mb-0.5">
           <CreditsCard />
         </div>
         {user && (
           <Link
             href="/settings"
             data-tour="profile"
-            className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-[10px] hover:bg-white/5 transition-colors"
+            className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-[10px] hover:bg-white/5 transition-colors"
           >
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-sidebar-card text-[11px] font-semibold text-sidebar-foreground">
               {user.fullName.trim().split(/\s+/).map(p => p[0]).slice(0, 2).join('').toUpperCase()}
@@ -169,7 +169,7 @@ export function Sidebar() {
         )}
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-2.5 px-2.5 py-2.5 rounded-[10px] text-[13.5px] font-semibold text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground transition-colors"
+          className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-[10px] text-[13.5px] font-semibold text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground transition-colors"
         >
           <LogOut className="h-[17px] w-[17px]" strokeWidth={1.7} />
           Log out
