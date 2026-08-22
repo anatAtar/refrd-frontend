@@ -22,7 +22,7 @@ export function MarketingFooter() {
       <div className="mx-auto flex max-w-6xl flex-col gap-4 px-5 py-10 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <FooterLogo />
-          <p className="mt-2 text-[13px]" style={{ color: mkt.textMuted }}>Built for Israeli tech · Connecting people to their next role.</p>
+          <p className="mt-2 text-[13px]" style={{ color: mkt.textMuted }}>Connecting people to their next role.</p>
         </div>
         <nav className="flex flex-wrap gap-5 text-[13.5px]">
           <Link href="/our-story" style={footerLinkStyle}>Our story</Link>

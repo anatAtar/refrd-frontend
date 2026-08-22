@@ -119,7 +119,7 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-6xl gap-12 px-5 py-16 lg:grid-cols-[1.15fr_1fr] lg:py-20 items-center">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.09em]" style={{ color: mkt.textMuted }}>
-              Referral-first job network · Israeli tech
+              Referral-first job network
             </p>
             <h1 className="mt-5 text-[38px] sm:text-[48px] leading-[1.08] font-extrabold tracking-[-0.02em] text-balance">
               Get referred from the inside.
@@ -144,7 +144,6 @@ export default function LandingPage() {
               </Link>
             </div>
             <p className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-[12.5px]" style={{ color: mkt.textMuted }}>
-              <span>Israel-first</span>
               <span>Free to start</span>
               <span>No credit card</span>
             </p>
@@ -158,7 +157,7 @@ export default function LandingPage() {
             <div className="space-y-3">
               <div className="rounded-xl p-3.5" style={{ border: `1px solid ${mkt.border}` }}>
                 <div className="flex items-center justify-between">
-                  <span className="text-[14px] font-semibold" style={{ color: mkt.textPrimary }}>Product Designer, Growth</span>
+                  <span className="text-[14px] font-semibold" style={{ color: mkt.textPrimary }}>Frontend Engineer</span>
                   <span
                     className="rounded-full px-2.5 py-1 text-[12px] font-medium whitespace-nowrap"
                     style={{ background: 'oklch(0.88 0.09 85)', color: 'oklch(0.3 0.06 85)' }}
@@ -166,7 +165,7 @@ export default function LandingPage() {
                     Submitted
                   </span>
                 </div>
-                <p className="mt-1 text-[12.5px]" style={{ color: mkt.textMuted }}>Series C fintech · via Maya S.</p>
+                <p className="mt-1 text-[12.5px]" style={{ color: mkt.textMuted }}>Series C fintech · via John Doe</p>
                 <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full" style={{ background: mkt.border }}>
                   <div className="h-full rounded-full" style={{ width: '38%', background: mkt.accentSeeker }} />
                 </div>
@@ -182,12 +181,9 @@ export default function LandingPage() {
                     Downloaded
                   </span>
                 </div>
-                <p className="mt-1 text-[12.5px]" style={{ color: mkt.textMuted }}>Series B cybersecurity · via Dana K.</p>
+                <p className="mt-1 text-[12.5px]" style={{ color: mkt.textMuted }}>Series B cybersecurity · via Jane Doe</p>
               </div>
             </div>
-            <p className="mt-4 text-[11px]" style={{ color: mkt.textMuted }}>
-              Illustration of the in-app status view. Not a screenshot, and not real user data.
-            </p>
           </div>
         </div>
       </section>
