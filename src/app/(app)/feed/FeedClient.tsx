@@ -9,25 +9,32 @@ import { savedJobsApi } from '@/lib/api/savedJobs';
 import { useAuth } from '@/lib/context/AuthContext';
 import { Avatar } from '@/components/ui/Avatar';
 import { JobCard } from '@/components/job/JobCard';
-import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS } from '@/lib/utils';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS, STATUS_TOOLTIPS } from '@/lib/utils';
 import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
 
-function hoursElapsed(dateStr: string): number {
-  return (Date.now() - new Date(dateStr).getTime()) / 1000 / 60 / 60;
+// Escalation ladder: Day 1 (referrer reminder), Day 3 (seeker notified),
+// Day 5 (auto-cancel + credit refund). Mirrors ESCALATION_DAYS in the
+// backend's src/config/escalation.ts — change both together.
+const ESCALATION_DAYS = { REMINDER: 1, ESCALATE: 3, AUTO_CANCEL: 5 } as const;
+
+function daysElapsed(dateStr: string): number {
+  return (Date.now() - new Date(dateStr).getTime()) / 1000 / 60 / 60 / 24;
 }
 
 function TimelineBar({ createdAt }: { createdAt: string }) {
-  const hours   = hoursElapsed(createdAt);
-  const pct     = Math.min(hours / 48, 1) * 100;
-  const overdue = hours >= 48;
-  const warning = hours >= 24;
+  const days    = daysElapsed(createdAt);
+  const pct     = Math.min(days / ESCALATION_DAYS.AUTO_CANCEL, 1) * 100;
+  const overdue = days >= ESCALATION_DAYS.AUTO_CANCEL;
+  const warning = days >= ESCALATION_DAYS.ESCALATE;
   const color   = overdue || warning ? '#B45309' : '#D4AF7A';
-  const label   = overdue ? 'Overdue' : `${Math.floor(hours)}h / 48h`;
+  const dayNum  = Math.min(ESCALATION_DAYS.AUTO_CANCEL, Math.floor(days) + 1);
+  const label   = overdue ? 'Overdue' : `Day ${dayNum} of ${ESCALATION_DAYS.AUTO_CANCEL}`;
 
   const milestones: string[] = [];
-  if (hours >= 12) milestones.push('12h reminder sent');
-  if (hours >= 24) milestones.push('24h reminder sent');
+  if (days >= ESCALATION_DAYS.REMINDER) milestones.push('Day 1 reminder sent');
+  if (days >= ESCALATION_DAYS.ESCALATE) milestones.push('Day 3 update sent');
 
   return (
     <div className="mt-2.5" style={{ maxWidth: 300 }}>
@@ -43,7 +50,7 @@ function TimelineBar({ createdAt }: { createdAt: string }) {
         </span>
       </div>
       <p className="text-[11px]" style={{ color: 'oklch(0.62 0.008 60)' }}>
-        48h response window{milestones.length > 0 ? ` · ${milestones.join(' · ')}` : ''}
+        5-day response window{milestones.length > 0 ? ` · ${milestones.join(' · ')}` : ''}
       </p>
     </div>
   );
@@ -242,9 +249,14 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                         {a.job.companyName} · via {a.referrer?.fullName} · {timeAgo(a.application.createdAt)}
                       </p>
                     </div>
-                    <span className={`text-[12px] font-semibold px-3.5 py-1.5 rounded-full border shrink-0 ${STATUS_COLORS[a.application.status] ?? ''}`}>
-                      {STATUS_LABELS[a.application.status]}
-                    </span>
+                    <Tooltip content={STATUS_TOOLTIPS[a.application.status]}>
+                      <span
+                        tabIndex={0}
+                        className={`text-[12px] font-semibold px-3.5 py-1.5 rounded-full border shrink-0 cursor-help ${STATUS_COLORS[a.application.status] ?? ''}`}
+                      >
+                        {STATUS_LABELS[a.application.status]}
+                      </span>
+                    </Tooltip>
                   </Link>
                 ))}
               </div>
@@ -403,7 +415,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                   Needs your attention
                   <span
                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: '100%', border: '1px solid oklch(0.62 0.008 60)', fontSize: 9, fontWeight: 700, cursor: 'default' }}
-                    title="The bar shows time elapsed since the CV was received. More fill = more urgent. Reminders go out at 12h and 24h."
+                    title="The bar shows days elapsed since the CV was received. More fill = more urgent. A reminder goes out on Day 1, the seeker is notified on Day 3, and the application auto-closes with a credit refund on Day 5."
                   >?</span>
                 </p>
 
@@ -436,8 +448,8 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                     <p style={{ fontSize: 13, fontWeight: 700, margin: '0 0 10px' }}>CVs waiting on your review — as the referrer</p>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                       {referrerPending.map(a => {
-                        const hours = hoursElapsed(a.application.createdAt);
-                        const urgent = hours >= 24;
+                        const days = daysElapsed(a.application.createdAt);
+                        const urgent = days >= ESCALATION_DAYS.ESCALATE;
                         const borderCol = urgent ? '#B45309' : 'oklch(0.72 0.13 85)';
                         return (
                           <div

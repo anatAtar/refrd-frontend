@@ -36,7 +36,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
           <h1 className="text-xl font-bold text-text-primary">Invalid invite link</h1>
           <p className="text-sm text-text-secondary">{error}</p>
           <Link href="/register"
-            className="inline-block px-6 py-2.5 bg-gold-300 hover:bg-gold-500 text-white font-semibold rounded-xl transition-colors">
+            className="inline-block px-6 py-2.5 bg-gold-300 hover:bg-gold-400 text-[#0A0A0A] font-semibold rounded-xl transition-colors">
             Sign up anyway
           </Link>
         </div>
@@ -89,7 +89,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
         <div className="space-y-3">
           <Link
             href={`/register?invite=${token}`}
-            className="block w-full py-3.5 px-6 bg-gold-300 hover:bg-gold-500 text-white font-semibold rounded-xl transition-colors"
+            className="block w-full py-3.5 px-6 bg-gold-300 hover:bg-gold-400 text-[#0A0A0A] font-semibold rounded-xl transition-colors"
           >
             Create your account →
           </Link>

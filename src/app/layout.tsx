@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { SWRProvider } from '@/components/SWRProvider';
+import { TooltipProvider } from '@/components/ui/Tooltip';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://direct-ref.com'),
@@ -14,7 +15,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <SWRProvider>
-          {children}
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
         </SWRProvider>
         <Toaster
           theme="dark"

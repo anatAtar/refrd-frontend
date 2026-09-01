@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
@@ -10,6 +11,7 @@ import { useUnreadCount } from '@/lib/hooks/useNotifications';
 import { applicationsApi } from '@/lib/api/applications';
 import { LogoMark } from '@/components/ui/Logo';
 import { CreditsCard } from '@/components/credits/CreditsCard';
+import { LogoutDialog } from './LogoutDialog';
 
 type Item = {
   href: string;
@@ -81,9 +83,7 @@ export function Sidebar() {
 
   const inReferrerSection = REFERRER_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'));
 
-  const handleLogout = () => {
-    if (window.confirm('Log out of DirectRef?')) logout();
-  };
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
     <aside className="hidden md:flex flex-col w-72 shrink-0 h-screen sticky top-0 bg-sidebar border-r border-sidebar-border">
@@ -168,13 +168,19 @@ export function Sidebar() {
           </Link>
         )}
         <button
-          onClick={handleLogout}
+          onClick={() => setLogoutOpen(true)}
           className="w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-[10px] text-[13.5px] font-semibold text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground transition-colors"
         >
           <LogOut className="h-[17px] w-[17px]" strokeWidth={1.7} />
           Log out
         </button>
       </div>
+
+      <LogoutDialog
+        open={logoutOpen}
+        onClose={() => setLogoutOpen(false)}
+        onConfirm={() => { setLogoutOpen(false); logout(); }}
+      />
     </aside>
   );
 }

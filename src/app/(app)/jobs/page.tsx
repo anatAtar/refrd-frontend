@@ -260,7 +260,7 @@ export default function JobsPage() {
                 {allJobs.length === 0 ? 'Check back soon — new roles are added all the time' : 'Try adjusting or clearing your filters'}
               </p>
               {hasFilters && (
-                <button onClick={clearAll} className="rounded-[10px] bg-gold-300 hover:opacity-90 text-gold-500 text-[13.5px] font-semibold px-4 py-2 transition-opacity">
+                <button onClick={clearAll} className="rounded-[10px] bg-gold-300 hover:bg-gold-400 text-[#0A0A0A] text-[13.5px] font-semibold px-4 py-2 transition-colors">
                   Reset filters
                 </button>
               )}

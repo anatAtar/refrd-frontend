@@ -121,7 +121,7 @@ export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCV
               <button
                 type="button"
                 onClick={handleTrack}
-                className="rounded-[10px] bg-gold-300 hover:opacity-90 px-4 py-2.5 text-[13.5px] font-semibold text-gold-500 transition-opacity"
+                className="rounded-[10px] bg-gold-300 hover:bg-gold-400 px-4 py-2.5 text-[13.5px] font-semibold text-[#0A0A0A] transition-colors"
               >
                 Track status
               </button>
@@ -199,7 +199,7 @@ export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCV
                 type="button"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="w-full rounded-[10px] bg-gold-300 hover:opacity-90 disabled:opacity-50 py-3 text-[14px] font-semibold text-gold-500 transition-opacity"
+                className="w-full rounded-[10px] bg-gold-300 hover:bg-gold-400 disabled:opacity-50 py-3 text-[14px] font-semibold text-[#0A0A0A] transition-colors"
               >
                 {isSubmitting ? 'Sending…' : `Send to ${referrerFirst}`}
               </button>

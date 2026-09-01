@@ -56,7 +56,7 @@ export default function OnboardingWelcomePage() {
         {/* CTA */}
         <Link
           href="/onboarding/company"
-          className="block w-full py-3 px-6 bg-gold-300 hover:bg-gold-500 text-white font-semibold rounded-xl transition-colors text-center"
+          className="block w-full py-3 px-6 bg-gold-300 hover:bg-gold-400 text-[#0A0A0A] font-semibold rounded-xl transition-colors text-center"
         >
           Let's set up your network →
         </Link>

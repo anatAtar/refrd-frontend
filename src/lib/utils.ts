@@ -123,15 +123,26 @@ export const STATUS_LABELS: Record<string, string> = {
   viewed: 'Reviewed',
   forwarded: 'Downloaded',
   rejected: 'Not a fit',
+  expired: 'Expired',
 };
 
 /** Map application status to badge color classes.
- *  "Not a fit" is a valid, neutral outcome — never colored as an error/red state. */
+ *  "Not a fit" and "Expired" are both neutral outcomes — never colored as an error/red state. */
 export const STATUS_COLORS: Record<string, string> = {
   submitted: 'bg-warn/10 text-warn border-warn/20',
   viewed: 'bg-blue/10 text-blue border-blue/20',
   forwarded: 'bg-good/10 text-good border-good/20',
+  expired: 'bg-border text-text-secondary border-border-strong',
   rejected: 'bg-border text-text-secondary border-border-strong',
+};
+
+/** Plain-language explanation shown in a tooltip on hover/focus of a status badge. */
+export const STATUS_TOOLTIPS: Record<string, string> = {
+  submitted: 'Your CV has been submitted to the referrer.',
+  viewed: 'The referrer has opened your CV and is reviewing it.',
+  forwarded: 'The referrer downloaded your CV and passed it to HR.',
+  rejected: 'The referrer marked this application as not a fit for the role.',
+  expired: 'This application expired because the referrer did not respond within 5 days. Your credit was returned.',
 };
 
 /** Map connection status to label */

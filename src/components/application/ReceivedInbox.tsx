@@ -6,9 +6,10 @@ import { toast } from 'sonner';
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Dialog, DialogContent } from '@/components/ui/Dialog';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { MessageThread } from '@/components/application/MessageThread';
 import { applicationsApi } from '@/lib/api/applications';
-import { STATUS_COLORS, formatBytes, cn } from '@/lib/utils';
+import { STATUS_COLORS, STATUS_TOOLTIPS, formatBytes, cn } from '@/lib/utils';
 import { ApiError } from '@/lib/api/client';
 import type { ApplicationWithDetails } from '@/lib/types';
 
@@ -19,6 +20,7 @@ const STATUS_LABEL: Record<string, string> = {
   viewed: 'Viewed',
   forwarded: 'Downloaded',
   rejected: 'Not a fit',
+  expired: 'Expired',
 };
 
 // The 4 KPI/filter chips — fixed set. Submitted + Viewed collapse into one
@@ -161,14 +163,18 @@ export function ReceivedInbox({
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <p className="text-sm font-bold text-text-primary truncate">{a.seeker?.fullName}</p>
-                    <span
-                      className={cn(
-                        'shrink-0 inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full border',
-                        STATUS_COLORS[a.application.status],
-                      )}
-                    >
-                      {STATUS_LABEL[a.application.status] ?? a.application.status}
-                    </span>
+                    <Tooltip content={STATUS_TOOLTIPS[a.application.status]}>
+                      {/* No tabIndex here — this row is already a <button>; a focusable
+                          child inside it would be a nested-interactive-element a11y bug. */}
+                      <span
+                        className={cn(
+                          'shrink-0 inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full border cursor-help',
+                          STATUS_COLORS[a.application.status],
+                        )}
+                      >
+                        {STATUS_LABEL[a.application.status] ?? a.application.status}
+                      </span>
+                    </Tooltip>
                   </div>
                   <p className="text-xs text-text-secondary mb-0.5 truncate">{a.job.title}</p>
                   {preview && <p className="text-xs text-text-muted line-clamp-2 mb-1">{preview}</p>}
@@ -202,7 +208,7 @@ function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdat
   );
   const unreadCount = msgData?.unreadCount ?? 0;
 
-  const isDecided = application.status === 'forwarded' || application.status === 'rejected';
+  const isDecided = application.status === 'forwarded' || application.status === 'rejected' || application.status === 'expired';
   const cvUrl = applicationsApi.cvUrl(application.id);
   const cvPreviewUrl = applicationsApi.cvPreviewUrl(application.id);
 
@@ -303,7 +309,11 @@ function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdat
       {isDecided ? (
         <p className="flex items-center gap-1.5 text-sm font-semibold text-text-secondary">
           <CheckIcon />
-          {application.status === 'forwarded' ? 'Downloaded.' : 'Marked not a fit.'}
+          {application.status === 'forwarded'
+            ? 'Downloaded.'
+            : application.status === 'expired'
+              ? 'Expired — no response within 5 days.'
+              : 'Marked not a fit.'}
         </p>
       ) : (
         <div className="flex gap-3">

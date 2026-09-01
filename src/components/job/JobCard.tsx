@@ -129,7 +129,7 @@ export function JobCard({ data }: JobCardProps) {
                 <button
                   type="button"
                   onClick={handleSendClick}
-                  className="rounded-md bg-gold-300 hover:opacity-90 text-[13px] font-semibold text-gold-500 px-3.5 py-2 transition-opacity"
+                  className="rounded-md bg-gold-300 hover:bg-gold-400 text-[13px] font-semibold text-[#0A0A0A] px-3.5 py-2 transition-colors"
                 >
                   Send my C.V.
                 </button>

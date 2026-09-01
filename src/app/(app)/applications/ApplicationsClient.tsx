@@ -9,7 +9,8 @@ import { savedJobsApi } from '@/lib/api/savedJobs';
 import { useAuth } from '@/lib/context/AuthContext';
 import { ReceivedInbox } from '@/components/application/ReceivedInbox';
 import { MessageThread } from '@/components/application/MessageThread';
-import { timeAgo, jobSlug, STATUS_LABELS } from '@/lib/utils';
+import { Tooltip } from '@/components/ui/Tooltip';
+import { timeAgo, jobSlug, STATUS_LABELS, STATUS_TOOLTIPS } from '@/lib/utils';
 import type { ApplicationWithDetails, SavedJob } from '@/lib/types';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -41,24 +42,31 @@ function BuildingIcon() {
 // ─── Status badge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }: { status: string }) {
   const label = STATUS_LABELS[status] ?? status;
+
+  let badge: React.ReactNode;
   if (status === 'forwarded') {
-    return (
-      <span className="bg-good/15 text-good border border-good/25 rounded-full whitespace-nowrap" style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 14px' }}>
+    badge = (
+      <span tabIndex={0} className="bg-good/15 text-good border border-good/25 rounded-full whitespace-nowrap cursor-help" style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 14px' }}>
+        {label}
+      </span>
+    );
+  } else {
+    const colors: Record<string, { bg: string; color: string }> = {
+      submitted: { bg: 'oklch(0.88 0.09 85)',  color: 'oklch(0.3 0.06 85)' },
+      viewed:    { bg: 'oklch(0.88 0.05 240)', color: 'oklch(0.3 0.05 240)' },
+      rejected:  { bg: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)' },
+      expired:   { bg: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)' },
+    };
+    const c = colors[status] ?? { bg: 'oklch(0.93 0.004 70)', color: MUTED };
+    badge = (
+      <span tabIndex={0} className="cursor-help" style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 14px', borderRadius: 100, background: c.bg, color: c.color, whiteSpace: 'nowrap' }}>
         {label}
       </span>
     );
   }
-  const colors: Record<string, { bg: string; color: string }> = {
-    submitted: { bg: 'oklch(0.88 0.09 85)',  color: 'oklch(0.3 0.06 85)' },
-    viewed:    { bg: 'oklch(0.88 0.05 240)', color: 'oklch(0.3 0.05 240)' },
-    rejected:  { bg: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)' },
-  };
-  const c = colors[status] ?? { bg: 'oklch(0.93 0.004 70)', color: MUTED };
-  return (
-    <span style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 14px', borderRadius: 100, background: c.bg, color: c.color, whiteSpace: 'nowrap' }}>
-      {label}
-    </span>
-  );
+
+  const tooltip = STATUS_TOOLTIPS[status];
+  return tooltip ? <Tooltip content={tooltip}>{badge}</Tooltip> : badge;
 }
 
 // ─── TAB: Requests you sent ───────────────────────────────────────────────────
