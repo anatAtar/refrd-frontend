@@ -20,8 +20,9 @@ export const applicationsApi = {
   byId: (id: string) =>
     api.get<{ data: ApplicationWithDetails }>(`/api/applications/${id}`),
 
-  /** Update status (referrer: viewed | forwarded (Download decision) | rejected (Not a fit)) */
-  updateStatus: (id: string, status: 'viewed' | 'forwarded' | 'rejected') =>
+  /** Update status (referrer: viewed | forwarded (Download decision) | rejected (Not a fit) |
+   *  internally_submitted (confirms a downloaded CV was submitted internally)) */
+  updateStatus: (id: string, status: 'viewed' | 'forwarded' | 'rejected' | 'internally_submitted') =>
     api.patch(`/api/applications/${id}/status`, { status }),
 
   /** Forward to HR */

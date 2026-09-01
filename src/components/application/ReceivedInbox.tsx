@@ -19,6 +19,7 @@ const STATUS_LABEL: Record<string, string> = {
   submitted: 'Submitted',
   viewed: 'Viewed',
   forwarded: 'Downloaded',
+  internally_submitted: 'Submitted internally',
   rejected: 'Not a fit',
   expired: 'Expired',
 };
@@ -196,7 +197,7 @@ export function ReceivedInbox({
 
 function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdate: () => void }) {
   const { application, job, seeker } = data;
-  const [busy, setBusy] = useState<'download' | 'reject' | null>(null);
+  const [busy, setBusy] = useState<'download' | 'reject' | 'confirm' | null>(null);
   const [msgOpen, setMsgOpen] = useState(false);
   const [cvOpen, setCvOpen] = useState(false);
 
@@ -208,7 +209,10 @@ function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdat
   );
   const unreadCount = msgData?.unreadCount ?? 0;
 
-  const isDecided = application.status === 'forwarded' || application.status === 'rejected' || application.status === 'expired';
+  // 'forwarded' (downloaded) isn't terminal anymore — the referrer still owes a
+  // yes/no on whether they submitted it internally, so it gets its own branch below.
+  const isAwaitingSubmission = application.status === 'forwarded';
+  const isDecided = application.status === 'internally_submitted' || application.status === 'rejected' || application.status === 'expired';
   const cvUrl = applicationsApi.cvUrl(application.id);
   const cvPreviewUrl = applicationsApi.cvPreviewUrl(application.id);
 
@@ -244,6 +248,19 @@ function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdat
     try {
       await applicationsApi.updateStatus(application.id, 'rejected');
       toast.success('Marked as not a fit');
+      onUpdate();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to update status');
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleConfirmSubmitted = async () => {
+    setBusy('confirm');
+    try {
+      await applicationsApi.updateStatus(application.id, 'internally_submitted');
+      toast.success('Marked as submitted internally');
       onUpdate();
     } catch (err) {
       toast.error(err instanceof ApiError ? err.message : 'Failed to update status');
@@ -305,14 +322,40 @@ function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdat
         </Button>
       </div>
 
-      {/* Decision — replaced by a static status line once taken; no re-deciding after the fact */}
-      {isDecided ? (
+      {/* Decision — replaced by a static status line once fully resolved; no re-deciding after the fact */}
+      {isAwaitingSubmission ? (
+        <div className="space-y-3">
+          <p className="text-sm text-text-secondary bg-input rounded-lg px-3.5 py-2.5">
+            Did you submit this to your internal system yet?
+          </p>
+          <div className="flex gap-3">
+            <Button
+              variant="primary"
+              onClick={handleConfirmSubmitted}
+              isLoading={busy === 'confirm'}
+              disabled={busy !== null}
+              className="flex-1"
+            >
+              I submitted it
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={handleNotAFit}
+              isLoading={busy === 'reject'}
+              disabled={busy !== null}
+              className="flex-1"
+            >
+              Not a fit
+            </Button>
+          </div>
+        </div>
+      ) : isDecided ? (
         <p className="flex items-center gap-1.5 text-sm font-semibold text-text-secondary">
           <CheckIcon />
-          {application.status === 'forwarded'
-            ? 'Downloaded.'
+          {application.status === 'internally_submitted'
+            ? 'Submitted internally.'
             : application.status === 'expired'
-              ? 'Expired — no response within 5 days.'
+              ? 'Expired — no response in time.'
               : 'Marked not a fit.'}
         </p>
       ) : (

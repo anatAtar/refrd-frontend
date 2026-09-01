@@ -122,6 +122,7 @@ export const STATUS_LABELS: Record<string, string> = {
   submitted: 'Pending',
   viewed: 'Reviewed',
   forwarded: 'Downloaded',
+  internally_submitted: 'Submitted internally',
   rejected: 'Not a fit',
   expired: 'Expired',
 };
@@ -132,6 +133,7 @@ export const STATUS_COLORS: Record<string, string> = {
   submitted: 'bg-warn/10 text-warn border-warn/20',
   viewed: 'bg-blue/10 text-blue border-blue/20',
   forwarded: 'bg-good/10 text-good border-good/20',
+  internally_submitted: 'bg-good/10 text-good border-good/20',
   expired: 'bg-border text-text-secondary border-border-strong',
   rejected: 'bg-border text-text-secondary border-border-strong',
 };
@@ -140,9 +142,10 @@ export const STATUS_COLORS: Record<string, string> = {
 export const STATUS_TOOLTIPS: Record<string, string> = {
   submitted: 'Your CV has been submitted to the referrer.',
   viewed: 'The referrer has opened your CV and is reviewing it.',
-  forwarded: 'The referrer downloaded your CV and passed it to HR.',
+  forwarded: 'The referrer downloaded your CV and is deciding whether to submit it internally.',
+  internally_submitted: "The referrer submitted your CV into their company's internal system.",
   rejected: 'The referrer marked this application as not a fit for the role.',
-  expired: 'This application expired because the referrer did not respond within 5 days. Your credit was returned.',
+  expired: 'This application expired because the referrer did not respond in time. Your credit was returned.',
 };
 
 /** Map connection status to label */

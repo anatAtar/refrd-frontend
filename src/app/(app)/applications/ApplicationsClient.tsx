@@ -44,7 +44,7 @@ function StatusBadge({ status }: { status: string }) {
   const label = STATUS_LABELS[status] ?? status;
 
   let badge: React.ReactNode;
-  if (status === 'forwarded') {
+  if (status === 'forwarded' || status === 'internally_submitted') {
     badge = (
       <span tabIndex={0} className="bg-good/15 text-good border border-good/25 rounded-full whitespace-nowrap cursor-help" style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 14px' }}>
         {label}

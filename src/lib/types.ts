@@ -83,7 +83,7 @@ export interface Application {
   cvSizeBytes: number;
   cvMimetype: string;
   coverNote: string | null;
-  status: 'submitted' | 'viewed' | 'forwarded' | 'rejected' | 'expired';
+  status: 'submitted' | 'viewed' | 'forwarded' | 'internally_submitted' | 'rejected' | 'expired';
   referrerNote: string | null;
   hrEmail: string | null;
   forwardedAt: string | null;

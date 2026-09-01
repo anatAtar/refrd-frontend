@@ -14,10 +14,11 @@ import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS, STATUS_TOOLTIPS } from 
 import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
 
-// Escalation ladder: Day 1 (referrer reminder), Day 3 (seeker notified),
-// Day 5 (auto-cancel + credit refund). Mirrors ESCALATION_DAYS in the
-// backend's src/config/escalation.ts — change both together.
-const ESCALATION_DAYS = { REMINDER: 1, ESCALATE: 3, AUTO_CANCEL: 5 } as const;
+// Escalation ladder (Clock A only — from CV sent): Day 1 (referrer reminder),
+// Day 2 (stronger referrer reminder), Day 5 (auto-cancel + credit refund).
+// Mirrors ESCALATION_DAYS in the backend's src/config/escalation.ts —
+// change both together.
+const ESCALATION_DAYS = { REMINDER: 1, ESCALATE: 2, AUTO_CANCEL: 5 } as const;
 
 function daysElapsed(dateStr: string): number {
   return (Date.now() - new Date(dateStr).getTime()) / 1000 / 60 / 60 / 24;
@@ -34,7 +35,7 @@ function TimelineBar({ createdAt }: { createdAt: string }) {
 
   const milestones: string[] = [];
   if (days >= ESCALATION_DAYS.REMINDER) milestones.push('Day 1 reminder sent');
-  if (days >= ESCALATION_DAYS.ESCALATE) milestones.push('Day 3 update sent');
+  if (days >= ESCALATION_DAYS.ESCALATE) milestones.push('Day 2 reminder sent');
 
   return (
     <div className="mt-2.5" style={{ maxWidth: 300 }}>
@@ -415,7 +416,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                   Needs your attention
                   <span
                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: '100%', border: '1px solid oklch(0.62 0.008 60)', fontSize: 9, fontWeight: 700, cursor: 'default' }}
-                    title="The bar shows days elapsed since the CV was received. More fill = more urgent. A reminder goes out on Day 1, the seeker is notified on Day 3, and the application auto-closes with a credit refund on Day 5."
+                    title="The bar shows days elapsed since the CV was received. More fill = more urgent. A reminder goes out on Day 1, a stronger one on Day 2, and the application auto-closes with a credit refund on Day 5."
                   >?</span>
                 </p>
 
