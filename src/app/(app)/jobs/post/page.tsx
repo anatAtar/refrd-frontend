@@ -54,6 +54,7 @@ export default function PostJobPage() {
         location:    data.location    ?? prev.location,
         description: data.description ?? prev.description,
         jobType:     data.jobType     ?? prev.jobType,
+        workMode:    data.workMode    ?? prev.workMode,
       }));
       setScraped(true);
       toast.success('Details filled in! Review and publish.');
