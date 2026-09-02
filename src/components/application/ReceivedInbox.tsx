@@ -10,7 +10,7 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { MessageThread } from '@/components/application/MessageThread';
 import { applicationsApi } from '@/lib/api/applications';
 import { STATUS_COLORS, STATUS_TOOLTIPS, formatBytes, cn } from '@/lib/utils';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, ensureFreshSession } from '@/lib/api/client';
 import type { ApplicationWithDetails } from '@/lib/types';
 
 // Status pill wording is fixed by spec — do not rename these, even though the
@@ -220,7 +220,11 @@ function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdat
     .filter(Boolean)
     .join(', ');
 
-  const handleViewCv = () => {
+  const handleViewCv = async () => {
+    // The iframe navigates straight to a cookie-authed URL — it can't retry on
+    // a 401 the way apiFetch does, so make sure the token is fresh first.
+    const ok = await ensureFreshSession();
+    if (!ok) { toast.error('Your session expired — refresh the page and log in again.'); return; }
     // Inline preview modal, not a download prompt — the referrer reads it without leaving the page.
     setCvOpen(true);
     if (application.status === 'submitted') setTimeout(onUpdate, 1200);
@@ -229,6 +233,8 @@ function DetailPanel({ data, onUpdate }: { data: ApplicationWithDetails; onUpdat
   const handleDownload = async () => {
     setBusy('download');
     try {
+      const ok = await ensureFreshSession();
+      if (!ok) { toast.error('Your session expired — refresh the page and log in again.'); return; }
       const link = document.createElement('a');
       link.href = cvUrl;
       link.download = application.cvOriginalName;

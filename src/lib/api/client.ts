@@ -91,6 +91,26 @@ export async function apiFetch<T = unknown>(
   return res.json() as Promise<T>;
 }
 
+/**
+ * Proactively refreshes the access-token cookie (15min TTL). Call this before
+ * handing a raw file URL to something that can't retry on 401 itself — an
+ * <iframe src>, window.open, or a plain <a href> download all bypass
+ * apiFetch's reactive refresh-on-401 above, so a token that's simply gone
+ * stale surfaces as a broken/failed file load instead of a fresh one.
+ * Returns false if the session is fully expired (refresh token also gone).
+ */
+export async function ensureFreshSession(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 // ── Convenient method wrappers ───────────────────────────────────────────────
 export const api = {
   get: <T>(path: string, init?: RequestInit) =>

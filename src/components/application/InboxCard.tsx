@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { MessageThread } from '@/components/application/MessageThread';
 import { applicationsApi } from '@/lib/api/applications';
 import { STATUS_LABELS, STATUS_COLORS, formatBytes, timeAgo, jobCode } from '@/lib/utils';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, ensureFreshSession } from '@/lib/api/client';
 import type { ApplicationWithDetails } from '@/lib/types';
 
 interface InboxCardProps {
@@ -39,10 +39,23 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
   const statusColor = STATUS_COLORS[application.status] ?? '';
   const isDone      = application.status === 'rejected';
 
-  const handleView = () => {
+  const handleView = async () => {
+    // window.open navigates straight to a cookie-authed URL — it can't retry
+    // on a 401 the way apiFetch does, so make sure the token is fresh first.
+    const ok = await ensureFreshSession();
+    if (!ok) { toast.error('Your session expired — refresh the page and log in again.'); return; }
     // Opens inline in browser tab — PDF displays, Word downloads
     window.open(cvPreviewUrl, '_blank');
     setTimeout(onUpdate, 1500);
+  };
+
+  const handleDownloadClick = async () => {
+    const ok = await ensureFreshSession();
+    if (!ok) { toast.error('Your session expired — refresh the page and log in again.'); return; }
+    const link = document.createElement('a');
+    link.href = cvUrl;
+    link.download = application.cvOriginalName;
+    link.click();
   };
 
   const handleDecline = async () => {
@@ -104,11 +117,9 @@ export function InboxCard({ data, onUpdate }: InboxCardProps) {
                 </Button>
 
                 {/* Download — always available */}
-                <a href={cvUrl} download={application.cvOriginalName} className="flex-1">
-                  <Button variant="primary" size="sm" className="w-full gap-1.5">
-                    <Download className="w-3.5 h-3.5" strokeWidth={1.8} /> Download CV
-                  </Button>
-                </a>
+                <Button variant="primary" size="sm" onClick={handleDownloadClick} className="flex-1 gap-1.5">
+                  <Download className="w-3.5 h-3.5" strokeWidth={1.8} /> Download CV
+                </Button>
 
                 {/* Message */}
                 <Button
