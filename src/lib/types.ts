@@ -159,12 +159,18 @@ export interface ApplicationMessage {
 }
 
 export interface CreditBalance {
-  freeAvailable: number;
-  freeTotal: number;
-  purchased: number;
   total: number;
+  // Legacy free/purchased split — the backend no longer distinguishes these
+  // (see credits.service.ts), so it never sends them. Kept optional only so
+  // the untouched, currently-unreachable /credits purchase page still
+  // compiles; every live consumer reads `total`.
+  freeAvailable?: number;
+  freeTotal?: number;
+  purchased?: number;
 }
 
+// Kept for the (currently disabled) purchase UI — see credits/page.tsx and
+// lib/api/credits.ts.
 export interface CreditPackage {
   id: string;
   name: string;

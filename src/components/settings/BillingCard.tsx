@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
+// import Link from 'next/link';
 import { pfx } from '@/app/(app)/settings/tokens';
-import { PrimaryButton } from './buttons';
+// import { PrimaryButton } from './buttons';
 import { useCreditBalance } from '@/lib/hooks/useCredits';
 
 export function BillingCard() {
@@ -15,28 +15,24 @@ export function BillingCard() {
       </p>
 
       {balance ? (
-        <>
-          <p className="mt-2 text-[20px] font-bold" style={{ color: pfx.ink }}>
-            {balance.total} credits available
-          </p>
-          <p className="mt-1.5 text-[13.5px] leading-relaxed" style={{ color: pfx.inkSecondary }}>
-            {balance.freeAvailable} of {balance.freeTotal} free · {balance.purchased} purchased. One credit sends a
-            C.V. or posts a job — it is one shared balance.
-          </p>
-        </>
+        <p className="mt-2 text-[20px] font-bold" style={{ color: pfx.ink }}>
+          {balance.total} credits available
+        </p>
       ) : (
         <p className="mt-2 text-[13.5px]" style={{ color: pfx.inkSecondary }}>Loading balance…</p>
       )}
 
-      <p className="mt-3 text-[12.5px]" style={{ color: pfx.inkMuted }}>
-        Purchased credits are valid for 12 months. Your free credit resets every month, regardless of purchases.
+      <p className="mt-1.5 text-[13.5px] leading-relaxed" style={{ color: pfx.inkSecondary }}>
+        One credit sends a C.V. or posts a job — it is one shared balance. You get 3 credits when you
+        join, then 1 more every month.
       </p>
 
-      <div className="mt-5 flex justify-end">
+      {/* Buy credits is disabled — kept for a quick re-enable, not shown. */}
+      {/* <div className="mt-5 flex justify-end">
         <Link href="/credits">
           <PrimaryButton type="button">Buy credits</PrimaryButton>
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 }

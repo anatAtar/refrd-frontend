@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { useCreditBalance } from '@/lib/hooks/useCredits';
 
 /** Sidebar credits card — dark palette matches Sidebar.tsx's own hardcoded
@@ -11,11 +11,7 @@ export function CreditsCard() {
   const { balance, isLoading } = useCreditBalance();
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
-  const total         = balance?.total ?? 0;
-  const freeAvailable = balance?.freeAvailable ?? 0;
-  const freeTotal     = balance?.freeTotal ?? 1;
-  const purchased     = balance?.purchased ?? 0;
-  const freePct       = freeTotal > 0 ? (freeAvailable / freeTotal) * 100 : 0;
+  const total = balance?.total ?? 0;
 
   return (
     <div className="rounded-[14px] p-2.5" style={{ background: '#1A1410', border: '1px solid rgba(212,175,122,0.08)' }}>
@@ -41,35 +37,28 @@ export function CreditsCard() {
               className="absolute left-0 bottom-6 z-50 w-48 text-[11px] leading-snug px-2.5 py-2 rounded-lg pointer-events-none"
               style={{ background: '#2A2118', color: '#E8DCC8', border: '1px solid rgba(212,175,122,0.15)' }}
             >
-              1 credit sends a C.V. or posts a job. Free credit resets monthly.
+              1 credit sends a C.V. or posts a job. You start with 3 and get 1 more every month.
             </div>
           )}
         </div>
       </div>
 
       {isLoading ? (
-        <p className="text-[13px] mb-2" style={{ color: '#A89070' }}>Loading…</p>
+        <p className="text-[13px]" style={{ color: '#A89070' }}>Loading…</p>
       ) : (
-        <>
-          <p className="text-[15px] font-bold mb-1" style={{ color: '#F0E8D8' }}>
-            {total} credit{total === 1 ? '' : 's'} available
-          </p>
-          <p className="text-[12px] mb-1.5" style={{ color: '#A89070' }}>
-            {freeAvailable} of {freeTotal} free · {purchased} purchased
-          </p>
-          <div className="h-1.5 rounded-full overflow-hidden mb-1.5" style={{ background: 'rgba(255,255,255,0.08)' }}>
-            <div className="h-full rounded-full transition-all" style={{ width: `${freePct}%`, background: '#D4AF7A' }} />
-          </div>
-        </>
+        <p className="text-[15px] font-bold" style={{ color: '#F0E8D8' }}>
+          {total} credit{total === 1 ? '' : 's'} available
+        </p>
       )}
 
-      <Link
+      {/* Buy credits is disabled — kept for a quick re-enable, not shown. */}
+      {/* <Link
         href="/credits"
-        className="w-full flex items-center justify-center py-1.5 rounded-lg text-[13px] font-semibold transition-colors hover:bg-white/5"
+        className="w-full flex items-center justify-center py-1.5 rounded-lg text-[13px] font-semibold transition-colors hover:bg-white/5 mt-1.5"
         style={{ border: '1px solid rgba(168,144,112,0.4)', color: '#D9C9A8' }}
       >
         Buy credits
-      </Link>
+      </Link> */}
     </div>
   );
 }

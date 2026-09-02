@@ -6,13 +6,10 @@ import type { CreditBalance } from './types';
  *  same shared-balance rule in both places, per the credits guidelines. */
 export function creditHintText(balance: CreditBalance | null | undefined): string {
   if (!balance) return '';
-  if (balance.freeAvailable > 0) {
-    return `Uses 1 of your ${balance.freeTotal} free credit${balance.freeTotal === 1 ? '' : 's'}. You have ${balance.total} credit${balance.total === 1 ? '' : 's'} total.`;
+  if (balance.total > 0) {
+    return `Uses 1 credit. You have ${balance.total} credit${balance.total === 1 ? '' : 's'}.`;
   }
-  if (balance.purchased > 0) {
-    return `Uses 1 purchased credit. You have ${balance.total} credit${balance.total === 1 ? '' : 's'} left.`;
-  }
-  return "You're out of credits. Buy more credits.";
+  return "You're out of credits.";
 }
 
 /** Validate a `next=` post-login redirect target: same-origin path only.
