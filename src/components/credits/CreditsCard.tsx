@@ -37,7 +37,7 @@ export function CreditsCard() {
               className="absolute left-0 bottom-6 z-50 w-48 text-[11px] leading-snug px-2.5 py-2 rounded-lg pointer-events-none"
               style={{ background: '#2A2118', color: '#E8DCC8', border: '1px solid rgba(212,175,122,0.15)' }}
             >
-              1 credit sends a C.V. or posts a job. You start with 3 and get 1 more every month.
+              1 credit posts a job. You start with 3 and get 1 more every month.
             </div>
           )}
         </div>

@@ -17,7 +17,7 @@ export function OutOfCreditsModal({ open, onClose }: OutOfCreditsModalProps) {
       <DialogContent title="You don't have enough credits" onClose={onClose}>
         <div className="px-6 py-5">
           <p className="text-sm text-text-secondary">
-            You need a credit to send a C.V. or post a job. Reach out to support and we&apos;ll help you out.
+            You need a credit to post a job. Reach out to support and we&apos;ll help you out.
           </p>
         </div>
         <div className="px-6 pb-5 flex justify-end gap-2 border-t border-border pt-4">

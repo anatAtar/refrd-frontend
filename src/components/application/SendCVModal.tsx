@@ -9,8 +9,7 @@ import { FileDropzone } from '@/components/ui/FileDropzone';
 import { Avatar } from '@/components/ui/Avatar';
 import { applicationsApi } from '@/lib/api/applications';
 import { optimisticAddApplication } from '@/lib/hooks/useApplications';
-import { useCreditBalance } from '@/lib/hooks/useCredits';
-import { formatBytes, cn, creditHintText } from '@/lib/utils';
+import { formatBytes, cn } from '@/lib/utils';
 import { ApiError } from '@/lib/api/client';
 import type { Job, JobReferrer } from '@/lib/types';
 
@@ -27,7 +26,6 @@ interface SendCVModalProps {
  *  `alreadyApplied` flips true right after submit. */
 export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCVModalProps) {
   const router = useRouter();
-  const { balance } = useCreditBalance();
   const [view, setView] = useState<'form' | 'success'>('form');
   const [selectedId, setSelectedId] = useState(referrers[0]?.id);
   const [sentTo, setSentTo] = useState<JobReferrer | null>(null);
@@ -203,7 +201,6 @@ export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCV
               >
                 {isSubmitting ? 'Sending…' : `Send to ${referrerFirst}`}
               </button>
-              <p className="text-center text-[11.5px] text-jobs-ink-muted mt-2.5">{creditHintText(balance)}</p>
             </div>
           </>
         )}

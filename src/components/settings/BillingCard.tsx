@@ -23,8 +23,7 @@ export function BillingCard() {
       )}
 
       <p className="mt-1.5 text-[13.5px] leading-relaxed" style={{ color: pfx.inkSecondary }}>
-        One credit sends a C.V. or posts a job — it is one shared balance. You get 3 credits when you
-        join, then 1 more every month.
+        One credit posts a job. You get 3 credits when you join, then 1 more every month.
       </p>
 
       {/* Buy credits is disabled — kept for a quick re-enable, not shown. */}

@@ -2,8 +2,8 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import type { CreditBalance } from './types';
 
-/** Copy for the credits-hint line shown under "Send My C.V." / "Post Job" —
- *  same shared-balance rule in both places, per the credits guidelines. */
+/** Copy for the credits-hint line shown under "Post Job" — credits currently
+ *  gate the referrer side only; sending a C.V. doesn't spend one. */
 export function creditHintText(balance: CreditBalance | null | undefined): string {
   if (!balance) return '';
   if (balance.total > 0) {
@@ -157,7 +157,7 @@ export const STATUS_TOOLTIPS: Record<string, string> = {
   forwarded: 'The referrer downloaded your CV and is deciding whether to submit it internally.',
   internally_submitted: "The referrer submitted your CV into their company's internal system.",
   rejected: 'The referrer marked this application as not a fit for the role.',
-  expired: 'This application expired because the referrer did not respond in time. Your credit was returned.',
+  expired: 'This application expired because the referrer did not respond in time.',
 };
 
 /** Map connection status to label */

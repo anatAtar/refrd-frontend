@@ -137,7 +137,7 @@ export default function PostJobPage() {
         <div>
           <h1 className="text-2xl font-bold text-text-primary mb-1">Post a Job</h1>
           <p className="text-sm text-text-secondary">
-            Roles at your company you&apos;re offering to refer for. Costs 1 credit — same balance as sending a C.V.
+            Roles at your company you&apos;re offering to refer for. Costs 1 credit.
           </p>
         </div>
 

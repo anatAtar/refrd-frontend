@@ -35,8 +35,7 @@ export default function SupportPage() {
         </div>
         <h1 className="text-[20px] font-bold text-text-primary mb-2">Need more credits?</h1>
         <p className="text-sm text-text-secondary mb-1">
-          You get 3 credits when you join, then 1 more every month — one shared balance for sending a
-          C.V. or posting a job.
+          You get 3 credits when you join, then 1 more every month — one credit posts a job.
         </p>
         {balance && (
           <p className="text-xs text-text-muted mb-5">

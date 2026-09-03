@@ -7,11 +7,9 @@ import { CompanyIcon } from '@/components/job/CompanyIcon';
 import { JobDescription } from '@/components/job/JobDescription';
 import { Avatar } from '@/components/ui/Avatar';
 import { SendCVModal } from '@/components/application/SendCVModal';
-import { OutOfCreditsModal } from '@/components/credits/OutOfCreditsModal';
 import { useAuth } from '@/lib/context/AuthContext';
 import { useAppliedJobIds } from '@/lib/hooks/useApplications';
-import { useCreditBalance, refreshCreditBalance } from '@/lib/hooks/useCredits';
-import { creditHintText, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
 
@@ -20,17 +18,10 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
   const router = useRouter();
   const { user } = useAuth();
   const appliedJobIds = useAppliedJobIds();
-  const { balance } = useCreditBalance();
   const [sendCVOpen, setSendCVOpen] = useState(false);
-  const [outOfCreditsOpen, setOutOfCreditsOpen] = useState(false);
 
   const isOwnPosting  = referrers.some((r) => r.id === user?.id) || user?.id === job.referrerId;
   const alreadyApplied = referrers.some((r) => appliedJobIds.has(r.jobId));
-
-  const handleSendClick = () => {
-    if (balance && balance.total <= 0) setOutOfCreditsOpen(true);
-    else setSendCVOpen(true);
-  };
 
   return (
     <>
@@ -137,7 +128,7 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
                 <>
                   <button
                     type="button"
-                    onClick={handleSendClick}
+                    onClick={() => setSendCVOpen(true)}
                     className="w-full rounded-md bg-gold-300 hover:bg-gold-400 text-[#0A0A0A] text-[14px] font-semibold px-4 py-3 transition-colors"
                   >
                     Send my C.V.
@@ -147,7 +138,6 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
                       ? `${referrers.length} people at ${job.companyName} can refer you`
                       : `Goes straight to ${referrers[0]?.fullName.split(' ')[0]} at ${job.companyName}`}
                   </p>
-                  <p className="mt-1 text-[11.5px] text-jobs-ink-muted text-center">{creditHintText(balance)}</p>
                 </>
               ) : (
                 <button type="button" disabled className="w-full rounded-md bg-jobs-chip-bg text-jobs-ink-muted text-[13.5px] font-semibold py-3 cursor-not-allowed">
@@ -166,12 +156,10 @@ export default function JobDetailClient({ data }: { data: JobWithReferrer }) {
         <SendCVModal
           open={sendCVOpen}
           onClose={() => setSendCVOpen(false)}
-          onSuccess={() => refreshCreditBalance()}
           job={job}
           referrers={referrers}
         />
       )}
-      <OutOfCreditsModal open={outOfCreditsOpen} onClose={() => setOutOfCreditsOpen(false)} />
     </>
   );
 }

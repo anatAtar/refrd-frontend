@@ -15,7 +15,7 @@ import type { JobWithReferrer } from '@/lib/types';
 import Link from 'next/link';
 
 // Escalation ladder (Clock A only — from CV sent): Day 1 (referrer reminder),
-// Day 2 (stronger referrer reminder), Day 5 (auto-cancel + credit refund).
+// Day 2 (stronger referrer reminder), Day 5 (auto-cancel).
 // Mirrors ESCALATION_DAYS in the backend's src/config/escalation.ts —
 // change both together.
 const ESCALATION_DAYS = { REMINDER: 1, ESCALATE: 2, AUTO_CANCEL: 5 } as const;
@@ -157,14 +157,14 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
               <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: 0 }}>Browse roles and track your applications</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+              <Link href="/applications?tab=sent" style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center', textDecoration: 'none' }}>
                 <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: '#000000' }}>{appsSent}</p>
                 <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Apps sent</p>
-              </div>
-              <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+              </Link>
+              <Link href="/applications?tab=sent" style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center', textDecoration: 'none' }}>
                 <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: awaitingResp > 0 ? 'oklch(0.72 0.13 85)' : '#000000' }}>{awaitingResp}</p>
                 <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Awaiting response</p>
-              </div>
+              </Link>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <Link href="/jobs" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13, fontWeight: 700, borderRadius: 9, textDecoration: 'none' }}>
@@ -185,14 +185,14 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
               <p style={{ fontSize: 12.5, color: 'oklch(0.62 0.008 60)', margin: 0 }}>Review applicants and manage your openings</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+              <Link href="/jobs/post" style={{ background: 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center', textDecoration: 'none' }}>
                 <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: '#000000' }}>{activeJobs}</p>
                 <p style={{ fontSize: 11.5, color: 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>Jobs posted</p>
-              </div>
-              <div style={{ background: pendingCVs > 0 ? 'oklch(0.88 0.09 85)' : 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
+              </Link>
+              <Link href="/applications?tab=received" style={{ background: pendingCVs > 0 ? 'oklch(0.88 0.09 85)' : 'oklch(0.97 0.003 75)', borderRadius: 10, padding: '12px 14px', textAlign: 'center', textDecoration: 'none' }}>
                 <p style={{ fontSize: 24, fontWeight: 700, margin: '0 0 2px', color: pendingCVs > 0 ? 'oklch(0.3 0.06 85)' : '#000000' }}>{pendingCVs}</p>
                 <p style={{ fontSize: 11.5, color: pendingCVs > 0 ? 'oklch(0.4 0.06 85)' : 'oklch(0.62 0.008 60)', margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>CVs to review</p>
-              </div>
+              </Link>
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <Link href="/applications?tab=received" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '9px 0', background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13, fontWeight: 700, borderRadius: 9, textDecoration: 'none' }}>
@@ -416,7 +416,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                   Needs your attention
                   <span
                     style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: '100%', border: '1px solid oklch(0.62 0.008 60)', fontSize: 9, fontWeight: 700, cursor: 'default' }}
-                    title="The bar shows days elapsed since the CV was received. More fill = more urgent. A reminder goes out on Day 1, a stronger one on Day 2, and the application auto-closes with a credit refund on Day 5."
+                    title="The bar shows days elapsed since the CV was received. More fill = more urgent. A reminder goes out on Day 1, a stronger one on Day 2, and the application auto-closes on Day 5."
                   >?</span>
                 </p>
 
