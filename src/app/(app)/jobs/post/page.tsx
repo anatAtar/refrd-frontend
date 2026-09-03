@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { CheckCircle2, ClipboardList } from 'lucide-react';
+import { CheckCircle2, ClipboardList, ShieldAlert } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
+import { WORK_EMAIL_ANCHOR } from '@/components/settings/WorkEmailCard';
 import { jobsApi } from '@/lib/api/jobs';
 import { useMyJobs } from '@/lib/hooks/useJobs';
 import { Input } from '@/components/ui/Input';
@@ -16,6 +18,7 @@ import { Tooltip } from '@/components/ui/Tooltip';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { OutOfCreditsModal } from '@/components/credits/OutOfCreditsModal';
+import { WorkEmailRequiredModal } from '@/components/job/WorkEmailRequiredModal';
 import { ApiError } from '@/lib/api/client';
 import { timeAgo, jobSlug, creditHintText, jobDeletionTooltip } from '@/lib/utils';
 import { useCreditBalance, refreshCreditBalance } from '@/lib/hooks/useCredits';
@@ -23,9 +26,12 @@ import Link from 'next/link';
 
 export default function PostJobPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const workEmailVerified = !!user?.workEmailVerified;
   const { jobs, isLoading: jobsLoading, mutate } = useMyJobs();
   const { balance } = useCreditBalance();
   const [outOfCreditsOpen, setOutOfCreditsOpen] = useState(false);
+  const [workEmailReason, setWorkEmailReason] = useState<'WORK_EMAIL_REQUIRED' | 'COMPANY_MISMATCH' | null>(null);
 
   // Post form state
   const [url, setUrl] = useState('');
@@ -93,7 +99,9 @@ export default function PostJobPage() {
       setForm({ sourceUrl: '', title: '', companyName: '', location: '', description: '', jobType: '', workMode: '' });
     } catch (err) {
       if (err instanceof ApiError && err.code === 'OUT_OF_CREDITS') setOutOfCreditsOpen(true);
-      else toast.error(err instanceof ApiError ? err.message : 'Failed to post job');
+      else if (err instanceof ApiError && (err.code === 'WORK_EMAIL_REQUIRED' || err.code === 'COMPANY_MISMATCH')) {
+        setWorkEmailReason(err.code);
+      } else toast.error(err instanceof ApiError ? err.message : 'Failed to post job');
     } finally {
       setIsSubmitting(false);
     }
@@ -133,7 +141,20 @@ export default function PostJobPage() {
           </p>
         </div>
 
-        {!scraped ? (
+        {!workEmailVerified ? (
+          <div className="flex items-start gap-3 bg-warn/10 border border-warn/20 rounded-xl px-4 py-3.5">
+            <ShieldAlert className="w-5 h-5 shrink-0 text-warn mt-0.5" strokeWidth={1.8} />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-text-primary">Verify your work email to post a job</p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                We need to confirm you actually work at the company before you can post on its behalf.
+              </p>
+              <Button variant="primary" size="sm" className="mt-3" onClick={() => router.push(`/settings#${WORK_EMAIL_ANCHOR}`)}>
+                Verify work email
+              </Button>
+            </div>
+          </div>
+        ) : !scraped ? (
           <div data-tour="post-form" className="space-y-4">
             <div className="space-y-2">
               <label className="text-xs font-semibold text-text-secondary block">
@@ -277,6 +298,12 @@ export default function PostJobPage() {
       </div>
 
       <OutOfCreditsModal open={outOfCreditsOpen} onClose={() => setOutOfCreditsOpen(false)} />
+      <WorkEmailRequiredModal
+        open={workEmailReason !== null}
+        onClose={() => setWorkEmailReason(null)}
+        reason={workEmailReason}
+        companyName={form.companyName}
+      />
     </div>
   );
 }

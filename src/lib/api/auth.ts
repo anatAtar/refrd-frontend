@@ -24,6 +24,9 @@ export const authApi = {
   verifyEmail: (token: string) =>
     api.get<{ message: string }>(`/api/auth/verify-email/${token}`),
 
+  verifyWorkEmail: (token: string) =>
+    api.get<{ message: string }>(`/api/auth/verify-work-email/${token}`),
+
   /** Full-page Google OAuth redirect — use window.location */
   googleOAuthUrl: () => `${API_BASE}/api/auth/google`,
 };

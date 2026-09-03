@@ -15,6 +15,8 @@ export interface User {
   isReferrer: boolean;
   isSeeker: boolean;
   emailVerified: boolean;
+  workEmail: string | null;
+  workEmailVerified: boolean;
   onboarded: boolean;
   inviteCode: string | null;
   invitedById: string | null;

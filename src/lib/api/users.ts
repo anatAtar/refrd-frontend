@@ -12,6 +12,11 @@ export const usersApi = {
   ) =>
     api.patch<ApiResponse<User>>('/api/users/me', body),
 
+  /** Submits (or replaces) a work email and sends a confirmation link —
+   *  required before posting a job (see jobs/post/page.tsx). */
+  submitWorkEmail: (workEmail: string) =>
+    api.post<{ message: string }>('/api/users/me/work-email', { workEmail }),
+
   byId: (id: string) =>
     api.get<ApiResponse<PublicUser>>(`/api/users/${id}`),
 

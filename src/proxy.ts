@@ -11,8 +11,12 @@ const PUBLIC_PATHS = [
   '/join',
 ];
 
-// Marketing pages: reachable regardless of auth state, no redirect either way.
-const NEUTRAL_PATHS = ['/our-story', '/terms', '/privacy'];
+// Reachable regardless of auth state, no redirect either way. Work-email
+// verification in particular is normally clicked while still logged in
+// (submitted from Settings, unlike account signup verification) — putting
+// it in PUBLIC_PATHS above would bounce an authenticated visitor to /feed
+// before the page ever renders and fires the verify call.
+const NEUTRAL_PATHS = ['/our-story', '/terms', '/privacy', '/verify-work-email'];
 
 // The actual authenticated app — everything under src/app/(app)/. Matched
 // as an allowlist (rather than "everything not public") so a genuinely

@@ -7,6 +7,7 @@ import { pfx } from './tokens';
 import { useAuth } from '@/lib/context/AuthContext';
 import { ProfileCard } from '@/components/settings/ProfileCard';
 import { LinkedInCard } from '@/components/settings/LinkedInCard';
+import { WorkEmailCard } from '@/components/settings/WorkEmailCard';
 import { BillingCard } from '@/components/settings/BillingCard';
 
 export default function SettingsPage() {
@@ -49,6 +50,7 @@ export default function SettingsPage() {
       <div className="flex flex-col gap-6">
         <ProfileCard />
         {!user?.linkedinId && <LinkedInCard />}
+        {user?.isReferrer && <WorkEmailCard />}
         <BillingCard />
       </div>
     </div>
