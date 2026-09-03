@@ -43,6 +43,7 @@ export interface Job {
   bonusNotes: string | null;
   isActive: boolean;
   expiresAt: string | null;
+  deactivatedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

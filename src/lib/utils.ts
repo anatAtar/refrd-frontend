@@ -12,6 +12,21 @@ export function creditHintText(balance: CreditBalance | null | undefined): strin
   return "You're out of credits.";
 }
 
+/** Copy for the tooltip on an inactive job's badge — explains the 30-day
+ *  deletion policy (see backend/src/scheduler/jobCleanupSweep.ts) and, once
+ *  known, gives the exact date it kicks in. */
+export function jobDeletionTooltip(deactivatedAt: string | null): string {
+  if (!deactivatedAt) {
+    return 'Inactive postings are kept for 30 days, then permanently deleted along with their applications. Reactivate any time to keep it.';
+  }
+  const daysInactive = Math.max(0, Math.floor((Date.now() - new Date(deactivatedAt).getTime()) / 86_400_000));
+  const daysLeft = Math.max(0, 30 - daysInactive);
+  const deleteDate = new Date(deactivatedAt);
+  deleteDate.setDate(deleteDate.getDate() + 30);
+  const dateStr = deleteDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return `Inactive for ${daysInactive} day${daysInactive === 1 ? '' : 's'}. Unless reactivated, this posting and its applications will be permanently deleted on ${dateStr} (${daysLeft} day${daysLeft === 1 ? '' : 's'} left).`;
+}
+
 /** Validate a `next=` post-login redirect target: same-origin path only.
  *  Rejects protocol-relative ("//host") and absolute URLs to prevent an
  *  open redirect via a crafted `?next=` value. */

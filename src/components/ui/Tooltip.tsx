@@ -9,14 +9,20 @@ interface TooltipProps {
   content: string;
   children: React.ReactNode;
   className?: string;
+  /** Controlled mode — pass both to show/hide the tooltip programmatically
+   *  (e.g. right after an action) instead of only on hover/focus. Omit both
+   *  for the default uncontrolled hover/focus behavior. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 /** Flat, dark tooltip for supplementary info (e.g. what a status badge means).
  *  Shows on hover and keyboard focus — wrap the trigger element with
- *  `tabIndex={0}` if it isn't already focusable. */
-export function Tooltip({ content, children, className }: TooltipProps) {
+ *  `tabIndex={0}` if it isn't already focusable. Pass `open`/`onOpenChange`
+ *  to trigger it programmatically instead. */
+export function Tooltip({ content, children, className, open, onOpenChange }: TooltipProps) {
   return (
-    <TooltipPrimitive.Root delayDuration={0}>
+    <TooltipPrimitive.Root delayDuration={0} open={open} onOpenChange={onOpenChange}>
       <TooltipPrimitive.Trigger asChild>
         {children}
       </TooltipPrimitive.Trigger>

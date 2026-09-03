@@ -12,11 +12,12 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Switch } from '@/components/ui/Switch';
+import { Tooltip } from '@/components/ui/Tooltip';
 import { JobCardSkeleton } from '@/components/ui/Skeleton';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { OutOfCreditsModal } from '@/components/credits/OutOfCreditsModal';
 import { ApiError } from '@/lib/api/client';
-import { timeAgo, jobSlug, creditHintText } from '@/lib/utils';
+import { timeAgo, jobSlug, creditHintText, jobDeletionTooltip } from '@/lib/utils';
 import { useCreditBalance, refreshCreditBalance } from '@/lib/hooks/useCredits';
 import Link from 'next/link';
 
@@ -99,11 +100,19 @@ export default function PostJobPage() {
   };
 
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  // Shows the retention tooltip right at the moment a job is switched off —
+  // separate from the hover tooltip on the "Inactive" badge, which explains
+  // the same policy once the switch has settled into its inactive state.
+  const [justDeactivatedId, setJustDeactivatedId] = useState<string | null>(null);
   const handleToggleActive = async (id: string, isActive: boolean) => {
     setTogglingId(id);
     try {
       await jobsApi.update(id, { isActive: !isActive });
       toast.success(isActive ? 'Job deactivated' : 'Job reactivated');
+      if (isActive) {
+        setJustDeactivatedId(id);
+        setTimeout(() => setJustDeactivatedId((cur) => (cur === id ? null : cur)), 4000);
+      }
       mutate();
     } catch {
       toast.error('Failed to update job');
@@ -226,18 +235,39 @@ export default function PostJobPage() {
                       </Link>
                       <p className="text-xs text-text-secondary mt-0.5">{job.companyName} · {job.location ?? 'Remote'}</p>
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        {job.isActive ? <Badge variant="good">Active</Badge> : <Badge variant="muted">Inactive</Badge>}
+                        {job.isActive ? (
+                          <Badge variant="good">Active</Badge>
+                        ) : (
+                          <Tooltip content={jobDeletionTooltip(job.deactivatedAt)}>
+                            {/* Badge doesn't forward props, so the Tooltip trigger (asChild)
+                                needs a plain element to attach its handlers to — same
+                                muted-badge styling, just not the shared component. */}
+                            <span
+                              tabIndex={0}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border bg-border text-text-secondary border-border-strong cursor-help"
+                            >
+                              Inactive
+                            </span>
+                          </Tooltip>
+                        )}
                         <span className="text-xs text-text-muted">{timeAgo(job.createdAt)}</span>
                       </div>
                     </div>
-                    <div onClick={(e) => e.stopPropagation()} className="shrink-0 pt-1">
-                      <Switch
-                        checked={job.isActive}
-                        onChange={() => handleToggleActive(job.id, job.isActive)}
-                        disabled={togglingId === job.id}
-                        label={job.isActive ? 'Deactivate job' : 'Reactivate job'}
-                      />
-                    </div>
+                    <Tooltip
+                      content="We're going to save this position for 30 days before it's permanently deleted."
+                      open={justDeactivatedId === job.id}
+                      onOpenChange={(o) => { if (!o) setJustDeactivatedId((cur) => (cur === job.id ? null : cur)); }}
+                    >
+                      <div onClick={(e) => e.stopPropagation()} className="shrink-0 pt-1">
+                        <Switch
+                          checked={job.isActive}
+                          onChange={() => handleToggleActive(job.id, job.isActive)}
+                          disabled={togglingId === job.id}
+                          label={job.isActive ? 'Deactivate job' : 'Reactivate job'}
+                        />
+                      </div>
+                    </Tooltip>
                   </div>
                 </Card>
               );
