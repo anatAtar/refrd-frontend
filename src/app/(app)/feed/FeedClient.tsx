@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import { Bookmark } from 'lucide-react';
 import { jobsApi } from '@/lib/api/jobs';
 import { applicationsApi } from '@/lib/api/applications';
 import { savedJobsApi } from '@/lib/api/savedJobs';
 import { useAuth } from '@/lib/context/AuthContext';
-import { Avatar } from '@/components/ui/Avatar';
 import { JobCard } from '@/components/job/JobCard';
 import { Tooltip } from '@/components/ui/Tooltip';
 import { timeAgo, jobSlug, STATUS_LABELS, STATUS_COLORS, STATUS_TOOLTIPS } from '@/lib/utils';
@@ -83,16 +81,17 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
   const { data: myJobs }  = useSWR('feed/my-jobs',  () => jobsApi.mine().then(r => r.data));
   const { data: myInbox } = useSWR('feed/my-inbox', () => applicationsApi.inbox().then(r => r.data));
   const { data: myApps }  = useSWR('feed/my-apps',  () => applicationsApi.mine().then(r => r.data));
-  const { data: savedData, mutate: mutateSaved } = useSWR(
+  const { data: savedData } = useSWR(
     'saved-jobs',
     () => savedJobsApi.getAll().then(r => r.data),
   );
 
-  // Matched jobs — search by desiredRole if set
-  const hasPrefs = !!(user?.desiredRole || user?.preferredLocation);
+  // Matched jobs — filtered against every preference the seeker has set
+  // (desired role, location, employment type, seniority), not just role.
+  const hasPrefs = !!(user?.desiredRole || user?.preferredLocation || user?.employmentType || user?.seniority);
   const { data: matchedJobs } = useSWR(
-    hasPrefs ? ['feed/matched', user?.desiredRole, user?.preferredLocation] : null,
-    () => jobsApi.search({ q: user?.desiredRole ?? '' }).then(r => r.data),
+    hasPrefs ? ['feed/matched', user?.desiredRole, user?.preferredLocation, user?.employmentType, user?.seniority] : null,
+    () => jobsApi.suggested(5).then(r => r.data),
   );
 
   // Most recently posted jobs, platform-wide — shown to every user regardless of role
@@ -307,8 +306,14 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                 <Link href="/jobs" style={{ fontSize: 13.5, fontWeight: 600, color: 'oklch(0.5 0.02 60)', textDecoration: 'none' }}>Browse all jobs →</Link>
               </div>
               <p style={{ fontSize: 13, color: 'oklch(0.62 0.008 60)', margin: '0 0 16px' }}>
-                {user?.desiredRole && <><strong style={{ color: '#000000' }}>{user.desiredRole}</strong>{user?.preferredLocation ? ' · ' : ''}</>}
-                {user?.preferredLocation && <strong style={{ color: '#000000' }}>{user.preferredLocation}</strong>}
+                <strong style={{ color: '#000000' }}>
+                  {[
+                    user?.desiredRole,
+                    user?.preferredLocation,
+                    user?.employmentType === 'full-time' ? 'Full-time' : user?.employmentType === 'part-time' ? 'Part-time' : undefined,
+                    user?.seniority ? user.seniority[0].toUpperCase() + user.seniority.slice(1) : undefined,
+                  ].filter(Boolean).join(' · ')}
+                </strong>
                 {' · '}
                 <Link href="/settings" style={{ color: 'oklch(0.72 0.13 85)', fontWeight: 600, textDecoration: 'none' }}>Edit preferences →</Link>
               </p>
@@ -324,73 +329,11 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
                   </p>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                  {matchedJobs.slice(0, 5).map((j, idx) => {
-                    const isSaved = (savedData ?? []).some(s => s.job.id === j.job.id);
-                    const toggleSave = async () => {
-                      try {
-                        if (isSaved) {
-                          await savedJobsApi.unsave(j.job.id);
-                          mutateSaved((savedData ?? []).filter(s => s.job.id !== j.job.id), false);
-                        } else {
-                          await savedJobsApi.save(j.job.id);
-                          mutateSaved();
-                        }
-                      } catch {
-                        mutateSaved();
-                      }
-                    };
-                    return (
-                    <div
-                      key={j.job.id}
-                      style={{ background: '#fff', border: idx === 0 ? '1px solid oklch(0.72 0.13 85)' : '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: 22, display: 'flex', flexDirection: 'column', gap: 12 }}
-                    >
-                      {/* Row 1: company icon + name + button */}
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 38, height: 38, borderRadius: 10, background: 'oklch(0.94 0.004 70)', color: '#000000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                              <rect x="4" y="3" width="16" height="18" rx="1" />
-                              <rect x="8" y="7" width="2.5" height="2.5" fill="currentColor" stroke="none" />
-                              <rect x="13.5" y="7" width="2.5" height="2.5" fill="currentColor" stroke="none" />
-                              <rect x="8" y="12" width="2.5" height="2.5" fill="currentColor" stroke="none" />
-                              <rect x="13.5" y="12" width="2.5" height="2.5" fill="currentColor" stroke="none" />
-                              <rect x="9.5" y="17" width="5" height="4" fill="currentColor" stroke="none" />
-                            </svg>
-                          </div>
-                          <span style={{ fontSize: 15, fontWeight: 700 }}>{j.job.companyName}</span>
-                        </div>
-                        <Link
-                          href={`/jobs/${jobSlug(j.job.title, j.job.id)}`}
-                          style={{ background: 'oklch(0.72 0.13 85)', color: '#1a1206', fontSize: 13.5, fontWeight: 700, padding: '10px 18px', border: 'none', borderRadius: 9, cursor: 'pointer', whiteSpace: 'nowrap', textDecoration: 'none' }}
-                        >
-                          Role Details
-                        </Link>
-                      </div>
-                      {/* Row 2: job title */}
-                      <h3 style={{ fontSize: 16.5, fontWeight: 700, margin: 0, color: '#000000' }}>{j.job.title}</h3>
-                      {/* Row 3: meta */}
-                      <p style={{ fontSize: 13, color: '#000000', margin: 0 }}>
-                        {[j.job.location, j.job.jobType, j.job.workMode, timeAgo(j.job.createdAt)].filter(Boolean).join(' · ')}
-                      </p>
-                  {/* Row 4: referrer footer */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid oklch(0.93 0.004 70)', paddingTop: 14 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Avatar src={j.referrer.avatarUrl} name={j.referrer.fullName} size="sm" />
-                      <span style={{ fontSize: 13, fontWeight: 600, color: 'oklch(0.72 0.13 85)' }}>via {j.referrer.fullName}</span>
-                    </div>
-                    <button
-                      onClick={toggleSave}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, border: '1px solid oklch(0.93 0.004 70)', background: isSaved ? 'oklch(0.88 0.09 85)' : 'transparent', color: isSaved ? 'oklch(0.3 0.06 85)' : '#000000', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer' }}
-                    >
-                      <Bookmark size={14} strokeWidth={1.8} fill={isSaved ? 'currentColor' : 'none'} />
-                      {isSaved ? 'Saved' : 'Save'}
-                    </button>
-                  </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+                  {matchedJobs.slice(0, 5).map((j) => (
+                    <JobCard key={j.job.id} data={j} />
+                  ))}
                 </div>
-                );
-              })}
-              </div>
               )}
             </div>
           )}
@@ -400,7 +343,7 @@ export default function FeedClient({ initialJobs }: { initialJobs: JobWithReferr
             <div style={{ background: '#fff', border: '1px solid oklch(0.93 0.004 70)', borderRadius: 16, padding: '20px 22px' }}>
               <p style={{ fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>Get matched to relevant jobs</p>
               <p style={{ fontSize: 13, color: 'oklch(0.62 0.008 60)', margin: '0 0 12px' }}>
-                Set your desired role and location to see matched jobs right here.
+                Set your desired role, location, employment type, or seniority to see matched jobs right here.
               </p>
               <Link href="/settings" style={{ fontSize: 13, fontWeight: 600, color: 'oklch(0.72 0.13 85)', textDecoration: 'none' }}>
                 Set preferences →

@@ -26,6 +26,11 @@ export const jobsApi = {
   search: (params?: JobsParams) =>
     api.get<{ data: JobWithReferrer[] }>(`/api/jobs${toQuery(params)}`),
 
+  /** Jobs matching the seeker's saved profile preferences (desired role,
+   *  location, employment type, seniority) */
+  suggested: (limit?: number) =>
+    api.get<{ data: JobWithReferrer[] }>(`/api/jobs/suggested${toQuery({ limit })}`),
+
   /** Referrer's own posted jobs */
   mine: (params?: Pick<JobsParams, 'page' | 'limit'>) =>
     api.get<{ data: Job[] }>(`/api/jobs/mine${toQuery(params)}`),
