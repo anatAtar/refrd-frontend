@@ -46,6 +46,53 @@ function signInMethod(user: User | null): string {
   return 'email & password';
 }
 
+// Israel's standard tech-job regional split (the breakdown used across
+// Israeli job boards like AllJobs/Drushim) rather than official CBS
+// districts, since it's what job postings' free-text locations map to
+// in practice for a tech audience.
+const ISRAEL_REGIONS = [
+  { value: 'Tel Aviv', label: 'Tel Aviv' },
+  { value: 'Central', label: 'Central' },
+  { value: 'Sharon', label: 'Sharon' },
+  { value: 'Haifa', label: 'Haifa' },
+  { value: 'North', label: 'North' },
+  { value: 'Jerusalem', label: 'Jerusalem' },
+  { value: 'South', label: 'South' },
+];
+
+// Trimmed from the Stack Overflow Developer Survey's published role
+// taxonomy down to roles relevant to hiring/referrals (dropped
+// academic-only categories like Student/Educator/Retired).
+const TECH_ROLES = [
+  { value: 'Full-Stack Developer', label: 'Full-Stack Developer' },
+  { value: 'Back-End Developer', label: 'Back-End Developer' },
+  { value: 'Front-End Developer', label: 'Front-End Developer' },
+  { value: 'Mobile Developer', label: 'Mobile Developer' },
+  { value: 'Desktop/Enterprise Developer', label: 'Desktop/Enterprise Developer' },
+  { value: 'Embedded/Devices Developer', label: 'Embedded/Devices Developer' },
+  { value: 'Game/Graphics Developer', label: 'Game/Graphics Developer' },
+  { value: 'QA/Test Engineer', label: 'QA/Test Engineer' },
+  { value: 'DevOps Engineer', label: 'DevOps Engineer' },
+  { value: 'Site Reliability Engineer', label: 'Site Reliability Engineer' },
+  { value: 'Cloud Infrastructure Engineer', label: 'Cloud Infrastructure Engineer' },
+  { value: 'Cybersecurity/InfoSec Engineer', label: 'Cybersecurity/InfoSec Engineer' },
+  { value: 'Software/Solutions Architect', label: 'Software/Solutions Architect' },
+  { value: 'Database Administrator', label: 'Database Administrator' },
+  { value: 'System Administrator', label: 'System Administrator' },
+  { value: 'Engineering Manager', label: 'Engineering Manager' },
+  { value: 'Data Engineer', label: 'Data Engineer' },
+  { value: 'Data Scientist', label: 'Data Scientist' },
+  { value: 'AI/ML Engineer', label: 'AI/ML Engineer' },
+  { value: 'Data/Business Analyst', label: 'Data/Business Analyst' },
+  { value: 'Product Manager', label: 'Product Manager' },
+  { value: 'Project Manager', label: 'Project Manager' },
+  { value: 'UX/UI Designer', label: 'UX/UI Designer' },
+  { value: 'Support Engineer/Analyst', label: 'Support Engineer/Analyst' },
+  { value: 'Financial Analyst/Engineer', label: 'Financial Analyst/Engineer' },
+];
+
+const OTHER_ROLE = '__other__';
+
 const EMPLOYMENT_TYPES = [
   { value: 'full-time', label: 'Full-time' },
   { value: 'part-time', label: 'Part-time' },
@@ -65,11 +112,23 @@ export function ProfileCard() {
   const [savedForm, setSavedForm] = useState<FormState>(() => fromUser(user));
   const [form, setForm] = useState<FormState>(() => fromUser(user));
   const [isLoading, setIsLoading] = useState(false);
+  const isKnownRole = (role: string) => TECH_ROLES.some((r) => r.value === role);
+  const [customRole, setCustomRole] = useState(() => form.desiredRole !== '' && !isKnownRole(form.desiredRole));
 
   const hasChanges = isDirty(form, savedForm);
 
   const set = <K extends keyof FormState>(key: K) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
+  };
+
+  const handleRoleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    if (e.target.value === OTHER_ROLE) {
+      setCustomRole(true);
+      setForm((prev) => ({ ...prev, desiredRole: isKnownRole(prev.desiredRole) ? '' : prev.desiredRole }));
+    } else {
+      setCustomRole(false);
+      setForm((prev) => ({ ...prev, desiredRole: e.target.value }));
+    }
   };
 
   const handleSave = async () => {
@@ -146,8 +205,31 @@ export function ProfileCard() {
           <Link href="/feed" className="font-semibold" style={{ color: pfx.gold }}>Home</Link> page.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Desired role" value={form.desiredRole} onChange={set('desiredRole')} placeholder="e.g. Senior Frontend Engineer" />
-          <Field label="Preferred location" value={form.preferredLocation} onChange={set('preferredLocation')} placeholder="e.g. Tel Aviv, Remote" />
+          <div className="w-full">
+            <SelectField
+              label="Desired role"
+              value={customRole ? OTHER_ROLE : form.desiredRole}
+              onChange={handleRoleSelect}
+              options={[...TECH_ROLES, { value: OTHER_ROLE, label: 'Other…' }]}
+              placeholder="Select…"
+            />
+            {customRole && (
+              <Field
+                label="Custom role"
+                value={form.desiredRole}
+                onChange={set('desiredRole')}
+                placeholder="e.g. Growth Hacker"
+                className="mt-2"
+              />
+            )}
+          </div>
+          <SelectField
+            label="Preferred location"
+            value={form.preferredLocation}
+            onChange={set('preferredLocation')}
+            options={ISRAEL_REGIONS}
+            placeholder="Select…"
+          />
           <SelectField
             label="Employment type"
             value={form.employmentType}
