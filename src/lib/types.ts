@@ -42,6 +42,10 @@ export interface Job {
   description: string | null;
   jobType: string | null;
   workMode: string | null;
+  /** Derived server-side from the title (e.g. "Product Manager",
+   *  "Back-End Developer") — null when the title doesn't match any
+   *  canonical role. Powers the Browse Jobs "Role type" filter. */
+  roleType: string | null;
   salaryRange: string | null;
   bonusAmount: string | null;
   bonusCurrency: string | null;

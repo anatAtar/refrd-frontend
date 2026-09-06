@@ -112,6 +112,7 @@ export default function JobsPage() {
   const searchParams = useSearchParams();
   const [search, setSearch]                             = useState('');
   const [selectedCompanies, setSelectedCompanies]         = useState<Set<string>>(new Set());
+  const [selectedRoleTypes, setSelectedRoleTypes]         = useState<Set<string>>(new Set());
   const [selectedEmploymentTypes, setSelectedEmploymentTypes] = useState<Set<string>>(new Set());
   const [selectedWorkModes, setSelectedWorkModes]         = useState<Set<string>>(new Set());
   const [selectedLocations, setSelectedLocations]         = useState<Set<string>>(new Set());
@@ -135,12 +136,14 @@ export default function JobsPage() {
 
   const facets = useMemo(() => {
     const companies       = new Map<string, number>();
+    const roleTypes       = new Map<string, number>();
     const employmentTypes = new Map<string, number>();
     const workModes       = new Map<string, number>();
     const locations        = new Map<string, number>();
 
     allJobs.forEach((item) => {
       companies.set(item.job.companyName, (companies.get(item.job.companyName) ?? 0) + 1);
+      if (item.job.roleType) roleTypes.set(item.job.roleType, (roleTypes.get(item.job.roleType) ?? 0) + 1);
       if (item.job.jobType) employmentTypes.set(item.job.jobType, (employmentTypes.get(item.job.jobType) ?? 0) + 1);
       if (item.job.workMode) workModes.set(item.job.workMode, (workModes.get(item.job.workMode) ?? 0) + 1);
       if (item.job.location) locations.set(item.job.location, (locations.get(item.job.location) ?? 0) + 1);
@@ -148,6 +151,7 @@ export default function JobsPage() {
 
     return {
       companies:       [...companies.entries()].sort((a, b) => b[1] - a[1]),
+      roleTypes:       [...roleTypes.entries()].sort((a, b) => b[1] - a[1]),
       employmentTypes: [...employmentTypes.entries()].sort((a, b) => b[1] - a[1]),
       workModes:       [...workModes.entries()].sort((a, b) => b[1] - a[1]),
       locations:       [...locations.entries()].sort((a, b) => b[1] - a[1]),
@@ -157,6 +161,7 @@ export default function JobsPage() {
   const filtered = useMemo(() => {
     return allJobs.filter((item) => {
       if (selectedCompanies.size > 0 && !selectedCompanies.has(item.job.companyName)) return false;
+      if (selectedRoleTypes.size > 0 && (!item.job.roleType || !selectedRoleTypes.has(item.job.roleType))) return false;
       if (selectedEmploymentTypes.size > 0 && (!item.job.jobType || !selectedEmploymentTypes.has(item.job.jobType))) return false;
       if (selectedWorkModes.size > 0 && (!item.job.workMode || !selectedWorkModes.has(item.job.workMode))) return false;
       if (selectedLocations.size > 0 && (!item.job.location || !selectedLocations.has(item.job.location))) return false;
@@ -173,12 +178,14 @@ export default function JobsPage() {
       }
       return true;
     });
-  }, [allJobs, selectedCompanies, selectedEmploymentTypes, selectedWorkModes, selectedLocations, selectedContact, debounced]);
+  }, [allJobs, selectedCompanies, selectedRoleTypes, selectedEmploymentTypes, selectedWorkModes, selectedLocations, selectedContact, debounced]);
 
-  const hasFilters = selectedCompanies.size > 0 || selectedEmploymentTypes.size > 0 || selectedWorkModes.size > 0 || selectedLocations.size > 0 || !!selectedContact || !!debounced;
+  const hasFilters = selectedCompanies.size > 0 || selectedRoleTypes.size > 0 || selectedEmploymentTypes.size > 0 || selectedWorkModes.size > 0 || selectedLocations.size > 0 || !!selectedContact || !!debounced;
 
   const toggleCompany = (name: string) =>
     setSelectedCompanies((prev) => { const n = new Set(prev); n.has(name) ? n.delete(name) : n.add(name); return n; });
+  const toggleRoleType = (role: string) =>
+    setSelectedRoleTypes((prev) => { const n = new Set(prev); n.has(role) ? n.delete(role) : n.add(role); return n; });
   const toggleEmploymentType = (type: string) =>
     setSelectedEmploymentTypes((prev) => { const n = new Set(prev); n.has(type) ? n.delete(type) : n.add(type); return n; });
   const toggleWorkMode = (mode: string) =>
@@ -187,7 +194,7 @@ export default function JobsPage() {
     setSelectedLocations((prev) => { const n = new Set(prev); n.has(location) ? n.delete(location) : n.add(location); return n; });
 
   const clearAll = () => {
-    setSelectedCompanies(new Set()); setSelectedEmploymentTypes(new Set());
+    setSelectedCompanies(new Set()); setSelectedRoleTypes(new Set()); setSelectedEmploymentTypes(new Set());
     setSelectedWorkModes(new Set()); setSelectedLocations(new Set());
     setSelectedContact(null); setSelectedContactName(''); setSearch('');
   };
@@ -234,6 +241,7 @@ export default function JobsPage() {
           </div>
           <div className="space-y-4">
             <FilterGroup title="Company" items={facets.companies} selected={selectedCompanies} onToggle={toggleCompany} searchPlaceholder="Search companies…" showSearch />
+            <FilterGroup title="Role type" items={facets.roleTypes} selected={selectedRoleTypes} onToggle={toggleRoleType} searchPlaceholder="Search roles…" showSearch />
             <FilterGroup title="Employment type" items={facets.employmentTypes} selected={selectedEmploymentTypes} onToggle={toggleEmploymentType} searchPlaceholder="" />
             <FilterGroup title="Work mode" items={facets.workModes} selected={selectedWorkModes} onToggle={toggleWorkMode} searchPlaceholder="" />
             <FilterGroup title="Location" items={facets.locations} selected={selectedLocations} onToggle={toggleLocation} searchPlaceholder="Search locations…" showSearch />
