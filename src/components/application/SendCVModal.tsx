@@ -8,9 +8,12 @@ import { Dialog, DialogContent } from '@/components/ui/Dialog';
 import { FileDropzone } from '@/components/ui/FileDropzone';
 import { Avatar } from '@/components/ui/Avatar';
 import { applicationsApi } from '@/lib/api/applications';
+import { usersApi } from '@/lib/api/users';
 import { optimisticAddApplication } from '@/lib/hooks/useApplications';
+import { useAuth } from '@/lib/context/AuthContext';
+import { FileText } from 'lucide-react';
 import { formatBytes, cn } from '@/lib/utils';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, ensureFreshSession } from '@/lib/api/client';
 import type { Job, JobReferrer } from '@/lib/types';
 
 interface SendCVModalProps {
@@ -26,20 +29,26 @@ interface SendCVModalProps {
  *  `alreadyApplied` flips true right after submit. */
 export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCVModalProps) {
   const router = useRouter();
+  const { user } = useAuth();
+  const hasProfileCv = !!user?.cvOriginalName;
   const [view, setView] = useState<'form' | 'success'>('form');
   const [selectedId, setSelectedId] = useState(referrers[0]?.id);
   const [sentTo, setSentTo] = useState<JobReferrer | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [useProfileCv, setUseProfileCv] = useState(hasProfileCv);
   const [coverNote, setCoverNote] = useState('');
   const [fileError, setFileError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cvPreviewOpen, setCvPreviewOpen] = useState(false);
 
   // Reset to a fresh form each time the modal opens
   useEffect(() => {
     if (open) {
       setView('form');
       setSelectedId(referrers[0]?.id);
+      setUseProfileCv(hasProfileCv);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, referrers]);
 
   const reset = () => { setFile(null); setCoverNote(''); setFileError(''); };
@@ -54,6 +63,14 @@ export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCV
     setFile(f);
   };
 
+  const handleViewProfileCv = async () => {
+    // The iframe navigates straight to a cookie-authed URL — it can't retry on
+    // a 401 the way apiFetch does, so make sure the token is fresh first.
+    const ok = await ensureFreshSession();
+    if (!ok) { toast.error('Your session expired — refresh the page and log in again.'); return; }
+    setCvPreviewOpen(true);
+  };
+
   const handleFileView = (f: File) => {
     const url = URL.createObjectURL(f);
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -62,12 +79,16 @@ export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCV
 
   const handleSubmit = async () => {
     if (!selected) return;
-    if (!file) { setFileError('Please select your CV'); return; }
+    if (!useProfileCv && !file) { setFileError('Please select your CV'); return; }
     setIsSubmitting(true);
     try {
       const form = new FormData();
       form.append('jobId', selected.jobId);
-      form.append('cv', file);
+      if (useProfileCv) {
+        form.append('useProfileCv', 'true');
+      } else {
+        form.append('cv', file!);
+      }
       if (coverNote.trim()) form.append('coverNote', coverNote.trim());
       await applicationsApi.submit(form);
       optimisticAddApplication(selected.jobId);
@@ -172,7 +193,60 @@ export function SendCVModal({ open, onClose, onSuccess, job, referrers }: SendCV
               {/* CV upload */}
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.09em] text-jobs-ink-muted mb-2">Your CV</p>
-                <FileDropzone onFile={handleFileSelect} onView={handleFileView} file={file} error={fileError} />
+                {useProfileCv && hasProfileCv ? (
+                  <div className="rounded-[10px] border border-jobs-border-strong p-3 flex items-center gap-3">
+                    <FileText className="w-4 h-4 shrink-0 text-gold-500" strokeWidth={1.8} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13.5px] font-medium text-jobs-ink truncate">{user!.cvOriginalName}</p>
+                      {user!.cvSizeBytes != null && (
+                        <p className="text-[11.5px] text-jobs-ink-muted">{formatBytes(user!.cvSizeBytes)} · from your profile</p>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleViewProfileCv}
+                      className="shrink-0 text-[12.5px] font-medium text-gold-500 hover:text-gold-400"
+                    >
+                      View
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUseProfileCv(false)}
+                      className="shrink-0 text-[12.5px] font-medium text-jobs-ink-secondary hover:text-jobs-ink"
+                    >
+                      Use a different file
+                    </button>
+
+                    <Dialog open={cvPreviewOpen} onOpenChange={setCvPreviewOpen}>
+                      <DialogContent
+                        title={user!.cvOriginalName ?? undefined}
+                        onClose={() => setCvPreviewOpen(false)}
+                        className="max-w-4xl w-[92vw] h-[88vh] flex flex-col"
+                      >
+                        <div className="flex-1 min-h-0 p-3">
+                          <iframe
+                            src={usersApi.cvPreviewUrl()}
+                            title={user!.cvOriginalName ?? 'CV preview'}
+                            className="w-full h-full rounded-lg border border-jobs-border bg-white"
+                          />
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                ) : (
+                  <>
+                    <FileDropzone onFile={handleFileSelect} onView={handleFileView} file={file} error={fileError} />
+                    {hasProfileCv && (
+                      <button
+                        type="button"
+                        onClick={() => { setUseProfileCv(true); setFile(null); setFileError(''); }}
+                        className="mt-1.5 text-[12.5px] font-medium text-gold-500 hover:text-gold-400"
+                      >
+                        Use the CV on your profile instead
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
 
               {/* Cover note */}

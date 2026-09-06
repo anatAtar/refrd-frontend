@@ -25,6 +25,9 @@ export interface User {
   yearsOfExperience: number | null;
   employmentType: EmploymentType | null;
   seniority: Seniority | null;
+  cvOriginalName: string | null;
+  cvMimetype: string | null;
+  cvSizeBytes: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -86,7 +89,7 @@ export interface Application {
   cvSizeBytes: number;
   cvMimetype: string;
   coverNote: string | null;
-  status: 'submitted' | 'viewed' | 'forwarded' | 'internally_submitted' | 'rejected' | 'expired';
+  status: 'submitted' | 'viewed' | 'forwarded' | 'internally_submitted' | 'rejected' | 'expired' | 'withdrawn';
   referrerNote: string | null;
   hrEmail: string | null;
   forwardedAt: string | null;

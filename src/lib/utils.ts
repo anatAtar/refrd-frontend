@@ -137,6 +137,7 @@ export const STATUS_LABELS: Record<string, string> = {
   internally_submitted: 'Submitted internally',
   rejected: 'Not a fit',
   expired: 'Expired',
+  withdrawn: 'Withdrawn',
 };
 
 /** Map application status to badge color classes.
@@ -148,6 +149,7 @@ export const STATUS_COLORS: Record<string, string> = {
   internally_submitted: 'bg-good/10 text-good border-good/20',
   expired: 'bg-border text-text-secondary border-border-strong',
   rejected: 'bg-border text-text-secondary border-border-strong',
+  withdrawn: 'bg-border text-text-secondary border-border-strong',
 };
 
 /** Plain-language explanation shown in a tooltip on hover/focus of a status badge. */
@@ -158,6 +160,7 @@ export const STATUS_TOOLTIPS: Record<string, string> = {
   internally_submitted: "The referrer submitted your CV into their company's internal system.",
   rejected: 'The referrer marked this application as not a fit for the role.',
   expired: 'This application expired because the referrer did not respond in time.',
+  withdrawn: 'You withdrew this application before the referrer opened your CV.',
 };
 
 /** Map connection status to label */

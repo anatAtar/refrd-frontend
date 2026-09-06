@@ -29,6 +29,19 @@ export const applicationsApi = {
   forward: (id: string, body: { hrEmail: string; referrerNote?: string }) =>
     api.post(`/api/applications/${id}/forward`, body),
 
+  /** Seeker: swap the CV on a pending application — only while status is
+   *  'submitted' (before the referrer has opened it). */
+  replaceCv: (id: string, file: File) => {
+    const form = new FormData();
+    form.append('cv', file);
+    return api.upload<ApiResponse<{ id: string }>>(`/api/applications/${id}/cv`, form, { method: 'PATCH' });
+  },
+
+  /** Seeker: withdraw a pending application — only while status is
+   *  'submitted'. Marks it withdrawn rather than deleting it. */
+  withdraw: (id: string) =>
+    api.post<ApiResponse<{ id: string }>>(`/api/applications/${id}/withdraw`),
+
   /** CV download URL — forces file save */
   cvUrl: (id: string) =>
     `${process.env.NEXT_PUBLIC_API_URL}/api/applications/${id}/cv`,

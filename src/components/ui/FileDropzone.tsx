@@ -16,7 +16,7 @@ interface FileDropzoneProps {
 export function FileDropzone({
   onFile,
   onView,
-  accept = '.pdf,.doc,.docx',
+  accept = '.pdf',
   maxBytes = 10 * 1024 * 1024,
   file,
   error,
@@ -79,7 +79,7 @@ export function FileDropzone({
             <FileText className="w-4 h-4 shrink-0 text-jobs-ink-muted" strokeWidth={1.8} />
             <p className="flex-1 text-[13.5px] text-jobs-ink-secondary">
               Drop your CV here, or <span className="text-gold-500 font-semibold">browse</span>
-              <span className="block text-[11.5px] text-jobs-ink-muted">PDF or Word · Max {formatBytes(maxBytes)}</span>
+              <span className="block text-[11.5px] text-jobs-ink-muted">PDF · Max {formatBytes(maxBytes)}</span>
             </p>
           </>
         )}

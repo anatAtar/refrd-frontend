@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { FileText } from 'lucide-react';
 import { pfx } from '@/app/(app)/settings/tokens';
 import { useAuth } from '@/lib/context/AuthContext';
 import { usersApi } from '@/lib/api/users';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, ensureFreshSession } from '@/lib/api/client';
 import { Field, SelectField } from './fields';
 import { PrimaryButton } from './buttons';
-import { getInitials } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { Dialog, DialogContent } from '@/components/ui/Dialog';
+import { getInitials, formatBytes, cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
 
 type FormState = {
@@ -114,6 +117,11 @@ export function ProfileCard() {
   const [isLoading, setIsLoading] = useState(false);
   const isKnownRole = (role: string) => TECH_ROLES.some((r) => r.value === role);
   const [customRole, setCustomRole] = useState(() => form.desiredRole !== '' && !isKnownRole(form.desiredRole));
+  const [cvUploading, setCvUploading] = useState(false);
+  const [removeCvOpen, setRemoveCvOpen] = useState(false);
+  const [removingCv, setRemovingCv] = useState(false);
+  const [cvPreviewOpen, setCvPreviewOpen] = useState(false);
+  const cvInputRef = useRef<HTMLInputElement>(null);
 
   const hasChanges = isDirty(form, savedForm);
 
@@ -152,6 +160,46 @@ export function ProfileCard() {
       toast.error(err instanceof ApiError ? err.message : 'Save failed');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCvInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow picking the same filename again later
+    if (!file) return;
+    const maxBytes = 10 * 1024 * 1024;
+    if (file.size > maxBytes) { toast.error(`File is too large (max ${formatBytes(maxBytes)})`); return; }
+    setCvUploading(true);
+    try {
+      await usersApi.uploadCv(file);
+      await refresh();
+      toast.success('CV updated.');
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Upload failed');
+    } finally {
+      setCvUploading(false);
+    }
+  };
+
+  const handleViewCv = async () => {
+    // The iframe navigates straight to a cookie-authed URL — it can't retry on
+    // a 401 the way apiFetch does, so make sure the token is fresh first.
+    const ok = await ensureFreshSession();
+    if (!ok) { toast.error('Your session expired — refresh the page and log in again.'); return; }
+    setCvPreviewOpen(true);
+  };
+
+  const handleRemoveCv = async () => {
+    setRemovingCv(true);
+    try {
+      await usersApi.removeCv();
+      await refresh();
+      toast.success('CV removed.');
+      setRemoveCvOpen(false);
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to remove CV');
+    } finally {
+      setRemovingCv(false);
     }
   };
 
@@ -245,6 +293,64 @@ export function ProfileCard() {
             placeholder="Select…"
           />
         </div>
+
+        {/* CV of record — kept on the profile so applying can reuse it instead of a fresh upload every time */}
+        <div className="mt-4">
+          <p className="block text-[12.5px] font-medium mb-1.5" style={{ color: pfx.inkSecondary }}>Add my CV</p>
+          {user?.cvOriginalName ? (
+            <div className="flex items-center gap-3 rounded-[10px] border p-3" style={{ borderColor: pfx.border, background: pfx.surface }}>
+              <FileText className="w-4 h-4 shrink-0" style={{ color: pfx.gold }} strokeWidth={1.8} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[13.5px] font-medium truncate" style={{ color: pfx.ink }}>{user.cvOriginalName}</p>
+                {user.cvSizeBytes != null && (
+                  <p className="text-[11.5px]" style={{ color: pfx.inkMuted }}>{formatBytes(user.cvSizeBytes)}</p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleViewCv}
+                className="shrink-0 text-[12.5px] font-medium"
+                style={{ color: pfx.gold }}
+              >
+                View
+              </button>
+              <button
+                type="button"
+                onClick={() => cvInputRef.current?.click()}
+                disabled={cvUploading}
+                className="shrink-0 text-[12.5px] font-medium disabled:opacity-50"
+                style={{ color: pfx.inkSecondary }}
+              >
+                {cvUploading ? 'Uploading…' : 'Replace'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setRemoveCvOpen(true)}
+                className="shrink-0 text-[12.5px] font-medium text-crit"
+              >
+                Remove
+              </button>
+            </div>
+          ) : (
+            <div
+              onClick={() => !cvUploading && cvInputRef.current?.click()}
+              className={cn(
+                'rounded-[10px] border border-dashed p-3 flex items-center gap-3',
+                !cvUploading && 'cursor-pointer hover:border-gold-300/50',
+              )}
+              style={{ borderColor: pfx.border }}
+            >
+              <FileText className="w-4 h-4 shrink-0" style={{ color: pfx.inkMuted }} strokeWidth={1.8} />
+              <p className="flex-1 text-[13.5px]" style={{ color: pfx.inkSecondary }}>
+                {cvUploading ? 'Uploading…' : (
+                  <>Drop your CV here, or <span className="font-semibold" style={{ color: pfx.gold }}>browse</span></>
+                )}
+                <span className="block text-[11.5px]" style={{ color: pfx.inkMuted }}>PDF · Max 10MB</span>
+              </p>
+            </div>
+          )}
+          <input ref={cvInputRef} type="file" accept=".pdf" className="hidden" onChange={handleCvInputChange} />
+        </div>
       </div>
 
       {/* Footer */}
@@ -253,6 +359,32 @@ export function ProfileCard() {
           {isLoading ? 'Saving…' : 'Save changes'}
         </PrimaryButton>
       </div>
+
+      <ConfirmDialog
+        open={removeCvOpen}
+        onOpenChange={setRemoveCvOpen}
+        title="Remove your CV?"
+        description="You can upload a new one anytime. This won't affect CVs already sent for existing applications."
+        confirmLabel="Remove CV"
+        onConfirm={handleRemoveCv}
+        isLoading={removingCv}
+      />
+
+      <Dialog open={cvPreviewOpen} onOpenChange={setCvPreviewOpen}>
+        <DialogContent
+          title={user?.cvOriginalName ?? undefined}
+          onClose={() => setCvPreviewOpen(false)}
+          className="max-w-4xl w-[92vw] h-[88vh] flex flex-col"
+        >
+          <div className="flex-1 min-h-0 p-3">
+            <iframe
+              src={usersApi.cvPreviewUrl()}
+              title={user?.cvOriginalName ?? 'CV preview'}
+              className="w-full h-full rounded-lg border border-border bg-white"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

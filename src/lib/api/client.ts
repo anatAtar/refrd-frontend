@@ -133,9 +133,10 @@ export const api = {
   delete: <T = void>(path: string, init?: RequestInit) =>
     apiFetch<T>(path, { ...init, method: 'DELETE' }),
 
-  /** Multipart upload — caller builds FormData, Content-Type set by browser */
+  /** Multipart upload — caller builds FormData, Content-Type set by browser.
+   *  Defaults to POST; pass init.method to override (e.g. PATCH to replace). */
   upload: <T>(path: string, form: FormData, init?: RequestInit) =>
-    apiFetch<T>(path, { ...init, method: 'POST', body: form }),
+    apiFetch<T>(path, { method: 'POST', ...init, body: form }),
 };
 
 // ── Server-side fetch (forwards Next.js cookies) ─────────────────────────────

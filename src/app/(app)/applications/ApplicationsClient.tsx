@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import { FileText, MessageCircle, Bookmark } from 'lucide-react';
@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/context/AuthContext';
 import { ReceivedInbox } from '@/components/application/ReceivedInbox';
 import { MessageThread } from '@/components/application/MessageThread';
 import { Tooltip } from '@/components/ui/Tooltip';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { timeAgo, jobSlug, STATUS_LABELS, STATUS_TOOLTIPS } from '@/lib/utils';
 import type { ApplicationWithDetails, SavedJob } from '@/lib/types';
 import Link from 'next/link';
@@ -56,6 +57,7 @@ function StatusBadge({ status }: { status: string }) {
       viewed:    { bg: 'oklch(0.88 0.05 240)', color: 'oklch(0.3 0.05 240)' },
       rejected:  { bg: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)' },
       expired:   { bg: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)' },
+      withdrawn: { bg: 'oklch(0.93 0.004 70)', color: 'oklch(0.47 0.008 60)' },
     };
     const c = colors[status] ?? { bg: 'oklch(0.93 0.004 70)', color: MUTED };
     badge = (
@@ -70,12 +72,56 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 // ─── TAB: Requests you sent ───────────────────────────────────────────────────
-function SentTab({ apps }: { apps: ApplicationWithDetails[] }) {
+function SentTab({ apps, onUpdate }: { apps: ApplicationWithDetails[]; onUpdate: () => void }) {
   const [msgOpen, setMsgOpen] = useState<string | null>(null);
   const { data: msgData } = useSWR(
     msgOpen ? `messages-${msgOpen}` : null,
     () => applicationsApi.getMessages(msgOpen!).then(r => r.data),
   );
+
+  const [replaceTargetId, setReplaceTargetId] = useState<string | null>(null);
+  const [replacingId, setReplacingId] = useState<string | null>(null);
+  const [withdrawTarget, setWithdrawTarget] = useState<string | null>(null);
+  const [withdrawingId, setWithdrawingId] = useState<string | null>(null);
+  const replaceInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReplaceInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const applicationId = replaceTargetId;
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!applicationId || !file) return;
+    await handleReplaceFile(applicationId, file);
+  };
+
+  const handleReplaceFile = async (applicationId: string, file: File) => {
+    const maxBytes = 10 * 1024 * 1024;
+    if (file.size > maxBytes) { toast.error('File is too large (max 10MB)'); return; }
+    setReplacingId(applicationId);
+    try {
+      await applicationsApi.replaceCv(applicationId, file);
+      toast.success('CV replaced.');
+      onUpdate();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to replace CV');
+    } finally {
+      setReplacingId(null);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!withdrawTarget) return;
+    setWithdrawingId(withdrawTarget);
+    try {
+      await applicationsApi.withdraw(withdrawTarget);
+      toast.success('Application withdrawn.');
+      onUpdate();
+    } catch (err) {
+      toast.error(err instanceof ApiError ? err.message : 'Failed to withdraw');
+    } finally {
+      setWithdrawingId(null);
+      setWithdrawTarget(null);
+    }
+  };
 
   if (apps.length === 0) {
     return (
@@ -109,15 +155,34 @@ function SentTab({ apps }: { apps: ApplicationWithDetails[] }) {
             {`${a.job.companyName} · Applied ${timeAgo(a.application.createdAt)}`}
           </p>
 
-          {/* Footer: via referrer + message button */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `1px solid ${BORDER}`, paddingTop: 14 }}>
+          {/* Footer: via referrer + message/CV actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: `1px solid ${BORDER}`, paddingTop: 14, flexWrap: 'wrap', gap: 10 }}>
             <span style={{ fontSize: 13, fontWeight: 600, color: GOLD }}>via {a.referrer?.fullName}</span>
-            <button
-              onClick={() => setMsgOpen(a.application.id)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${BORDER}`, background: 'transparent', color: 'oklch(0.47 0.008 60)', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer' }}
-            >
-              <MessageCircle size={14} strokeWidth={1.8} /> Message
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {a.application.status === 'submitted' && (
+                <>
+                  <button
+                    onClick={() => { setReplaceTargetId(a.application.id); replaceInputRef.current?.click(); }}
+                    disabled={replacingId === a.application.id}
+                    style={{ border: `1px solid ${BORDER}`, background: 'transparent', color: 'oklch(0.47 0.008 60)', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer', opacity: replacingId === a.application.id ? 0.5 : 1 }}
+                  >
+                    {replacingId === a.application.id ? 'Replacing…' : 'Replace CV'}
+                  </button>
+                  <button
+                    onClick={() => setWithdrawTarget(a.application.id)}
+                    style={{ border: `1px solid ${BORDER}`, background: 'transparent', color: 'oklch(0.55 0.15 30)', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer' }}
+                  >
+                    Withdraw
+                  </button>
+                </>
+              )}
+              <button
+                onClick={() => setMsgOpen(a.application.id)}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${BORDER}`, background: 'transparent', color: 'oklch(0.47 0.008 60)', fontSize: 13, fontWeight: 600, padding: '8px 14px', borderRadius: 9, cursor: 'pointer' }}
+              >
+                <MessageCircle size={14} strokeWidth={1.8} /> Message
+              </button>
+            </div>
           </div>
 
           {msgOpen === a.application.id && (
@@ -131,6 +196,18 @@ function SentTab({ apps }: { apps: ApplicationWithDetails[] }) {
           )}
         </div>
       ))}
+
+      <input ref={replaceInputRef} type="file" accept=".pdf" className="hidden" onChange={handleReplaceInputChange} />
+
+      <ConfirmDialog
+        open={withdrawTarget !== null}
+        onOpenChange={(open) => !open && setWithdrawTarget(null)}
+        title="Withdraw this application?"
+        description="The referrer will be notified. You can't undo this — apply again if you change your mind."
+        confirmLabel="Withdraw"
+        onConfirm={handleWithdraw}
+        isLoading={withdrawingId !== null}
+      />
     </div>
   );
 }
@@ -250,7 +327,7 @@ export default function ApplicationsClient({
       </p>
 
       {/* Content — one view per tab; which view shows is decided by the ?tab= route from the sidebar */}
-      {tab === 'sent'     && <SentTab apps={sentApps ?? []} />}
+      {tab === 'sent'     && <SentTab apps={sentApps ?? []} onUpdate={() => mutateSent()} />}
       {tab === 'received' && <ReceivedInbox apps={receivedApps ?? []} onUpdate={() => mutateReceived()} />}
       {tab === 'saved'    && <SavedTab />}
     </div>
