@@ -37,7 +37,6 @@ const GENERAL_ITEMS: Item[] = [
 ];
 
 const EXACT_ROUTES = ['/applications', '/jobs'];
-const REFERRER_ROUTES = ['/jobs/post', '/applications/inbox'];
 
 function isActive(pathname: string, search: string, href: string) {
   const [path, query] = href.split('?');
@@ -50,7 +49,7 @@ function isActive(pathname: string, search: string, href: string) {
   return wantedTab === null || wantedTab === currentTab;
 }
 
-function NavLink({ item, dim, active }: { item: Item; dim?: boolean; active: boolean }) {
+function NavLink({ item, active }: { item: Item; active: boolean }) {
   const Icon = item.icon;
   return (
     <Link
@@ -58,7 +57,7 @@ function NavLink({ item, dim, active }: { item: Item; dim?: boolean; active: boo
       data-tour={item.tourAnchor}
       className={cn(
         'flex items-center gap-2.5 rounded-[10px] px-2.5 py-1.5 text-[14.5px] font-medium transition-colors duration-150',
-        active ? 'bg-gold-glow text-gold-300' : dim ? 'text-sidebar-muted/60 hover:bg-white/5' : 'text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground',
+        active ? 'bg-gold-glow text-gold-300' : 'text-sidebar-muted hover:bg-white/5 hover:text-sidebar-foreground',
       )}
     >
       <Icon className="h-[17px] w-[17px] shrink-0" strokeWidth={1.7} />
@@ -80,8 +79,6 @@ export function Sidebar() {
   const { count: unreadCount } = useUnreadCount();
   const { data: inbox } = useSWR('sidebar/inbox', () => applicationsApi.inbox().then(r => r.data));
   const pendingCVs = (inbox ?? []).filter(a => a.application.status === 'submitted').length;
-
-  const inReferrerSection = REFERRER_ROUTES.some(r => pathname === r || pathname.startsWith(r + '/'));
 
   const [logoutOpen, setLogoutOpen] = useState(false);
 
@@ -113,7 +110,7 @@ export function Sidebar() {
         </p>
         <div className="space-y-0.5 mb-2.5">
           {SEEKER_ITEMS.map((item) => (
-            <NavLink key={item.href} item={item} active={isActive(pathname, search, item.href)} dim={inReferrerSection} />
+            <NavLink key={item.href} item={item} active={isActive(pathname, search, item.href)} />
           ))}
         </div>
 
@@ -127,7 +124,6 @@ export function Sidebar() {
               key={item.href}
               item={item.href === '/applications/inbox' && pendingCVs > 0 ? { ...item, badge: pendingCVs } : item}
               active={isActive(pathname, search, item.href)}
-              dim={!inReferrerSection}
             />
           ))}
         </div>
